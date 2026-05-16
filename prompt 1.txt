@@ -1,0 +1,336 @@
+Crie uma aplicação web/PWA chamada “Pressão Fácil”, voltada para registro e acompanhamento de pressão arterial, com foco em uso extremamente simples para idosos e familiares cuidadores.
+
+STACK:
+- Frontend: HTML, CSS e JavaScript ou React/Vite, conforme melhor estrutura para projeto moderno.
+- Backend: Firebase.
+- Autenticação: Firebase Auth com login Google.
+- Banco de dados: Firestore.
+- Hospedagem: Netlify.
+- Exportações: CSV/Excel e PDF.
+- O app deve ser responsivo, mobile-first e com aparência de aplicativo.
+
+OBJETIVO DO APP:
+Substituir a tradicional tabela de pressão no caderno por um app simples, visual e confiável, onde o paciente registra suas medições diárias, acompanha histórico, gráficos, médias, alertas visuais e consegue exportar relatório para levar ao médico.
+
+IMPORTANTE:
+O app NÃO deve fazer diagnóstico médico. Ele deve apenas registrar, organizar e apresentar os dados de forma visual, com mensagens educativas e cautelosas como:
+“Este aplicativo não substitui avaliação médica.”
+“Em caso de sintomas ou valores muito elevados, procure atendimento de saúde.”
+
+TELAS PRINCIPAIS:
+
+1. Tela de login
+- Login com Google.
+- Visual limpo.
+- Logo/nome do app.
+- Texto curto: “Registre sua pressão de forma simples e acompanhe sua evolução.”
+
+2. Primeiro acesso / cadastro do paciente
+Após o primeiro login, verificar se o usuário já possui perfil cadastrado no Firestore.
+Se não possuir, exibir formulário obrigatório com:
+
+Dados pessoais:
+- Nome completo
+- Data de nascimento ou idade
+- Sexo
+- Peso
+- Altura
+
+Dados de saúde:
+- Já possui diagnóstico de hipertensão? Sim/Não
+- Usa medicamento para pressão? Sim/Não
+- Nome do medicamento
+- Horários de uso do medicamento
+- Possui diabetes? Sim/Não
+- Possui colesterol alto? Sim/Não
+- Histórico de problema cardíaco? Sim/Não
+- Médico responsável
+- Observações gerais
+
+Também permitir editar esse perfil depois.
+
+3. Dashboard inicial
+A tela inicial deve ser extremamente simples, com botões grandes e leitura fácil.
+
+Elementos:
+- Saudação com nome do paciente.
+- Card com última medição.
+- Card de status visual da última medição.
+- Card com média dos últimos 7 dias.
+- Card com média dos últimos 30 dias.
+- Botão grande principal: “Registrar pressão”.
+- Atalhos: Histórico, Gráficos, Relatório, Perfil.
+
+O status visual deve usar cores:
+- Verde: dentro de faixa mais tranquila.
+- Amarelo: atenção.
+- Vermelho: atenção elevada/procurar orientação.
+
+Não usar linguagem alarmista.
+
+4. Tela de novo registro
+Formulário simples com campos grandes:
+
+Campos:
+- Pressão sistólica
+- Pressão diastólica
+- Batimentos cardíacos
+- Data e hora automática, mas editável
+- Braço usado: esquerdo/direito
+- Condição da medição:
+  - Em repouso
+  - Após esforço
+  - Após café
+  - Após estresse
+  - Antes do medicamento
+  - Depois do medicamento
+  - Outro
+- Observações
+
+REGRA OBRIGATÓRIA:
+O app deve separar automaticamente o período do dia conforme a hora do registro:
+
+- Madrugada: 00:00 às 05:59
+- Manhã: 06:00 às 11:59
+- Tarde: 12:00 às 17:59
+- Noite: 18:00 às 23:59
+
+Criar função:
+
+function definirPeriodoDoDia(data = new Date()) {
+  const hora = data.getHours();
+
+  if (hora >= 0 && hora < 6) return "madrugada";
+  if (hora >= 6 && hora < 12) return "manha";
+  if (hora >= 12 && hora < 18) return "tarde";
+  return "noite";
+}
+
+Cada registro salvo no Firestore deve conter:
+- userId
+- sistolica
+- diastolica
+- batimentos
+- dataHora
+- periodo
+- braco
+- condicao
+- observacoes
+- createdAt
+- updatedAt
+
+Exemplo:
+{
+  userId: "...",
+  sistolica: 135,
+  diastolica: 85,
+  batimentos: 78,
+  dataHora: "2026-05-16T12:30:00",
+  periodo: "tarde",
+  braco: "esquerdo",
+  condicao: "em_reposo",
+  observacoes: "",
+  createdAt: timestamp,
+  updatedAt: timestamp
+}
+
+5. Histórico
+Criar uma tela de histórico com:
+- Lista de registros em cards.
+- Cada card deve mostrar:
+  - Data
+  - Hora
+  - Período do dia
+  - Pressão
+  - Batimentos
+  - Status visual
+  - Observação resumida
+
+Filtros:
+- Hoje
+- Últimos 7 dias
+- Últimos 15 dias
+- Últimos 30 dias
+- Período personalizado
+- Filtro por período do dia: madrugada, manhã, tarde, noite
+- Filtro por status
+
+Permitir editar e excluir registros.
+
+6. Gráficos
+Criar tela de gráficos simples e visual.
+
+Gráficos necessários:
+- Evolução da pressão sistólica ao longo do tempo.
+- Evolução da pressão diastólica ao longo do tempo.
+- Evolução dos batimentos.
+- Média por período do dia.
+- Comparativo manhã x tarde x noite x madrugada.
+- Quantidade de medições por status.
+
+Pode usar biblioteca como Chart.js ou Recharts.
+
+7. Resumos inteligentes
+Criar seção de resumo com:
+- Média geral no período selecionado.
+- Maior pressão registrada.
+- Menor pressão registrada.
+- Período do dia com maior média.
+- Quantidade de registros.
+- Última medição.
+- Tendência simples: subindo, caindo ou estável, baseada nas médias recentes.
+
+Texto exemplo:
+“Nos últimos 7 dias, suas maiores médias ocorreram no período da noite.”
+
+8. Exportação de planilha
+Criar função para exportar os registros filtrados em CSV, compatível com Excel.
+
+Colunas:
+- Data
+- Hora
+- Período
+- Sistólica
+- Diastólica
+- Batimentos
+- Braço
+- Condição
+- Observações
+
+9. Exportação de PDF
+Criar relatório em PDF com layout limpo para entregar ao médico.
+
+O relatório deve conter:
+- Nome do paciente
+- Idade
+- Peso
+- Altura
+- Informações de saúde relevantes
+- Período analisado
+- Tabela de medições
+- Resumo geral
+- Média por período do dia
+- Maior e menor medição
+- Observações
+- Rodapé com aviso:
+“Relatório gerado pelo app Pressão Fácil. Este material é apenas informativo e não substitui avaliação médica.”
+
+10. Alertas e lembretes
+Implementar estrutura visual para:
+- Lembrete de medir pressão.
+- Lembrete de medicamento.
+- Configuração de horário preferido para medição.
+
+Caso notificações push sejam complexas na primeira versão, deixar estrutura preparada e implementar alertas locais visuais dentro do app.
+
+11. UX/UI
+O design deve ser:
+- Muito simples.
+- Mobile-first.
+- Acessível para idosos.
+- Fonte grande.
+- Alto contraste.
+- Botões grandes.
+- Poucas informações por tela.
+- Cores suaves.
+- Cards arredondados.
+- Ícones simples.
+- Navegação inferior fixa no mobile.
+
+Sugestão de navegação inferior:
+- Início
+- Registrar
+- Histórico
+- Gráficos
+- Perfil
+
+12. Firebase
+Configurar:
+- Firebase Auth com Google.
+- Firestore com coleção de usuários.
+- Firestore com subcoleção ou coleção de registros.
+
+Estrutura sugerida:
+
+users/{userId}
+{
+  nome,
+  idade,
+  sexo,
+  peso,
+  altura,
+  hipertenso,
+  usaMedicamento,
+  medicamentos,
+  horariosMedicamento,
+  diabetes,
+  colesterolAlto,
+  historicoCardiaco,
+  medico,
+  observacoes,
+  createdAt,
+  updatedAt
+}
+
+users/{userId}/pressureRecords/{recordId}
+{
+  sistolica,
+  diastolica,
+  batimentos,
+  dataHora,
+  periodo,
+  braco,
+  condicao,
+  observacoes,
+  status,
+  createdAt,
+  updatedAt
+}
+
+13. Regras de segurança Firestore
+Criar rules para que cada usuário leia e escreva apenas seus próprios dados.
+
+Exemplo:
+- userId autenticado só acessa users/{uid}
+- userId autenticado só acessa seus próprios pressureRecords
+
+14. Deploy
+Preparar projeto para deploy na Netlify.
+Adicionar:
+- package.json
+- scripts de build
+- .env.example com variáveis Firebase
+- README com instruções de instalação, configuração Firebase e deploy Netlify.
+
+15. Entregáveis esperados
+Gerar todos os arquivos necessários da aplicação.
+Organizar o código em pastas limpas.
+Criar componentes reutilizáveis.
+Criar funções utilitárias para:
+- definir período do dia
+- calcular status da pressão
+- filtrar registros
+- calcular médias
+- gerar CSV
+- gerar PDF
+
+16. Cuidados importantes
+Não usar linguagem de diagnóstico.
+Não afirmar que o usuário está saudável ou doente.
+Usar termos como:
+- “registro dentro da faixa de acompanhamento”
+- “atenção”
+- “valor elevado”
+- “procure orientação médica”
+- “acompanhe com seu profissional de saúde”
+
+Crie agora a primeira versão funcional do app, priorizando:
+- login com Google
+- cadastro do paciente
+- registro de pressão
+- separação automática por período do dia
+- histórico com filtros
+- dashboard com resumo
+- gráfico básico
+- exportação CSV
+- estrutura inicial para PDF

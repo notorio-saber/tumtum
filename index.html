@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TumTum App - Saúde em dia, vida tranquila</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Tela de Login -->
+        <section id="login-screen" class="screen active">
+            <div class="auth-container">
+                <div class="logo-area">
+                    <div class="icon-circle shadow-glow" style="overflow: hidden; padding: 0;">
+                        <img src="logo.jpg" alt="TumTum App" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    </div>
+                    <h1>TumTum App</h1>
+                    <p class="mote">Saúde em dia, vida tranquila.</p>
+                </div>
+                
+                <div class="auth-card glass">
+                    <p class="auth-text">Registre sua pressão de forma simples e acompanhe sua evolução.</p>
+                    <button id="btn-login-google" class="btn-google">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/layout/google.svg" alt="Google">
+                        Entrar com Google
+                    </button>
+                    <p class="disclaimer">Este aplicativo não substitui avaliação médica. Em caso de sintomas, procure ajuda.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tela de Cadastro de Perfil (Onboarding) -->
+        <section id="profile-setup-screen" class="screen">
+            <div class="container py-8">
+                <header class="mb-6">
+                    <h2 class="text-2xl font-bold">Conte-nos sobre você</h2>
+                    <p class="text-slate-500">Para um acompanhamento personalizado.</p>
+                </header>
+                <form id="profile-form" class="space-y-6">
+                    <div class="card-premium glass">
+                        <div class="input-field">
+                            <label>Nome Completo</label>
+                            <input type="text" id="p-nome" placeholder="Seu nome" required>
+                        </div>
+                        <div class="grid-2">
+                            <div class="input-field">
+                                <label>Nascimento</label>
+                                <input type="date" id="p-nascimento" required>
+                            </div>
+                            <div class="input-field">
+                                <label>Sexo</label>
+                                <select id="p-sexo">
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Feminino</option>
+                                    <option value="O">Outro</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-2">
+                            <div class="input-field">
+                                <label>Peso (kg)</label>
+                                <input type="number" id="p-peso" placeholder="85">
+                            </div>
+                            <div class="input-field">
+                                <label>Altura (m)</label>
+                                <input type="number" step="0.01" id="p-altura" placeholder="1.83">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-premium glass">
+                        <h3 class="font-bold mb-4">Saúde</h3>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="p-hipertenso"> Já possui diagnóstico de hipertensão?</label>
+                            <label><input type="checkbox" id="p-medicamento"> Usa medicamento para pressão?</label>
+                        </div>
+                        <div id="med-info" class="hidden mt-4">
+                            <div class="input-field">
+                                <label>Nome do Medicamento</label>
+                                <input type="text" id="p-med-nome" placeholder="Ex: Enalapril 20mg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary btn-large shadow-glow">Salvar e Continuar</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Dashboard -->
+        <section id="dashboard-screen" class="screen">
+            <header class="app-header glass">
+                <div class="user-info">
+                    <span class="greeting">Bom dia,</span>
+                    <h2 id="display-name" class="font-bold text-xl">Carregando...</h2>
+                </div>
+                <div class="header-actions">
+                    <button id="btn-notifications" class="icon-btn"><i data-lucide="bell"></i></button>
+                    <div class="avatar-circle">JS</div>
+                </div>
+            </header>
+
+            <main class="dashboard-content pb-24">
+                <!-- Última Medição -->
+                <div class="last-reading-container">
+                    <div id="status-card" class="card-premium glass border-l-8 border-success">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-slate-500 font-medium uppercase text-xs tracking-wider">Última Medição</span>
+                            <span id="last-time" class="time-tag">Hoje, 08:20</span>
+                        </div>
+                        <div class="pressure-display">
+                            <div class="val-group">
+                                <span id="last-sys" class="text-5xl font-black">120</span>
+                                <span class="text-xs uppercase font-bold text-slate-400">Sistólica</span>
+                            </div>
+                            <div class="divider">/</div>
+                            <div class="val-group">
+                                <span id="last-dia" class="text-5xl font-black text-slate-700">80</span>
+                                <span class="text-xs uppercase font-bold text-slate-400">Diastólica</span>
+                            </div>
+                        </div>
+                        <div id="status-badge" class="badge-success mt-4">Pressão Normal</div>
+                    </div>
+                </div>
+
+                <!-- Gráfico Rápido -->
+                <div class="chart-card card-premium glass mt-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold">Tendência Semanal</h3>
+                        <i data-lucide="trending-up" class="text-success"></i>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Médias -->
+                <div class="grid-2 mt-6">
+                    <div class="mini-card glass">
+                        <span class="text-xs text-slate-500">Média 7 dias</span>
+                        <div class="text-xl font-bold">118 / 78</div>
+                    </div>
+                    <div class="mini-card glass">
+                        <span class="text-xs text-slate-500">Média 30 dias</span>
+                        <div class="text-xl font-bold">121 / 80</div>
+                    </div>
+                </div>
+            </main>
+
+        <!-- Tela de Histórico -->
+        <section id="history-screen" class="screen">
+            <header class="app-header glass">
+                <div class="user-info">
+                    <h2 class="font-bold text-xl">Histórico</h2>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn" onclick="exportarCSV()"><i data-lucide="download"></i></button>
+                </div>
+            </header>
+
+            <main class="dashboard-content pb-24">
+                <div class="filters-container">
+                    <button class="filter-chip active" onclick="filtrarHistorico('todos')">Todos</button>
+                    <button class="filter-chip" onclick="filtrarHistorico('7dias')">7 dias</button>
+                    <button class="filter-chip" onclick="filtrarHistorico('30dias')">30 dias</button>
+                    <button class="filter-chip" onclick="filtrarHistorico('manha')">Manhã</button>
+                    <button class="filter-chip" onclick="filtrarHistorico('noite')">Noite</button>
+                </div>
+
+                <div id="history-list" class="history-list mt-4 space-y-4">
+                    <!-- Registros serão inseridos aqui dinamicamente -->
+                </div>
+            </main>
+        </section>
+
+            <!-- Bottom Nav -->
+            <nav class="bottom-nav glass">
+                <button class="nav-item active" onclick="showScreen('dashboard-screen')">
+                    <i data-lucide="home"></i>
+                    <span>Início</span>
+                </button>
+                <button class="nav-item" onclick="showScreen('history-screen')">
+                    <i data-lucide="history"></i>
+                    <span>Histórico</span>
+                </button>
+                <button class="nav-btn-center" onclick="showModal('new-record-modal')">
+                    <div class="plus-icon"><i data-lucide="plus"></i></div>
+                </button>
+                <button class="nav-item" onclick="showScreen('stats-screen')">
+                    <i data-lucide="bar-chart-2"></i>
+                    <span>Gráficos</span>
+                </button>
+                <button class="nav-item" onclick="showScreen('profile-screen')">
+                    <i data-lucide="user"></i>
+                    <span>Perfil</span>
+                </button>
+            </nav>
+        </section>
+
+        <!-- Modal de Novo Registro -->
+        <div id="new-record-modal" class="modal">
+            <div class="modal-overlay" onclick="closeModal('new-record-modal')"></div>
+            <div class="modal-body glass-heavy">
+                <div class="modal-header">
+                    <h2 class="text-xl font-bold">Novo Registro</h2>
+                    <button onclick="closeModal('new-record-modal')" class="close-btn"><i data-lucide="x"></i></button>
+                </div>
+                <form id="record-form" class="space-y-6">
+                    <div class="grid-2">
+                        <div class="input-field">
+                            <label>Sistólica (Máx)</label>
+                            <input type="number" id="reg-sys" placeholder="120" required>
+                        </div>
+                        <div class="input-field">
+                            <label>Diastólica (Mín)</label>
+                            <input type="number" id="reg-dia" placeholder="80" required>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Batimentos (BPM)</label>
+                        <input type="number" id="reg-bpm" placeholder="72">
+                    </div>
+                    <div class="input-field">
+                        <label>Condição</label>
+                        <select id="reg-condicao">
+                            <option value="repouso">Em repouso</option>
+                            <option value="esforco">Após esforço</option>
+                            <option value="cafe">Após café</option>
+                            <option value="estresse">Após estresse</option>
+                            <option value="medicamento_antes">Antes do medicamento</option>
+                            <option value="medicamento_depois">Depois do medicamento</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary btn-large">Salvar Registro</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Inicializar ícones Lucide
+        lucide.createIcons();
+    </script>
+</body>
+</html>

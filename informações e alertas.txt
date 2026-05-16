@@ -1,0 +1,127 @@
+Classificação da pressão arterial
+
+🟢 NORMAL
+
+Menor que:
+
+* 120 x 80 mmHg
+
+Exemplo:
+
+* 11x7
+* 12x8
+
+Mensagem:
+
+“Sua pressão está dentro da faixa ideal.”
+
+Risco:
+
+* baixo
+
+⸻
+
+🟡 ELEVADA / ATENÇÃO
+
+Entre:
+
+* 120–139 sistólica
+    OU
+* 80–89 diastólica
+
+Exemplos:
+
+* 13x8
+* 13x9
+
+Mensagem:
+
+“Sua pressão merece acompanhamento.”
+
+Risco:
+
+* leve/moderado
+
+Alerta:
+
+* observar rotina
+* reduzir sal
+* repetir aferição
+
+⸻
+
+🟠 HIPERTENSÃO ESTÁGIO 1
+
+Entre:
+
+* 140–159
+    OU
+* 90–99
+
+Exemplos:
+
+* 14x9
+* 15x9
+
+Mensagem:
+
+“Sua pressão está elevada.”
+
+Risco:
+
+* moderado
+
+Ação:
+
+* acompanhamento médico
+* medir novamente após repouso
+
+⸻
+
+🔴 HIPERTENSÃO ESTÁGIO 2
+
+Entre:
+
+* 160–179
+    OU
+* 100–109
+
+Exemplos:
+
+* 16x10
+* 17x10
+
+Mensagem:
+
+“Pressão muito elevada.”
+
+Risco:
+
+* alto
+
+Ação:
+
+* repetir aferição
+* observar sintomas
+* orientação médica
+
+⸻
+
+🚨 CRISE HIPERTENSIVA
+
+Igual ou maior que:
+
+* 180 x 120
+
+Exemplos:
+
+* 18x12
+* 20x13
+
+Mensagem:
+
+“Procure atendimento médico imediatamente.”
+
+Risco:
+
+* muito alto

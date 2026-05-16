@@ -1,0 +1,120 @@
+ETAPA 1 — Perfil básico
+
+Dados principais
+
+* Nome
+* Idade
+* Sexo
+* Altura
+* Peso
+
+⸻
+
+ETAPA 2 — Histórico cardiovascular
+
+Perguntas-chave
+
+* Você possui hipertensão?
+    * Sim
+    * Não
+    * Não sei
+* Faz uso de medicação para pressão?
+    * Sim
+    * Não
+
+Se SIM:
+
+* Qual medicamento?
+* Quantos horários por dia?
+
+⸻
+
+Histórico importante
+
+Já teve:
+    * Infarto
+    * AVC
+    * Arritmia
+    * Insuficiência cardíaca
+    * Cardiopatia
+    * Nenhum
+
+⸻
+
+Sintomas frequentes
+
+* Dor no peito
+* Falta de ar
+* Tontura
+* Dor de cabeça
+* Palpitação
+* Inchaço
+* Nenhum
+
+⸻
+
+ETAPA 3 — Hábitos
+
+Frequência
+
+* Você pratica atividade física?
+* Fuma?
+* Consome álcool?
+* Consome muito sal?
+* Tem diabetes?
+* Tem colesterol alto?
+
+⸻
+
+ETAPA 4 — Monitoramento
+
+Rotina de aferição
+
+* Quantas vezes deseja medir sua pressão?
+    * 1x
+    * 2x
+    * 3x+
+
+⸻
+
+Horários
+
+* Manhã
+* Tarde
+* Noite
+
+⸻
+
+Alertas
+
+* Deseja receber lembretes?
+    * Sim
+    * Não
+
+⸻
+
+ETAPA 5 — Emergência
+
+MUITO IMPORTANTE
+
+Pergunta:
+
+“Deseja cadastrar um familiar para emergência?”
+
+* Nome
+* Telefone
+
+
+
+⸻
+
+ETAPA 6 — Inteligência do app
+
+O app pode perguntar:
+
+“Qual situação descreve melhor sua pressão?”
+
+* Controlada
+* Oscila às vezes
+* Frequentemente alta
+* Ainda estou investigando
