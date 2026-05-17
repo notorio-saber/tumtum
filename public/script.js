@@ -100,10 +100,57 @@ function updateUserProfile(user, data = null) {
     }
     
     if (data) {
+        // Dados Clínicos
         if (document.getElementById('p-idade')) document.getElementById('p-idade').innerText = data.idade ? `${data.idade} anos` : '-- anos';
         if (document.getElementById('p-sexo')) document.getElementById('p-sexo').innerText = data.sexo || '--';
         if (document.getElementById('p-peso')) document.getElementById('p-peso').innerText = data.peso ? `${data.peso} kg` : '-- kg';
         if (document.getElementById('p-altura')) document.getElementById('p-altura').innerText = data.altura ? `${data.altura} cm` : '-- cm';
+        if (document.getElementById('p-situacao')) document.getElementById('p-situacao').innerText = data.situacaoPressao || '--';
+        
+        // Cardiovascular & Tratamento
+        if (document.getElementById('p-hiper')) document.getElementById('p-hiper').innerText = data.hipertensao || '--';
+        if (document.getElementById('p-med')) document.getElementById('p-med').innerText = data.usaMedicamento || '--';
+        
+        const medWrapper = document.getElementById('p-med-details-wrapper');
+        if (medWrapper) {
+            if (data.usaMedicamento === 'Sim') {
+                medWrapper.classList.remove('hidden');
+                if (document.getElementById('p-med-nome')) document.getElementById('p-med-nome').innerText = data.medicamentoNome || '--';
+                if (document.getElementById('p-med-freq')) document.getElementById('p-med-freq').innerText = data.medicamentoFreq ? `${data.medicamentoFreq} horários` : '-- horários';
+            } else {
+                medWrapper.classList.add('hidden');
+            }
+        }
+        
+        // Hábitos
+        const habits = data.habitos || {};
+        if (document.getElementById('p-hab-fisica')) document.getElementById('p-hab-fisica').innerText = habits.fisica || '--';
+        if (document.getElementById('p-hab-fuma')) document.getElementById('p-hab-fuma').innerText = habits.fuma || '--';
+        if (document.getElementById('p-hab-alcool')) document.getElementById('p-hab-alcool').innerText = habits.alcool || '--';
+        if (document.getElementById('p-hab-sal')) document.getElementById('p-hab-sal').innerText = habits.sal || '--';
+        if (document.getElementById('p-hab-diabetes')) document.getElementById('p-hab-diabetes').innerText = habits.diabetes || '--';
+        if (document.getElementById('p-hab-colesterol')) document.getElementById('p-hab-colesterol').innerText = habits.colesterol || '--';
+        
+        // Histórico & Sintomas (Doenças prévias e sintomas selecionados)
+        const histPills = document.getElementById('p-historico-pills');
+        if (histPills) {
+            if (data.historico && data.historico.length > 0) {
+                histPills.innerHTML = data.historico.map(h => `<span style="background: rgba(15, 23, 42, 0.05); color: #334155; font-size: 0.78rem; font-weight: 600; padding: 4px 10px; border-radius: 9999px; border: 1px solid rgba(15, 23, 42, 0.08);">${h}</span>`).join('');
+            } else {
+                histPills.innerHTML = `<span style="font-size: 0.82rem; color: #94a3b8; font-style: italic;">Nenhum histórico selecionado</span>`;
+            }
+        }
+        
+        const sintPills = document.getElementById('p-sintomas-pills');
+        if (sintPills) {
+            if (data.sintomas && data.sintomas.length > 0) {
+                sintPills.innerHTML = data.sintomas.map(s => `<span style="background: rgba(239, 68, 68, 0.05); color: var(--primary); font-size: 0.78rem; font-weight: 600; padding: 4px 10px; border-radius: 9999px; border: 1px solid rgba(239, 68, 68, 0.1);">${s}</span>`).join('');
+            } else {
+                sintPills.innerHTML = `<span style="font-size: 0.82rem; color: #94a3b8; font-style: italic;">Nenhum sintoma selecionado</span>`;
+            }
+        }
+        
+        // Emergência
         if (document.getElementById('p-emerg-nome')) document.getElementById('p-emerg-nome').innerText = data.emergenciaNome || '--';
         
         const emergTel = document.getElementById('p-emerg-tel');
@@ -111,11 +158,18 @@ function updateUserProfile(user, data = null) {
             if (data.emergenciaTel) {
                 emergTel.href = `tel:${data.emergenciaTel.replace(/\D/g, '')}`;
                 emergTel.querySelector('span').innerText = data.emergenciaTel;
+                emergTel.style.display = 'flex';
             } else {
                 emergTel.href = '#';
                 emergTel.querySelector('span').innerText = '--';
+                emergTel.style.display = 'none';
             }
         }
+    }
+    
+    // Atualiza/Recria os ícones dinâmicos do Lucide
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
     }
 }
 
@@ -599,6 +653,126 @@ async function handleLogout() {
     }
 }
 
+// Função para Iniciar Edição da Ficha de Saúde (Anamnese)
+function startEditAnamnese() {
+    const user = window.auth ? window.auth.currentUser : null;
+    if (!user) {
+        alert("Usuário não está autenticado.");
+        return;
+    }
+    
+    const localData = localStorage.getItem(`anamnese_data_${user.uid}`);
+    if (localData) {
+        try {
+            const data = JSON.parse(localData);
+            
+            // 1. Preenche Passo 1 (Dados Principais)
+            if (document.getElementById('a-nome')) document.getElementById('a-nome').value = data.nome || "";
+            
+            // Sexo
+            if (data.sexo) {
+                const sexBtn = Array.from(document.querySelectorAll('#step-1 button.choice-card')).find(b => b.innerText.trim().startsWith(data.sexo === 'M' ? 'Masculino' : 'Feminino'));
+                if (sexBtn) selectChoice(sexBtn, 'a-sexo', data.sexo);
+            }
+            
+            if (document.getElementById('a-idade')) document.getElementById('a-idade').value = data.idade || 60;
+            if (document.getElementById('a-peso')) document.getElementById('a-peso').value = data.peso || 70;
+            if (document.getElementById('a-altura')) document.getElementById('a-altura').value = data.altura || 160;
+            
+            // 2. Preenche Passo 2 (Cardiovascular)
+            if (data.hipertensao) {
+                const hiperBtn = Array.from(document.querySelectorAll('#step-2 button.choice-card')).find(b => b.innerText.trim() === data.hipertensao);
+                if (hiperBtn) selectChoice(hiperBtn, 'a-hiper', data.hipertensao);
+            }
+            
+            if (data.usaMedicamento) {
+                const medBtn = Array.from(document.querySelectorAll('#step-2 button.choice-card')).find(b => b.innerText.trim() === data.usaMedicamento);
+                if (medBtn) {
+                    selectChoice(medBtn, 'a-med', data.usaMedicamento);
+                    const medDetailsEl = document.getElementById('med-details');
+                    if (medDetailsEl) {
+                        if (data.usaMedicamento === 'Sim') {
+                            medDetailsEl.classList.remove('hidden');
+                        } else {
+                            medDetailsEl.classList.add('hidden');
+                        }
+                    }
+                }
+            }
+            
+            if (document.getElementById('a-med-nome')) document.getElementById('a-med-nome').value = data.medicamentoNome || "";
+            if (document.getElementById('a-med-freq')) document.getElementById('a-med-freq').value = data.medicamentoFreq || 1;
+            
+            // 3. Preenche Passo 3 (Histórico e Sintomas - Multiseletores)
+            // Reseta seleções prévias do passo 3
+            document.querySelectorAll('#step-3 .choice-card.multi').forEach(b => b.classList.remove('selected'));
+            
+            const selectedPills = [...(data.historico || []), ...(data.sintomas || [])];
+            if (selectedPills.length > 0) {
+                selectedPills.forEach(item => {
+                    const btn = Array.from(document.querySelectorAll('#step-3 .choice-card.multi')).find(b => b.innerText.trim() === item);
+                    if (btn) btn.classList.add('selected');
+                });
+            }
+            
+            // 4. Preenche Passo 4 (Hábitos)
+            const habits = data.habitos || {};
+            ['fisica', 'fuma', 'alcool', 'sal', 'diabetes', 'colesterol'].forEach(field => {
+                const val = habits[field];
+                if (val) {
+                    const btn = Array.from(document.querySelectorAll(`#step-4 button.choice-card`)).find(b => {
+                        const clickAttr = b.getAttribute('onclick');
+                        return clickAttr && clickAttr.includes(`'a-hab-${field}'`) && b.innerText.trim() === val;
+                    });
+                    if (btn) selectChoice(btn, `a-hab-${field}`, val);
+                }
+            });
+            
+            // 5. Preenche Passo 5 (Emergência)
+            if (data.emergenciaFamiliar) {
+                const emergBtn = Array.from(document.querySelectorAll('#step-5 button.choice-card')).find(b => b.innerText.trim() === data.emergenciaFamiliar);
+                if (emergBtn) {
+                    selectChoice(emergBtn, 'a-emergencia', data.emergenciaFamiliar);
+                    const emergDetailsEl = document.getElementById('emergencia-details');
+                    if (emergDetailsEl) {
+                        if (data.emergenciaFamiliar === 'Sim') {
+                            emergDetailsEl.classList.remove('hidden');
+                        } else {
+                            emergDetailsEl.classList.add('hidden');
+                        }
+                    }
+                }
+            }
+            if (document.getElementById('a-emerg-nome')) document.getElementById('a-emerg-nome').value = data.emergenciaNome || "";
+            if (document.getElementById('a-emerg-tel')) document.getElementById('a-emerg-tel').value = data.emergenciaTel || "";
+            
+            // 6. Preenche Passo 6 (Situação)
+            if (data.situacaoPressao) {
+                const sitBtn = Array.from(document.querySelectorAll('#step-6 button.choice-card')).find(b => b.innerText.trim().endsWith(data.situacaoPressao));
+                if (sitBtn) selectChoice(sitBtn, 'a-situacao', data.situacaoPressao);
+            }
+            
+        } catch (e) {
+            console.error("Erro ao fazer parse dos dados de anamnese para edição:", e);
+        }
+    } else {
+        // Fallback: Se não houver dados salvos, limpa o formulário de anamnese para valores padrão
+        if (document.getElementById('a-nome')) document.getElementById('a-nome').value = user.displayName || "";
+        document.querySelectorAll('#anamnese-screen .choice-card').forEach(b => b.classList.remove('selected'));
+        document.querySelectorAll('#anamnese-screen input[type="hidden"]').forEach(inp => inp.value = "");
+        if (document.getElementById('a-idade')) document.getElementById('a-idade').value = 60;
+        if (document.getElementById('a-peso')) document.getElementById('a-peso').value = 70;
+        if (document.getElementById('a-altura')) document.getElementById('a-altura').value = 160;
+        if (document.getElementById('med-details')) document.getElementById('med-details').classList.add('hidden');
+        if (document.getElementById('emergencia-details')) document.getElementById('emergencia-details').classList.add('hidden');
+    }
+    
+    // Inicia a tela de Anamnese no Passo 1
+    showScreen('anamnese-screen');
+    currentStep = 1;
+    updateProgress();
+}
+
 // Expor funções globalmente para o HTML
 window.showScreen = showScreen;
 window.showModal = showModal;
@@ -606,4 +780,5 @@ window.closeModal = closeModal;
 window.filtrarHistorico = filtrarHistorico;
 window.exportarCSV = exportarCSV;
 window.handleLogout = handleLogout;
+window.startEditAnamnese = startEditAnamnese;
 

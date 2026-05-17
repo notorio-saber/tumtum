@@ -376,49 +376,154 @@
 
             <main class="dashboard-content pb-24 space-y-6">
                 <!-- Cartão Principal do Usuário -->
-                <div class="card-premium glass flex flex-col items-center text-center p-6" style="gap: 12px;">
-                    <div class="avatar-circle" id="profile-avatar" style="width: 80px; height: 80px; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; font-weight: 700; background: var(--gray-light); color: var(--primary); border: 2px solid var(--gray-medium);">--</div>
-                    <div>
-                        <h3 id="profile-name" class="font-bold text-2xl">Carregando...</h3>
-                        <p id="profile-email" class="text-sm text-slate-500">...</p>
+                <div class="card-premium glass flex flex-row items-center text-left p-6 gap-5">
+                    <div class="avatar-circle flex-shrink-0 shadow-glow" id="profile-avatar" style="width: 72px; height: 72px; font-size: 1.6rem; display: flex; align-items: center; justify-content: center; font-weight: 700; background: var(--gray-light); color: var(--primary); border: 2px solid var(--gray-medium);">--</div>
+                    <div style="min-width: 0; flex: 1;">
+                        <h3 id="profile-name" class="font-bold text-xl truncate" style="font-family: 'Plus Jakarta Sans', sans-serif;">Carregando...</h3>
+                        <p id="profile-email" class="text-sm text-slate-500 truncate mt-0.5">...</p>
                     </div>
                 </div>
 
-                <!-- Detalhes de Saúde (Anamnese) -->
+                <!-- Botão de Editar Ficha de Saúde (Grande e Destacado) -->
+                <button onclick="startEditAnamnese()" class="btn-primary w-full py-4 text-lg font-bold rounded-2xl flex items-center justify-center gap-2 shadow-glow" style="cursor: pointer; transition: all 0.2s;">
+                    <i data-lucide="edit-3" class="w-5 h-5"></i>
+                    <span>Editar Ficha de Saúde</span>
+                </button>
+
+                <!-- 1. Dados Físicos e Clínicos -->
                 <div class="card-premium glass space-y-4">
-                    <h4 class="font-bold text-lg border-b pb-2 text-slate-700">Dados de Saúde</h4>
+                    <h4 class="font-bold text-lg border-b pb-2 text-slate-700 flex items-center gap-2">
+                        <i data-lucide="heart" class="w-5 h-5 text-primary"></i>
+                        <span>Dados Clínicos</span>
+                    </h4>
                     <div class="grid-2 gap-4 text-left">
                         <div>
                             <span class="text-xs text-slate-400 block uppercase font-bold">Idade</span>
-                            <span id="p-idade" class="font-bold text-lg">-- anos</span>
+                            <span id="p-idade" class="font-bold text-lg text-slate-800">-- anos</span>
                         </div>
                         <div>
                             <span class="text-xs text-slate-400 block uppercase font-bold">Sexo</span>
-                            <span id="p-sexo" class="font-bold text-lg">--</span>
+                            <span id="p-sexo" class="font-bold text-lg text-slate-800">--</span>
                         </div>
                         <div>
                             <span class="text-xs text-slate-400 block uppercase font-bold">Peso</span>
-                            <span id="p-peso" class="font-bold text-lg">-- kg</span>
+                            <span id="p-peso" class="font-bold text-lg text-slate-800">-- kg</span>
                         </div>
                         <div>
                             <span class="text-xs text-slate-400 block uppercase font-bold">Altura</span>
-                            <span id="p-altura" class="font-bold text-lg">-- cm</span>
+                            <span id="p-altura" class="font-bold text-lg text-slate-800">-- cm</span>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t pt-3 mt-2 text-left">
+                        <span class="text-xs text-slate-400 block uppercase font-bold">Situação da Pressão</span>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span id="p-situacao" class="font-bold text-base bg-red-50 text-primary border border-red-100 rounded-lg p-1.5 px-3" style="background: rgba(239, 68, 68, 0.05); color: var(--primary); border: 1px solid rgba(239, 68, 68, 0.1); display: inline-block;">--</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Contato de Emergência -->
+                <!-- 2. Tratamento & Medicamentos -->
                 <div class="card-premium glass space-y-4">
-                    <h4 class="font-bold text-lg border-b pb-2 text-slate-700">Contato de Emergência</h4>
-                    <div class="text-left space-y-2">
+                    <h4 class="font-bold text-lg border-b pb-2 text-slate-700 flex items-center gap-2">
+                        <i data-lucide="pill" class="w-5 h-5 text-primary"></i>
+                        <span>Cardiovascular & Tratamento</span>
+                    </h4>
+                    <div class="text-left space-y-3">
+                        <div class="grid-2 gap-4">
+                            <div>
+                                <span class="text-xs text-slate-400 block uppercase font-bold">Hipertenso</span>
+                                <span id="p-hiper" class="font-bold text-base text-slate-800">--</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-400 block uppercase font-bold">Usa Remédios</span>
+                                <span id="p-med" class="font-bold text-base text-slate-800">--</span>
+                            </div>
+                        </div>
+                        <div id="p-med-details-wrapper" class="hidden border-t pt-3 space-y-2">
+                            <div>
+                                <span class="text-xs text-slate-400 block uppercase font-bold">Nome do Medicamento</span>
+                                <span id="p-med-nome" class="font-bold text-base text-slate-800">--</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-400 block uppercase font-bold">Frequência Diária</span>
+                                <span id="p-med-freq" class="font-bold text-base text-slate-800">-- horários</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Hábitos e Riscos -->
+                <div class="card-premium glass space-y-4">
+                    <h4 class="font-bold text-lg border-b pb-2 text-slate-700 flex items-center gap-2">
+                        <i data-lucide="activity" class="w-5 h-5 text-primary"></i>
+                        <span>Hábitos de Vida</span>
+                    </h4>
+                    <div class="grid-2 gap-x-4 gap-y-3 text-left">
                         <div>
-                            <span class="text-xs text-slate-400 block uppercase font-bold">Nome</span>
-                            <span id="p-emerg-nome" class="font-bold text-lg">--</span>
+                            <span class="text-xs text-slate-400 block uppercase font-bold">Exercício</span>
+                            <span id="p-hab-fisica" class="font-bold text-base text-slate-800">--</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase font-bold">Fuma</span>
+                            <span id="p-hab-fuma" class="font-bold text-base text-slate-800">--</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase font-bold">Consome Álcool</span>
+                            <span id="p-hab-alcool" class="font-bold text-base text-slate-800">--</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase font-bold">Consome Sal</span>
+                            <span id="p-hab-sal" class="font-bold text-base text-slate-800">--</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase font-bold">Diabetes</span>
+                            <span id="p-hab-diabetes" class="font-bold text-base text-slate-800">--</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase font-bold">Colesterol Alto</span>
+                            <span id="p-hab-colesterol" class="font-bold text-base text-slate-800">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Histórico e Sintomas -->
+                <div id="p-historic-card" class="card-premium glass space-y-4">
+                    <h4 class="font-bold text-lg border-b pb-2 text-slate-700 flex items-center gap-2">
+                        <i data-lucide="clipboard-list" class="w-5 h-5 text-primary"></i>
+                        <span>Histórico & Sintomas</span>
+                    </h4>
+                    <div class="text-left space-y-3">
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase font-bold mb-1">Doenças Prévias / Histórico</span>
+                            <div id="p-historico-pills" class="flex flex-wrap gap-1.5 mt-1">
+                                <span class="text-xs text-slate-500 italic">Nenhum selecionado</span>
+                            </div>
+                        </div>
+                        <div class="border-t pt-3">
+                            <span class="text-xs text-slate-400 block uppercase font-bold mb-1">Sintomas Frequentes</span>
+                            <div id="p-sintomas-pills" class="flex flex-wrap gap-1.5 mt-1">
+                                <span class="text-xs text-slate-500 italic">Nenhum selecionado</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Contato de Emergência -->
+                <div class="card-premium glass space-y-4">
+                    <h4 class="font-bold text-lg border-b pb-2 text-slate-700 flex items-center gap-2">
+                        <i data-lucide="phone-call" class="w-5 h-5 text-primary"></i>
+                        <span>Contato de Emergência</span>
+                    </h4>
+                    <div class="text-left space-y-3">
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase font-bold">Nome do Contato</span>
+                            <span id="p-emerg-nome" class="font-bold text-lg text-slate-800">--</span>
                         </div>
                         <div>
                             <span class="text-xs text-slate-400 block uppercase font-bold">Telefone</span>
-                            <a id="p-emerg-tel" href="#" class="font-bold text-lg text-primary flex items-center gap-2 mt-1" style="color: var(--primary); text-decoration: none;">
-                                <i data-lucide="phone" class="w-5 h-5"></i>
+                            <a id="p-emerg-tel" href="#" class="font-bold text-lg text-primary flex items-center gap-2 mt-1.5 p-2 px-4 rounded-xl animate-pulse" style="background: rgba(239, 68, 68, 0.06); color: var(--primary); border: 1px solid rgba(239, 68, 68, 0.12); width: fit-content; text-decoration: none; display: inline-flex; align-items: center;">
+                                <i data-lucide="phone" class="w-4 h-4 text-primary"></i>
                                 <span>--</span>
                             </a>
                         </div>
