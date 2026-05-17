@@ -2730,7 +2730,9 @@ function playBeat(ctx, freq, duration) {
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(10, ctx.currentTime + duration);
     
-    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+    // Suaviza a curva de ganho (Fade-In de 20ms e Fade-Out de duration) para evitar estouro/pop digital
+    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + 0.02);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
     
     osc.start(ctx.currentTime);

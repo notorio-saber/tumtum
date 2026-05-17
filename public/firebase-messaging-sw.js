@@ -16,6 +16,15 @@ firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 
+// Instalação rápida e ativação imediata do service worker de messaging
+self.addEventListener('install', (event) => {
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim());
+});
+
 // Intercepta e exibe notificações push em segundo plano
 messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] Mensagem recebida em segundo plano: ', payload);

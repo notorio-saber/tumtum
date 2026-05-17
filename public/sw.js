@@ -1,11 +1,12 @@
-const CACHE_NAME = 'tumtum-pwa-v13';
+const CACHE_NAME = 'tumtum-pwa-v14';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/style.css',
   '/script.js',
   '/firebase-config.js',
-  '/logo.jpg'
+  '/logo.jpg',
+  '/logo.png'
 ];
 
 // Instalação do Service Worker
