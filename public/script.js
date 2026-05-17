@@ -282,22 +282,22 @@ let mockRecords = [];
 function updateNavigationByRole() {
     const navInicio = document.getElementById('nav-inicio');
     const navHistorico = document.getElementById('nav-historico');
+    const navAcompanhar = document.getElementById('nav-acompanhar');
+    const navPerfil = document.getElementById('nav-perfil');
     
     if (currentUserRole === 'paciente') {
         if (navInicio) navInicio.style.display = '';
         if (navHistorico) navHistorico.style.display = '';
+        if (navAcompanhar) navAcompanhar.style.display = '';
+        if (navPerfil) navPerfil.style.display = '';
     } else {
-        if (!activePatientUid) {
-            // Se NÃO tem paciente vinculado:
-            // Esconde Início e Histórico para o Acompanhante / Médico
-            if (navInicio) navInicio.style.display = 'none';
-            if (navHistorico) navHistorico.style.display = 'none';
-        } else {
-            // Se TEM paciente vinculado:
-            // Mostra tudo
-            if (navInicio) navInicio.style.display = '';
-            if (navHistorico) navHistorico.style.display = '';
-        }
+        // Familiar ou Médico: NUNCA vê "Início" (Dashboard do paciente)
+        if (navInicio) navInicio.style.display = 'none';
+        
+        // Sempre visíveis para acompanhantes
+        if (navHistorico) navHistorico.style.display = '';
+        if (navAcompanhar) navAcompanhar.style.display = '';
+        if (navPerfil) navPerfil.style.display = '';
     }
 }
 window.updateNavigationByRole = updateNavigationByRole;
@@ -344,6 +344,38 @@ function renderHistory(records) {
     if(!list) return;
     
     list.innerHTML = '';
+    
+    const filtersWrapper = document.getElementById('history-filters-wrapper');
+    const chipsWrapper = document.getElementById('history-chips-wrapper');
+    
+    // Se for acompanhante/médico e não tiver paciente ativo
+    if (currentUserRole !== 'paciente' && !activePatientUid) {
+        if (filtersWrapper) filtersWrapper.style.display = 'none';
+        if (chipsWrapper) chipsWrapper.style.display = 'none';
+        
+        list.innerHTML = `
+            <div class="card-premium glass" style="text-align: center; padding: 32px 20px; border: 1px dashed rgba(15, 23, 42, 0.08); margin-top: 20px; width: 100%;">
+                <div class="avatar-circle flex-shrink-0 shadow-glow" style="width: 56px; height: 56px; margin: 0 auto 16px; background: rgba(239, 68, 68, 0.05); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                    <i data-lucide="heart-handshake" style="width: 24px; height: 24px; stroke-width: 2;"></i>
+                </div>
+                <h3 class="font-bold text-base" style="color: var(--text-main); margin-bottom: 8px; font-weight: 800;">Nenhum Paciente Vinculado</h3>
+                <p class="text-sm text-slate-500 mb-6" style="line-height: 1.5; max-width: 280px; margin-left: auto; margin-right: auto;">
+                    Por favor, utilize a aba <strong>"Acompanhar"</strong> para buscar e vincular o e-mail ou código do paciente que você deseja monitorar.
+                </p>
+                <button onclick="showScreen('companions-screen')" class="btn-primary shadow-glow" style="padding: 12px 24px; border-radius: 12px; font-weight: 800; font-size: 0.85rem; width: auto; display: inline-flex; align-items: center; gap: 8px; margin: 0 auto;">
+                    <span>Vincular Paciente Agora</span>
+                </button>
+            </div>
+        `;
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+        return;
+    }
+    
+    // Restaura exibição de filtros para usuários com registros válidos
+    if (filtersWrapper) filtersWrapper.style.display = '';
+    if (chipsWrapper) chipsWrapper.style.display = '';
     
     records.forEach(record => {
         const status = getStatus(record.sys, record.dia);
@@ -939,26 +971,27 @@ window.changeUserRole = async (role) => {
     if (targetBtn) targetBtn.classList.add('selected');
     
     try {
-        const updates = { role: role };
-        // Se virar paciente, desativa assinatura por padrão para novas contas (exceto o admin UID etSpfstGkKSKmTfBploZqVMMVKu2)
-        if (role === 'paciente' && user.uid !== 'etSpfstGkKSKmTfBploZqVMMVKu2') {
-            updates.subscriptionActive = false;
-        } else if (role !== 'paciente') {
-            updates.subscriptionActive = true;
-        }
-        
-        // Exibe feedback visual de progresso
         if (targetBtn) {
             targetBtn.style.opacity = '0.7';
         }
         
-        // Atualiza no Firestore
-        if (window.db) {
-            await window.db.collection('users').doc(user.uid).update(updates);
+        if (user.uid === 'etSpfstGkKSKmTfBploZqVMMVKu2') {
+            // Conta Admin: Usa override local 100% livre de erros de regras do Firestore!
+            localStorage.setItem('admin_override_role', role);
+            localStorage.setItem('temp_login_role', role);
+        } else {
+            // Outros usuários (caso visível): Atualiza via Firestore
+            const updates = { role: role };
+            if (role === 'paciente') {
+                updates.subscriptionActive = false;
+            } else {
+                updates.subscriptionActive = true;
+            }
+            if (window.db) {
+                await window.db.collection('users').doc(user.uid).update(updates);
+            }
+            localStorage.setItem('temp_login_role', role);
         }
-        
-        // Força a role na sessão local
-        localStorage.setItem('temp_login_role', role);
         
         // Recarrega a página para reiniciar a tela sob as novas regras visuais
         window.location.reload();
@@ -1444,6 +1477,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const data = doc.data();
                 currentUserRole = data.role || 'paciente';
+                
+                // Aplicar override de papel local para o administrador (Dra. Layana) para testes rápidos e sem erro de permissões
+                if (user.uid === 'etSpfstGkKSKmTfBploZqVMMVKu2') {
+                    const override = localStorage.getItem('admin_override_role');
+                    if (override) {
+                        currentUserRole = override;
+                    }
+                    // Exibir o seletor premium de papel apenas para o administrador
+                    const roleSelectorWrapper = document.getElementById('profile-role-selector-wrapper');
+                    if (roleSelectorWrapper) roleSelectorWrapper.classList.remove('hidden');
+                } else {
+                    // Ocultar com absoluta certeza para qualquer usuário comum
+                    const roleSelectorWrapper = document.getElementById('profile-role-selector-wrapper');
+                    if (roleSelectorWrapper) roleSelectorWrapper.classList.add('hidden');
+                }
 
                 // Destacar o papel ativo no painel de perfil
                 document.querySelectorAll('[id^="profile-role-"]').forEach(btn => btn.classList.remove('selected'));
@@ -1634,8 +1682,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                             }
                             
-                            showScreen('dashboard-screen');
-                            initChart();
+                            if (currentUserRole === 'paciente') {
+                                showScreen('dashboard-screen');
+                                initChart();
+                            } else {
+                                showScreen('history-screen');
+                            }
                         } else {
                             // Paciente desvinculado ou ausente
                             alert("⚠️ O paciente vinculado não foi encontrado!");
@@ -1672,8 +1724,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Fallback offline (se já completou anamnese localmente ou se for médico/acompanhante)
                 const localCompleted = localStorage.getItem(`anamnese_completed_${user.uid}`);
                 if (localCompleted === 'true' || currentUserRole !== 'paciente') {
-                    showScreen('dashboard-screen');
-                    initChart();
+                    if (currentUserRole === 'paciente') {
+                        showScreen('dashboard-screen');
+                        initChart();
+                    } else {
+                        showScreen('history-screen');
+                    }
                 } else {
                     document.getElementById('a-nome').value = user.displayName || "";
                     showScreen('anamnese-screen');
