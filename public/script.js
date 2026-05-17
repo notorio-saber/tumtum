@@ -278,17 +278,51 @@ function updateUserProfile(user, data = null) {
 // Dados do histórico do aplicativo (inicia zerado para novas contas de acordo com as regras de negócio)
 let mockRecords = [];
 
-// Navegação de Telas
+// Navegação de Telas e Controle Dinâmico de Abas
+function updateNavigationByRole() {
+    const navInicio = document.getElementById('nav-inicio');
+    const navHistorico = document.getElementById('nav-historico');
+    
+    if (currentUserRole === 'paciente') {
+        if (navInicio) navInicio.style.display = '';
+        if (navHistorico) navHistorico.style.display = '';
+    } else {
+        if (!activePatientUid) {
+            // Se NÃO tem paciente vinculado:
+            // Esconde Início e Histórico para o Acompanhante / Médico
+            if (navInicio) navInicio.style.display = 'none';
+            if (navHistorico) navHistorico.style.display = 'none';
+        } else {
+            // Se TEM paciente vinculado:
+            // Mostra tudo
+            if (navInicio) navInicio.style.display = '';
+            if (navHistorico) navHistorico.style.display = '';
+        }
+    }
+}
+window.updateNavigationByRole = updateNavigationByRole;
+
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     
-    // Resetar navegação inferior (4 itens)
+    // Resetar navegação inferior
     document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
-    if(screenId === 'dashboard-screen') document.querySelectorAll('.bottom-nav .nav-item')[0].classList.add('active');
-    if(screenId === 'history-screen') document.querySelectorAll('.bottom-nav .nav-item')[1].classList.add('active');
-    if(screenId === 'companions-screen') document.querySelectorAll('.bottom-nav .nav-item')[2].classList.add('active');
-    if(screenId === 'profile-screen') document.querySelectorAll('.bottom-nav .nav-item')[3].classList.add('active');
+    
+    // Destaque preciso do botão correspondente de forma index-independente usando IDs
+    if (screenId === 'dashboard-screen') {
+        const btn = document.getElementById('nav-inicio');
+        if (btn) btn.classList.add('active');
+    } else if (screenId === 'history-screen') {
+        const btn = document.getElementById('nav-historico');
+        if (btn) btn.classList.add('active');
+    } else if (screenId === 'companions-screen') {
+        const btn = document.getElementById('nav-acompanhar');
+        if (btn) btn.classList.add('active');
+    } else if (screenId === 'profile-screen') {
+        const btn = document.getElementById('nav-perfil');
+        if (btn) btn.classList.add('active');
+    }
     
     if(screenId === 'history-screen') {
         renderHistory(mockRecords);
@@ -892,6 +926,49 @@ window.selectLoginRole = (role) => {
     if (targetBtn) targetBtn.classList.add('selected');
 };
 
+window.changeUserRole = async (role) => {
+    const user = window.auth ? window.auth.currentUser : null;
+    if (!user) {
+        alert("Você precisa estar logado para alterar seu papel de acesso.");
+        return;
+    }
+    
+    // Switch visual ativo imediato localmente
+    document.querySelectorAll('[id^="profile-role-"]').forEach(btn => btn.classList.remove('selected'));
+    const targetBtn = document.getElementById(`profile-role-${role}`);
+    if (targetBtn) targetBtn.classList.add('selected');
+    
+    try {
+        const updates = { role: role };
+        // Se virar paciente, desativa assinatura por padrão para novas contas (exceto o admin UID etSpfstGkKSKmTfBploZqVMMVKu2)
+        if (role === 'paciente' && user.uid !== 'etSpfstGkKSKmTfBploZqVMMVKu2') {
+            updates.subscriptionActive = false;
+        } else if (role !== 'paciente') {
+            updates.subscriptionActive = true;
+        }
+        
+        // Exibe feedback visual de progresso
+        if (targetBtn) {
+            targetBtn.style.opacity = '0.7';
+        }
+        
+        // Atualiza no Firestore
+        if (window.db) {
+            await window.db.collection('users').doc(user.uid).update(updates);
+        }
+        
+        // Força a role na sessão local
+        localStorage.setItem('temp_login_role', role);
+        
+        // Recarrega a página para reiniciar a tela sob as novas regras visuais
+        window.location.reload();
+    } catch (e) {
+        console.error("Erro ao alterar papel de acesso:", e);
+        alert("Não foi possível alterar seu papel de acesso: " + e.message);
+        window.location.reload();
+    }
+};
+
 window.selectInviteRole = (role) => {
     selectedInviteRole = role;
     const inviteRoleEl = document.getElementById('invite-role');
@@ -1368,6 +1445,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = doc.data();
                 currentUserRole = data.role || 'paciente';
 
+                // Destacar o papel ativo no painel de perfil
+                document.querySelectorAll('[id^="profile-role-"]').forEach(btn => btn.classList.remove('selected'));
+                const activeProfileRoleBtn = document.getElementById(`profile-role-${currentUserRole}`);
+                if (activeProfileRoleBtn) activeProfileRoleBtn.classList.add('selected');
+
                 // Garantia absoluta de controle visual da Ficha de Saúde (Anamnese) no perfil do usuário
                 const clinicalWrapper = document.getElementById('profile-clinical-wrapper');
                 const editAnamneseBtn = document.getElementById('profile-edit-anamnese-btn');
@@ -1398,6 +1480,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Carregar aba de Acompanhamento
                 window.loadCompanionsPage();
                 
+                // Atualizar navegação por papel
+                updateNavigationByRole();
+                
                 if (currentUserRole === 'paciente') {
                     // --- FLUXO DO PACIENTE ---
                     // Restaura controles exclusivos do paciente
@@ -1407,8 +1492,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const viewingBanner = document.getElementById('companion-viewing-banner');
                     if (viewingBanner) viewingBanner.classList.add('hidden');
                     
-                    const medStatsCard = document.getElementById('medical-stats-card');
-                    if (medStatsCard) medStatsCard.classList.add('hidden');
+                    const medicalStatsCard = document.getElementById('medical-stats-card');
+                    if (medicalStatsCard) medicalStatsCard.classList.add('hidden');
                     
                     if (!subscriptionActive) {
                         // BLOQUEADO: Exibir Paywall do WhatsApp da Dra. Layana
@@ -1458,6 +1543,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             localStorage.setItem(`active_patient_uid_${user.uid}`, activePatientUid);
                         }
                     }
+                    
+                    // Atualiza a navegação após calcular o activePatientUid do acompanhante
+                    updateNavigationByRole();
                     
                     if (activePatientUid) {
                         // Carregar dados do paciente acompanhado
@@ -1554,7 +1642,27 @@ document.addEventListener('DOMContentLoaded', () => {
                             showScreen('companions-screen');
                         }
                     } else {
-                        // Sem paciente vinculado: força a tela de vincular
+                        // Sem paciente vinculado: força a tela de vincular e oculta widgets clínicos do dashboard
+                        const giantCardWrapper = document.getElementById('patient-giant-card-wrapper');
+                        if (giantCardWrapper) giantCardWrapper.style.display = 'none';
+                        
+                        const viewingBanner = document.getElementById('companion-viewing-banner');
+                        if (viewingBanner) viewingBanner.classList.add('hidden');
+                        
+                        const medicalStatsCard = document.getElementById('medical-stats-card');
+                        if (medicalStatsCard) medicalStatsCard.classList.add('hidden');
+                        
+                        // Atualiza o greeting e o display name
+                        const greetEl = document.querySelector('.greeting');
+                        if (greetEl) {
+                            greetEl.innerText = "Nenhum paciente selecionado";
+                        }
+                        const nameEl = document.getElementById('display-name');
+                        if (nameEl) nameEl.innerText = "";
+                        
+                        // Reseta registros para evitar gráfico fantasma
+                        mockRecords = [];
+                        
                         showScreen('companions-screen');
                     }
                 }

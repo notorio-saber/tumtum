@@ -428,6 +428,29 @@
                     </div>
                 </div>
 
+                <!-- Seletor Premium de Papel no Perfil -->
+                <div class="card-premium glass" style="margin-top: 15px; width: 100%;">
+                    <h4 class="profile-section-title" style="display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="shield-check" class="text-primary"></i>
+                        <span>Papel de Acesso</span>
+                    </h4>
+                    <p class="text-xs text-slate-500 mb-4" style="line-height: 1.4; text-align: left;">Alterne seu papel de acesso instantaneamente para testar e usar diferentes interfaces.</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                        <button type="button" id="profile-role-paciente" class="choice-card" onclick="changeUserRole('paciente')" style="padding: 10px 4px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <i data-lucide="user" class="w-4 h-4"></i>
+                            <span>Paciente</span>
+                        </button>
+                        <button type="button" id="profile-role-familiar" class="choice-card" onclick="changeUserRole('familiar')" style="padding: 10px 4px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <i data-lucide="home" class="w-4 h-4"></i>
+                            <span>Familiar</span>
+                        </button>
+                        <button type="button" id="profile-role-medico" class="choice-card" onclick="changeUserRole('medico')" style="padding: 10px 4px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <i data-lucide="briefcase" class="w-4 h-4"></i>
+                            <span>Médico</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Botão de Editar Ficha de Saúde (Arredondado e Lindo) -->
                 <button id="profile-edit-anamnese-btn" onclick="startEditAnamnese()" class="btn-edit-profile shadow-glow">
                     <i data-lucide="edit-3" class="w-5 h-5"></i>
@@ -458,41 +481,35 @@
                                 <span class="profile-detail-label">Altura</span>
                                 <span id="p-altura" class="profile-detail-value">-- cm</span>
                             </div>
-                        </div>
-                        
-                        <div style="margin-top: 14px; text-align: left;">
-                            <span class="profile-detail-label" style="display: block; margin-bottom: 6px;">Situação da Pressão</span>
-                            <span id="p-situacao" class="profile-detail-value-highlight">--</span>
+                            <div class="profile-detail-item" style="grid-column: span 2;">
+                                <span class="profile-detail-label">Situação Atual da Pressão</span>
+                                <span id="p-situacao" class="profile-detail-value" style="color: var(--primary); font-weight: 800;">--</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- 2. Tratamento & Medicamentos -->
+                    <!-- 2. Cardiovascular & Tratamento -->
                     <div class="card-premium glass">
                         <h4 class="profile-section-title">
-                            <i data-lucide="pill" class="text-primary"></i>
+                            <i data-lucide="activity" class="text-primary"></i>
                             <span>Cardiovascular & Tratamento</span>
                         </h4>
-                        <div class="profile-treatment-section">
-                            <div class="profile-detail-grid">
-                                <div class="profile-detail-item">
-                                    <span class="profile-detail-label">Hipertenso</span>
-                                    <span id="p-hiper" class="profile-detail-value">--</span>
-                                </div>
-                                <div class="profile-detail-item">
-                                    <span class="profile-detail-label">Usa Remédios</span>
-                                    <span id="p-med" class="profile-detail-value">--</span>
-                                </div>
+                        <div class="profile-detail-grid">
+                            <div class="profile-detail-item">
+                                <span class="profile-detail-label">Hipertensão</span>
+                                <span id="p-hiper" class="profile-detail-value">--</span>
                             </div>
-                            
-                            <div id="p-med-details-wrapper" class="hidden" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
-                                <div class="profile-detail-item" style="width: 100%;">
-                                    <span class="profile-detail-label">Nome do Medicamento</span>
-                                    <span id="p-med-nome" class="profile-detail-value">--</span>
-                                </div>
-                                <div class="profile-detail-item" style="width: 100%;">
-                                    <span class="profile-detail-label">Frequência Diária</span>
-                                    <span id="p-med-freq" class="profile-detail-value">-- horários</span>
-                                </div>
+                            <div class="profile-detail-item">
+                                <span class="profile-detail-label">Usa Medicamentos</span>
+                                <span id="p-med" class="profile-detail-value">--</span>
+                            </div>
+                            <div class="profile-detail-item" style="grid-column: span 2;">
+                                <span class="profile-detail-label">Nome do Medicamento</span>
+                                <span id="p-med-nome" class="profile-detail-value">--</span>
+                            </div>
+                            <div class="profile-detail-item" style="grid-column: span 2;">
+                                <span class="profile-detail-label">Frequência Diária</span>
+                                <span id="p-med-freq" class="profile-detail-value">--x ao dia</span>
                             </div>
                         </div>
                     </div>
@@ -500,24 +517,24 @@
                     <!-- 3. Hábitos de Vida -->
                     <div class="card-premium glass">
                         <h4 class="profile-section-title">
-                            <i data-lucide="activity" class="text-primary"></i>
+                            <i data-lucide="apple" class="text-primary"></i>
                             <span>Hábitos de Vida</span>
                         </h4>
-                        <div class="profile-detail-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="profile-detail-grid">
                             <div class="profile-detail-item">
-                                <span class="profile-detail-label">Exercício</span>
+                                <span class="profile-detail-label">Atividade Física</span>
                                 <span id="p-hab-fisica" class="profile-detail-value">--</span>
                             </div>
                             <div class="profile-detail-item">
-                                <span class="profile-detail-label">Fuma</span>
+                                <span class="profile-detail-label">Fumante</span>
                                 <span id="p-hab-fuma" class="profile-detail-value">--</span>
                             </div>
                             <div class="profile-detail-item">
-                                <span class="profile-detail-label">Consome Álcool</span>
+                                <span class="profile-detail-label">Bebida Alcoólica</span>
                                 <span id="p-hab-alcool" class="profile-detail-value">--</span>
                             </div>
                             <div class="profile-detail-item">
-                                <span class="profile-detail-label">Consome Sal</span>
+                                <span class="profile-detail-label">Consumo de Sal</span>
                                 <span id="p-hab-sal" class="profile-detail-value">--</span>
                             </div>
                             <div class="profile-detail-item">
@@ -531,52 +548,53 @@
                         </div>
                     </div>
 
-                    <!-- 4. Histórico e Sintomas -->
-                    <div id="p-historic-card" class="card-premium glass">
+                    <!-- 4. Histórico & Sintomas -->
+                    <div class="card-premium glass">
                         <h4 class="profile-section-title">
                             <i data-lucide="clipboard-list" class="text-primary"></i>
                             <span>Histórico & Sintomas</span>
                         </h4>
-                        <div style="text-align: left; display: flex; flex-direction: column; gap: 16px;">
+                        <div class="space-y-4" style="text-align: left;">
                             <div>
-                                <span class="profile-detail-label">Doenças Prévias / Histórico</span>
-                                <div id="p-historico-pills" class="profile-pills-container">
-                                    <span class="text-xs text-slate-500 italic">Nenhum selecionado</span>
+                                <span class="profile-detail-label" style="display: block; margin-bottom: 6px;">Histórico Familiar de Hipertensão</span>
+                                <div id="p-historico-pills" class="flex flex-wrap gap-2">
+                                    <span class="text-slate-400 text-xs font-semibold">Nenhum registrado</span>
                                 </div>
                             </div>
-                            <div style="border-t: 1px solid var(--gray-medium); padding-top: 14px;">
-                                <span class="profile-detail-label">Sintomas Frequentes</span>
-                                <div id="p-sintomas-pills" class="profile-pills-container">
-                                    <span class="text-xs text-slate-500 italic">Nenhum selecionado</span>
+                            <div style="border-top: 1px dashed rgba(15, 23, 42, 0.06); padding-top: 12px;">
+                                <span class="profile-detail-label" style="display: block; margin-bottom: 6px;">Sintomas Frequentes Relatados</span>
+                                <div id="p-sintomas-pills" class="flex flex-wrap gap-2">
+                                    <span class="text-slate-400 text-xs font-semibold">Nenhum registrado</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 5. Contato de Emergência -->
+                    <!-- 5. Contatos de Emergência -->
                     <div class="card-premium glass">
                         <h4 class="profile-section-title">
                             <i data-lucide="phone-call" class="text-primary"></i>
-                            <span>Contato de Emergência</span>
+                            <span>Contatos de Emergência</span>
                         </h4>
-                        <div style="text-align: left; display: flex; flex-direction: column; gap: 12px;">
-                            <div class="profile-detail-item" style="width: 100%;">
+                        <div class="space-y-3" style="text-align: left;">
+                            <div class="profile-detail-item">
+                                <span class="profile-detail-label">Possui Contato de Emergência</span>
+                                <span id="p-emergencia" class="profile-detail-value">--</span>
+                            </div>
+                            <div class="profile-detail-item">
                                 <span class="profile-detail-label">Nome do Contato</span>
                                 <span id="p-emerg-nome" class="profile-detail-value">--</span>
                             </div>
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span class="profile-detail-label">Telefone</span>
-                                <a id="p-emerg-tel" href="#" class="profile-emergency-link animate-pulse">
-                                    <i data-lucide="phone" class="w-4 h-4 text-primary"></i>
-                                    <span>--</span>
-                                </a>
-                            </div>
+                            <a id="p-emerg-tel" href="#" class="btn-secondary" style="display: none; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 12px; color: var(--primary); font-weight: 800; font-size: 0.9rem; text-decoration: none; width: 100%;">
+                                <i data-lucide="phone" class="w-4 h-4"></i>
+                                <span>Ligar para --</span>
+                            </a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Seção Exclusiva de Admin (Apenas para UID etSpfstGkKSKmTfBploZqVMMVKu2) -->
-                <div id="admin-panel-section" class="card-premium glass hidden" style="border: 2px dashed #10b981; background: rgba(16, 185, 129, 0.02); text-align: left; margin-bottom: 20px;">
+                <!-- Painel Secreto do Admin (Dra. Layana) -->
+                <div id="admin-panel-section" class="card-premium glass hidden">
                     <h4 class="profile-section-title" style="color: #10b981; display: flex; align-items: center; gap: 8px;">
                         <i data-lucide="shield-alert" class="w-5 h-5"></i>
                         <span>⚙️ Painel Controle Admin</span>
@@ -692,19 +710,19 @@
 
         <!-- Bottom Nav -->
         <nav class="bottom-nav glass">
-            <button class="nav-item active" onclick="showScreen('dashboard-screen')">
+            <button id="nav-inicio" class="nav-item active" onclick="showScreen('dashboard-screen')">
                 <i data-lucide="home"></i>
                 <span>Início</span>
             </button>
-            <button class="nav-item" onclick="showScreen('history-screen')">
+            <button id="nav-historico" class="nav-item" onclick="showScreen('history-screen')">
                 <i data-lucide="history"></i>
                 <span>Histórico</span>
             </button>
-            <button class="nav-item" onclick="showScreen('companions-screen')">
+            <button id="nav-acompanhar" class="nav-item" onclick="showScreen('companions-screen')">
                 <i data-lucide="heart-handshake"></i>
                 <span id="companions-nav-label">Acompanhar</span>
             </button>
-            <button class="nav-item" onclick="showScreen('profile-screen')">
+            <button id="nav-perfil" class="nav-item" onclick="showScreen('profile-screen')">
                 <i data-lucide="user"></i>
                 <span>Perfil</span>
             </button>
