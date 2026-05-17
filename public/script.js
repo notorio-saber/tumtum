@@ -257,6 +257,18 @@ function updateUserProfile(user, data = null) {
         }
     }
     
+    // Ocultar dados médicos e botão de edição se o usuário logado for Médico ou Familiar
+    const clinicalWrapper = document.getElementById('profile-clinical-wrapper');
+    const editAnamneseBtn = document.getElementById('profile-edit-anamnese-btn');
+    
+    if (currentUserRole === 'paciente') {
+        if (clinicalWrapper) clinicalWrapper.classList.remove('hidden');
+        if (editAnamneseBtn) editAnamneseBtn.classList.remove('hidden');
+    } else {
+        if (clinicalWrapper) clinicalWrapper.classList.add('hidden');
+        if (editAnamneseBtn) editAnamneseBtn.classList.add('hidden');
+    }
+    
     // Atualiza/Recria os ícones dinâmicos do Lucide
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
@@ -303,17 +315,36 @@ function renderHistory(records) {
         const status = getStatus(record.sys, record.dia);
         const card = document.createElement('div');
         card.className = `history-card glass border-l-4 ${status.border}`;
+        
+        // Exclusivo do Médico: PAM (Pressão Arterial Média) e PP (Pressão de Pulso)
+        let medicalDetailHtml = '';
+        if (currentUserRole === 'medico') {
+            const pam = Math.round((parseInt(record.sys) + 2 * parseInt(record.dia)) / 3);
+            const pp = parseInt(record.sys) - parseInt(record.dia);
+            medicalDetailHtml = `
+                <div style="margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <span class="badge-role-medico" style="font-size: 0.62rem; padding: 2px 6px; border-radius: 4px; font-weight: 800; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25);">PAM: ${pam} mmHg</span>
+                    <span class="badge-role-medico" style="font-size: 0.62rem; padding: 2px 6px; border-radius: 4px; font-weight: 800; background: rgba(148, 163, 184, 0.15); color: #475569; border: 1px solid rgba(148, 163, 184, 0.25);">PP: ${pp} mmHg</span>
+                </div>
+            `;
+        }
+        
+        const deleteButtonHtml = currentUserRole === 'paciente' ? `
+            <button onclick="deleteRecord(${record.id})" style="background: transparent; border: none; cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; color: var(--primary); transition: all 0.2s;" title="Excluir Aferição">
+                <i data-lucide="trash-2" style="width: 15px; height: 15px; stroke-width: 2.5;"></i>
+            </button>
+        ` : '';
+
         card.innerHTML = `
             <div class="history-info">
                 <div class="date-time">${formatDate(record.date)} às ${record.time} • ${record.periodo}</div>
                 <div class="values">${record.sys} / ${record.dia} <span class="bpm">❤ ${record.bpm} bpm</span></div>
                 <div class="text-xs text-slate-500 mt-1">${record.condicao}</div>
+                ${medicalDetailHtml}
             </div>
             <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 8px;">
                 <div class="${status.class}" style="font-size: 0.7rem; padding: 4px 8px;">${status.label}</div>
-                <button onclick="deleteRecord(${record.id})" style="background: transparent; border: none; cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; color: var(--primary); transition: all 0.2s;" title="Excluir Aferição">
-                    <i data-lucide="trash-2" style="width: 15px; height: 15px; stroke-width: 2.5;"></i>
-                </button>
+                ${deleteButtonHtml}
             </div>
         `;
         list.appendChild(card);
@@ -1300,26 +1331,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 1. Verificar/Carregar documento do Usuário no Firestore
                 let doc = await window.db.collection('users').doc(user.uid).get();
                 
+                const tempRole = localStorage.getItem('temp_login_role');
                 if (!doc.exists) {
                     // Novo usuário! Criamos o perfil inicial
-                    const tempRole = localStorage.getItem('temp_login_role') || 'paciente';
+                    const finalRole = tempRole || 'paciente';
                     const initialData = {
                         uid: user.uid,
                         email: user.email || "",
                         displayName: user.displayName || "",
-                        role: tempRole,
+                        role: finalRole,
                         // Paciente novo começa INATIVO para forçar o Paywall do WhatsApp (exceto a Dra. Layana!)
-                        subscriptionActive: (user.uid === 'etSpfstGkKSKmTfBploZqVMMVKu2') ? true : (tempRole === 'paciente' ? false : true),
+                        subscriptionActive: (user.uid === 'etSpfstGkKSKmTfBploZqVMMVKu2') ? true : (finalRole === 'paciente' ? false : true),
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     };
                     
                     await window.db.collection('users').doc(user.uid).set(initialData, { merge: true });
                     doc = await window.db.collection('users').doc(user.uid).get();
-                    localStorage.removeItem('temp_login_role');
+                } else {
+                    // Usuário existente: Se selecionou um papel diferente no login, atualiza no Firestore!
+                    const existingData = doc.data();
+                    if (tempRole && tempRole !== existingData.role) {
+                        const updates = { role: tempRole };
+                        // Se virar paciente, resetar assinatura inativa por padrão (exceto admin)
+                        if (tempRole === 'paciente' && user.uid !== 'etSpfstGkKSKmTfBploZqVMMVKu2') {
+                            updates.subscriptionActive = false;
+                        } else if (tempRole !== 'paciente') {
+                            updates.subscriptionActive = true;
+                        }
+                        await window.db.collection('users').doc(user.uid).update(updates);
+                        // Atualiza o documento carregado
+                        doc = await window.db.collection('users').doc(user.uid).get();
+                    }
                 }
+                localStorage.removeItem('temp_login_role');
                 
                 const data = doc.data();
                 currentUserRole = data.role || 'paciente';
+
+                // Garantia absoluta de controle visual da Ficha de Saúde (Anamnese) no perfil do usuário
+                const clinicalWrapper = document.getElementById('profile-clinical-wrapper');
+                const editAnamneseBtn = document.getElementById('profile-edit-anamnese-btn');
+                if (currentUserRole === 'paciente') {
+                    if (clinicalWrapper) clinicalWrapper.classList.remove('hidden');
+                    if (editAnamneseBtn) editAnamneseBtn.classList.remove('hidden');
+                } else {
+                    if (clinicalWrapper) clinicalWrapper.classList.add('hidden');
+                    if (editAnamneseBtn) editAnamneseBtn.classList.add('hidden');
+                }
                 
                 // Atualizar o rótulo do menu bottom-nav dinamicamente conforme o papel
                 const companionsNavLabel = document.getElementById('companions-nav-label');
@@ -1342,6 +1400,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (currentUserRole === 'paciente') {
                     // --- FLUXO DO PACIENTE ---
+                    // Restaura controles exclusivos do paciente
+                    const giantCardWrapper = document.getElementById('patient-giant-card-wrapper');
+                    if (giantCardWrapper) giantCardWrapper.style.display = '';
+                    
+                    const viewingBanner = document.getElementById('companion-viewing-banner');
+                    if (viewingBanner) viewingBanner.classList.add('hidden');
+                    
+                    const medStatsCard = document.getElementById('medical-stats-card');
+                    if (medStatsCard) medStatsCard.classList.add('hidden');
+                    
                     if (!subscriptionActive) {
                         // BLOQUEADO: Exibir Paywall do WhatsApp da Dra. Layana
                         document.getElementById('paywall-overlay').classList.remove('hidden');
@@ -1493,9 +1561,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
             } catch(e) {
                 console.error("Erro completo ao verificar perfil no Firestore:", e);
-                // Fallback offline (se já completou anamnese localmente)
+                // Fallback offline (se já completou anamnese localmente ou se for médico/acompanhante)
                 const localCompleted = localStorage.getItem(`anamnese_completed_${user.uid}`);
-                if (localCompleted === 'true') {
+                if (localCompleted === 'true' || currentUserRole !== 'paciente') {
                     showScreen('dashboard-screen');
                     initChart();
                 } else {

@@ -429,146 +429,148 @@
                 </div>
 
                 <!-- Botão de Editar Ficha de Saúde (Arredondado e Lindo) -->
-                <button onclick="startEditAnamnese()" class="btn-edit-profile shadow-glow">
+                <button id="profile-edit-anamnese-btn" onclick="startEditAnamnese()" class="btn-edit-profile shadow-glow">
                     <i data-lucide="edit-3" class="w-5 h-5"></i>
                     <span>Editar Ficha de Saúde</span>
                 </button>
 
-                <!-- 1. Dados Clínicos -->
-                <div class="card-premium glass">
-                    <h4 class="profile-section-title">
-                        <i data-lucide="heart" class="text-primary"></i>
-                        <span>Dados Clínicos</span>
-                    </h4>
-                    <div class="profile-detail-grid">
-                        <div class="profile-detail-item">
-                            <span class="profile-detail-label">Idade</span>
-                            <span id="p-idade" class="profile-detail-value">-- anos</span>
-                        </div>
-                        <div class="profile-detail-item">
-                            <span class="profile-detail-label">Sexo</span>
-                            <span id="p-sexo" class="profile-detail-value">--</span>
-                        </div>
-                        <div class="profile-detail-item">
-                            <span class="profile-detail-label">Peso</span>
-                            <span id="p-peso" class="profile-detail-value">-- kg</span>
-                        </div>
-                        <div class="profile-detail-item">
-                            <span class="profile-detail-label">Altura</span>
-                            <span id="p-altura" class="profile-detail-value">-- cm</span>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 14px; text-align: left;">
-                        <span class="profile-detail-label" style="display: block; margin-bottom: 6px;">Situação da Pressão</span>
-                        <span id="p-situacao" class="profile-detail-value-highlight">--</span>
-                    </div>
-                </div>
-
-                <!-- 2. Tratamento & Medicamentos -->
-                <div class="card-premium glass">
-                    <h4 class="profile-section-title">
-                        <i data-lucide="pill" class="text-primary"></i>
-                        <span>Cardiovascular & Tratamento</span>
-                    </h4>
-                    <div class="profile-treatment-section">
+                <div id="profile-clinical-wrapper" class="space-y-6" style="width: 100%;">
+                    <!-- 1. Dados Clínicos -->
+                    <div class="card-premium glass">
+                        <h4 class="profile-section-title">
+                            <i data-lucide="heart" class="text-primary"></i>
+                            <span>Dados Clínicos</span>
+                        </h4>
                         <div class="profile-detail-grid">
                             <div class="profile-detail-item">
-                                <span class="profile-detail-label">Hipertenso</span>
-                                <span id="p-hiper" class="profile-detail-value">--</span>
+                                <span class="profile-detail-label">Idade</span>
+                                <span id="p-idade" class="profile-detail-value">-- anos</span>
                             </div>
                             <div class="profile-detail-item">
-                                <span class="profile-detail-label">Usa Remédios</span>
-                                <span id="p-med" class="profile-detail-value">--</span>
+                                <span class="profile-detail-label">Sexo</span>
+                                <span id="p-sexo" class="profile-detail-value">--</span>
+                            </div>
+                            <div class="profile-detail-item">
+                                <span class="profile-detail-label">Peso</span>
+                                <span id="p-peso" class="profile-detail-value">-- kg</span>
+                            </div>
+                            <div class="profile-detail-item">
+                                <span class="profile-detail-label">Altura</span>
+                                <span id="p-altura" class="profile-detail-value">-- cm</span>
                             </div>
                         </div>
                         
-                        <div id="p-med-details-wrapper" class="hidden" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
+                        <div style="margin-top: 14px; text-align: left;">
+                            <span class="profile-detail-label" style="display: block; margin-bottom: 6px;">Situação da Pressão</span>
+                            <span id="p-situacao" class="profile-detail-value-highlight">--</span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Tratamento & Medicamentos -->
+                    <div class="card-premium glass">
+                        <h4 class="profile-section-title">
+                            <i data-lucide="pill" class="text-primary"></i>
+                            <span>Cardiovascular & Tratamento</span>
+                        </h4>
+                        <div class="profile-treatment-section">
+                            <div class="profile-detail-grid">
+                                <div class="profile-detail-item">
+                                    <span class="profile-detail-label">Hipertenso</span>
+                                    <span id="p-hiper" class="profile-detail-value">--</span>
+                                </div>
+                                <div class="profile-detail-item">
+                                    <span class="profile-detail-label">Usa Remédios</span>
+                                    <span id="p-med" class="profile-detail-value">--</span>
+                                </div>
+                            </div>
+                            
+                            <div id="p-med-details-wrapper" class="hidden" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
+                                <div class="profile-detail-item" style="width: 100%;">
+                                    <span class="profile-detail-label">Nome do Medicamento</span>
+                                    <span id="p-med-nome" class="profile-detail-value">--</span>
+                                </div>
+                                <div class="profile-detail-item" style="width: 100%;">
+                                    <span class="profile-detail-label">Frequência Diária</span>
+                                    <span id="p-med-freq" class="profile-detail-value">-- horários</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Hábitos de Vida -->
+                    <div class="card-premium glass">
+                        <h4 class="profile-section-title">
+                            <i data-lucide="activity" class="text-primary"></i>
+                            <span>Hábitos de Vida</span>
+                        </h4>
+                        <div class="profile-detail-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="profile-detail-item">
+                                <span class="profile-detail-label">Exercício</span>
+                                <span id="p-hab-fisica" class="profile-detail-value">--</span>
+                            </div>
+                            <div class="profile-detail-item">
+                                <span class="profile-detail-label">Fuma</span>
+                                <span id="p-hab-fuma" class="profile-detail-value">--</span>
+                            </div>
+                            <div class="profile-detail-item">
+                                <span class="profile-detail-label">Consome Álcool</span>
+                                <span id="p-hab-alcool" class="profile-detail-value">--</span>
+                            </div>
+                            <div class="profile-detail-item">
+                                <span class="profile-detail-label">Consome Sal</span>
+                                <span id="p-hab-sal" class="profile-detail-value">--</span>
+                            </div>
+                            <div class="profile-detail-item">
+                                <span class="profile-detail-label">Diabetes</span>
+                                <span id="p-hab-diabetes" class="profile-detail-value">--</span>
+                            </div>
+                            <div class="profile-detail-item">
+                                <span class="profile-detail-label">Colesterol Alto</span>
+                                <span id="p-hab-colesterol" class="profile-detail-value">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Histórico e Sintomas -->
+                    <div id="p-historic-card" class="card-premium glass">
+                        <h4 class="profile-section-title">
+                            <i data-lucide="clipboard-list" class="text-primary"></i>
+                            <span>Histórico & Sintomas</span>
+                        </h4>
+                        <div style="text-align: left; display: flex; flex-direction: column; gap: 16px;">
+                            <div>
+                                <span class="profile-detail-label">Doenças Prévias / Histórico</span>
+                                <div id="p-historico-pills" class="profile-pills-container">
+                                    <span class="text-xs text-slate-500 italic">Nenhum selecionado</span>
+                                </div>
+                            </div>
+                            <div style="border-t: 1px solid var(--gray-medium); padding-top: 14px;">
+                                <span class="profile-detail-label">Sintomas Frequentes</span>
+                                <div id="p-sintomas-pills" class="profile-pills-container">
+                                    <span class="text-xs text-slate-500 italic">Nenhum selecionado</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Contato de Emergência -->
+                    <div class="card-premium glass">
+                        <h4 class="profile-section-title">
+                            <i data-lucide="phone-call" class="text-primary"></i>
+                            <span>Contato de Emergência</span>
+                        </h4>
+                        <div style="text-align: left; display: flex; flex-direction: column; gap: 12px;">
                             <div class="profile-detail-item" style="width: 100%;">
-                                <span class="profile-detail-label">Nome do Medicamento</span>
-                                <span id="p-med-nome" class="profile-detail-value">--</span>
+                                <span class="profile-detail-label">Nome do Contato</span>
+                                <span id="p-emerg-nome" class="profile-detail-value">--</span>
                             </div>
-                            <div class="profile-detail-item" style="width: 100%;">
-                                <span class="profile-detail-label">Frequência Diária</span>
-                                <span id="p-med-freq" class="profile-detail-value">-- horários</span>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span class="profile-detail-label">Telefone</span>
+                                <a id="p-emerg-tel" href="#" class="profile-emergency-link animate-pulse">
+                                    <i data-lucide="phone" class="w-4 h-4 text-primary"></i>
+                                    <span>--</span>
+                                </a>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Hábitos de Vida -->
-                <div class="card-premium glass">
-                    <h4 class="profile-section-title">
-                        <i data-lucide="activity" class="text-primary"></i>
-                        <span>Hábitos de Vida</span>
-                    </h4>
-                    <div class="profile-detail-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <div class="profile-detail-item">
-                            <span class="profile-detail-label">Exercício</span>
-                            <span id="p-hab-fisica" class="profile-detail-value">--</span>
-                        </div>
-                        <div class="profile-detail-item">
-                            <span class="profile-detail-label">Fuma</span>
-                            <span id="p-hab-fuma" class="profile-detail-value">--</span>
-                        </div>
-                        <div class="profile-detail-item">
-                            <span class="profile-detail-label">Consome Álcool</span>
-                            <span id="p-hab-alcool" class="profile-detail-value">--</span>
-                        </div>
-                        <div class="profile-detail-item">
-                            <span class="profile-detail-label">Consome Sal</span>
-                            <span id="p-hab-sal" class="profile-detail-value">--</span>
-                        </div>
-                        <div class="profile-detail-item">
-                            <span class="profile-detail-label">Diabetes</span>
-                            <span id="p-hab-diabetes" class="profile-detail-value">--</span>
-                        </div>
-                        <div class="profile-detail-item">
-                            <span class="profile-detail-label">Colesterol Alto</span>
-                            <span id="p-hab-colesterol" class="profile-detail-value">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 4. Histórico e Sintomas -->
-                <div id="p-historic-card" class="card-premium glass">
-                    <h4 class="profile-section-title">
-                        <i data-lucide="clipboard-list" class="text-primary"></i>
-                        <span>Histórico & Sintomas</span>
-                    </h4>
-                    <div style="text-align: left; display: flex; flex-direction: column; gap: 16px;">
-                        <div>
-                            <span class="profile-detail-label">Doenças Prévias / Histórico</span>
-                            <div id="p-historico-pills" class="profile-pills-container">
-                                <span class="text-xs text-slate-500 italic">Nenhum selecionado</span>
-                            </div>
-                        </div>
-                        <div style="border-t: 1px solid var(--gray-medium); padding-top: 14px;">
-                            <span class="profile-detail-label">Sintomas Frequentes</span>
-                            <div id="p-sintomas-pills" class="profile-pills-container">
-                                <span class="text-xs text-slate-500 italic">Nenhum selecionado</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 5. Contato de Emergência -->
-                <div class="card-premium glass">
-                    <h4 class="profile-section-title">
-                        <i data-lucide="phone-call" class="text-primary"></i>
-                        <span>Contato de Emergência</span>
-                    </h4>
-                    <div style="text-align: left; display: flex; flex-direction: column; gap: 12px;">
-                        <div class="profile-detail-item" style="width: 100%;">
-                            <span class="profile-detail-label">Nome do Contato</span>
-                            <span id="p-emerg-nome" class="profile-detail-value">--</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <span class="profile-detail-label">Telefone</span>
-                            <a id="p-emerg-tel" href="#" class="profile-emergency-link animate-pulse">
-                                <i data-lucide="phone" class="w-4 h-4 text-primary"></i>
-                                <span>--</span>
-                            </a>
                         </div>
                     </div>
                 </div>
