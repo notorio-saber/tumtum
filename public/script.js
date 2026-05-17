@@ -661,6 +661,18 @@ function updateProgress() {
 }
 
 function nextStep() {
+    if (currentStep === 5) {
+        const emergNomeEl = document.getElementById('a-emerg-nome');
+        const emergTelEl = document.getElementById('a-emerg-tel');
+        const nome = emergNomeEl ? emergNomeEl.value.trim() : "";
+        const tel = emergTelEl ? emergTelEl.value.trim() : "";
+        
+        if (!nome || !tel) {
+            alert("⚠️ Por favor, preencha o Nome e o Telefone do seu contato de emergência. Ele é obrigatório para a sua segurança!");
+            return;
+        }
+    }
+    
     if (currentStep < totalSteps) {
         document.getElementById(`step-${currentStep}`).classList.remove('active');
         currentStep++;
@@ -686,6 +698,26 @@ async function finishAnamnese() {
     }
     
     try {
+        // Validação estrita do contato de emergência (obrigatório)
+        const emergNomeEl = document.getElementById('a-emerg-nome');
+        const emergTelEl = document.getElementById('a-emerg-tel');
+        const emergNome = emergNomeEl ? emergNomeEl.value.trim() : "";
+        const emergTel = emergTelEl ? emergTelEl.value.trim() : "";
+        
+        if (!emergNome || !emergTel) {
+            alert("⚠️ O contato de emergência é obrigatório para sua segurança. Por favor, preencha os dados no Passo 5!");
+            if (btn) {
+                btn.innerText = "Concluir";
+                btn.disabled = false;
+            }
+            // Retorna ao passo 5 visualmente
+            document.getElementById(`step-${currentStep}`).classList.remove('active');
+            currentStep = 5;
+            document.getElementById(`step-${currentStep}`).classList.add('active');
+            updateProgress();
+            return;
+        }
+        
         // Obter elementos com segurança e usar fallbacks
         const nomeEl = document.getElementById('a-nome');
         const sexoEl = document.getElementById('a-sexo');

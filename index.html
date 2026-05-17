@@ -233,29 +233,21 @@
                     </div>
                 </div>
 
-                <!-- Passo 5: Monitoramento & Emergência -->
+                <!-- Passo 5: Contato de Emergência (Obrigatório) -->
                 <div class="step-container" id="step-5">
-                    <h3 class="text-xl font-bold mb-4">Rotina e Emergência</h3>
-                    <div class="card-premium glass space-y-6">
+                    <h3 class="text-xl font-bold mb-4">Contato de Emergência</h3>
+                    <div class="card-premium glass space-y-4">
+                        <p class="text-sm text-slate-500" style="line-height: 1.4; margin-bottom: 5px;">Configure os dados de uma pessoa de sua confiança. Em caso de pressão em nível crítico, você poderá ligar para ela com um único toque direto no painel.</p>
                         <div class="input-field">
-                            <label>Deseja cadastrar um familiar para emergência?</label>
-                            <div class="grid-2 gap-2 mb-4">
-                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-emergencia', 'Sim'); document.getElementById('emergencia-details').classList.remove('hidden')">Sim</button>
-                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-emergencia', 'Não'); document.getElementById('emergencia-details').classList.add('hidden')">Não</button>
-                            </div>
-                            <input type="hidden" id="a-emergencia">
+                            <label>Nome do Contato</label>
+                            <input type="text" id="a-emerg-nome" placeholder="Ex: Maria (Filha)" class="text-lg" required>
                         </div>
-                        
-                        <div id="emergencia-details" class="hidden space-y-4 pt-4 border-t border-gray-200">
-                            <div class="input-field">
-                                <label>Nome do Contato</label>
-                                <input type="text" id="a-emerg-nome" placeholder="Ex: Maria (Filha)" class="text-lg">
-                            </div>
-                            <div class="input-field">
-                                <label>Telefone</label>
-                                <input type="tel" id="a-emerg-tel" placeholder="(11) 99999-9999" class="text-lg">
-                            </div>
+                        <div class="input-field">
+                            <label>Telefone do Contato</label>
+                            <input type="tel" id="a-emerg-tel" placeholder="(11) 99999-9999" class="text-lg" required>
                         </div>
+                        <!-- Mantido hidden para manter a retrocompatibilidade de propriedades salváveis -->
+                        <input type="hidden" id="a-emergencia" value="Sim">
                     </div>
                 </div>
 
@@ -617,70 +609,70 @@
         <!-- Modal de Alerta Biomédico Dinâmico (Recomendações da Biomédica) -->
         <div id="biomedical-alert-modal" class="modal">
             <div class="modal-overlay" onclick="closeModal('biomedical-alert-modal')"></div>
-            <div class="modal-body glass-heavy" style="text-align: center; border-radius: 28px; max-width: 420px; width: 90%;">
-                <div class="modal-header" style="border: none; padding-bottom: 0;">
-                    <h2 class="text-xl font-bold w-full text-center">Análise da Aferição</h2>
-                    <button onclick="closeModal('biomedical-alert-modal')" class="close-btn"><i data-lucide="x"></i></button>
+            <div class="modal-body glass-heavy" style="text-align: center; border-radius: 28px; max-width: 420px; width: 90%; padding: 20px;">
+                <div class="modal-header" style="border: none; padding-bottom: 0; margin-bottom: 12px;">
+                    <h2 class="text-lg font-bold w-full text-center">Análise da Aferição</h2>
+                    <button onclick="closeModal('biomedical-alert-modal')" class="close-btn" style="padding: 6px;"><i data-lucide="x"></i></button>
                 </div>
                 
-                <div class="space-y-6" style="margin-top: 15px;">
+                <div class="space-y-3" style="margin-top: 8px;">
                     <!-- Aferição mmHg -->
-                    <div style="background: rgba(15, 23, 42, 0.03); border-radius: 20px; padding: 20px; border: 1px dashed rgba(15, 23, 42, 0.08); display: inline-block; width: 100%;">
-                        <span style="font-size: 0.8rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 5px;">Sua Pressão</span>
-                        <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; line-height: 1.1;">
-                            <span id="alert-val-sys">--</span>/<span id="alert-val-dia">--</span> <span style="font-size: 1rem; color: #64748b; font-weight: 500;">mmHg</span>
+                    <div style="background: rgba(15, 23, 42, 0.03); border-radius: 16px; padding: 12px 16px; border: 1px dashed rgba(15, 23, 42, 0.08); display: inline-block; width: 100%;">
+                        <span style="font-size: 0.72rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Sua Pressão</span>
+                        <div style="font-size: 1.85rem; font-weight: 800; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; line-height: 1.1;">
+                            <span id="alert-val-sys">--</span>/<span id="alert-val-dia">--</span> <span style="font-size: 0.9rem; color: #64748b; font-weight: 500;">mmHg</span>
                         </div>
-                        <div id="alert-val-conversion" style="font-size: 0.95rem; color: #64748b; font-weight: 600; margin-top: 6px;">Equivale a --</div>
+                        <div id="alert-val-conversion" style="font-size: 0.85rem; color: #64748b; font-weight: 600; margin-top: 2px;">Equivale a --</div>
                     </div>
 
                     <!-- Badge de Classificação -->
-                    <div>
-                        <span id="alert-badge" class="badge-success" style="font-size: 0.95rem; padding: 8px 16px; border-radius: 12px; display: inline-block;">--</span>
+                    <div style="margin: 6px 0;">
+                        <span id="alert-badge" class="badge-success" style="font-size: 0.82rem; padding: 6px 14px; border-radius: 10px; display: inline-block;">--</span>
                     </div>
 
                     <!-- Mensagem Biomédica -->
-                    <div style="background: white; border-radius: 16px; padding: 18px; border: 1px solid var(--gray-medium); text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-                        <div style="display: flex; align-items: flex-start; gap: 10px;">
-                            <i data-lucide="info" class="w-5 h-5 text-primary" style="flex-shrink: 0; margin-top: 2px;"></i>
+                    <div style="background: white; border-radius: 14px; padding: 12px 14px; border: 1px solid var(--gray-medium); text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <i data-lucide="info" class="w-4 h-4 text-primary" style="flex-shrink: 0; margin-top: 2px;"></i>
                             <div>
-                                <span style="font-size: 0.78rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 2px;">Diagnóstico</span>
-                                <p id="alert-message" style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); line-height: 1.3; margin: 0;">--</p>
+                                <span style="font-size: 0.7rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 1px;">Diagnóstico</span>
+                                <p id="alert-message" style="font-size: 0.92rem; font-weight: 700; color: var(--text-main); line-height: 1.25; margin: 0;">--</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Risco e Ação -->
-                    <div class="grid-2 text-left" style="gap: 12px; display: grid; grid-template-columns: 1fr 1fr;">
-                        <div style="background: var(--gray-light); padding: 12px; border-radius: 14px; border: 1px solid var(--gray-medium);">
-                            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 2px;">Nível de Risco</span>
-                            <span id="alert-risk" style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">--</span>
+                    <div class="grid-2 text-left" style="gap: 8px; display: grid; grid-template-columns: 1fr 1fr;">
+                        <div style="background: var(--gray-light); padding: 8px 10px; border-radius: 12px; border: 1px solid var(--gray-medium);">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 1px;">Nível de Risco</span>
+                            <span id="alert-risk" style="font-weight: 800; font-size: 0.85rem; color: var(--text-main);">--</span>
                         </div>
-                        <div style="background: var(--gray-light); padding: 12px; border-radius: 14px; border: 1px solid var(--gray-medium);">
-                            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 2px;">Recomendação</span>
-                            <span id="alert-action" style="font-weight: 800; font-size: 0.85rem; color: var(--text-main); display: block; line-height: 1.2;">--</span>
+                        <div style="background: var(--gray-light); padding: 8px 10px; border-radius: 12px; border: 1px solid var(--gray-medium);">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 1px;">Recomendação</span>
+                            <span id="alert-action" style="font-weight: 800; font-size: 0.8rem; color: var(--text-main); display: block; line-height: 1.15;">--</span>
                         </div>
                     </div>
 
                     <!-- Zona de Emergência Dinâmica (Exibida apenas em Coral, Vermelho e Crise) -->
-                    <div id="alert-emergency-zone" style="display: none; flex-direction: column; gap: 10px; margin-top: 15px;">
-                        <span style="font-size: 0.72rem; color: #ef4444; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; display: block; text-align: left; margin-bottom: 2px;">Ações Rápidas de Emergência</span>
+                    <div id="alert-emergency-zone" style="display: none; flex-direction: column; gap: 6px; margin-top: 8px;">
+                        <span style="font-size: 0.65rem; color: #ef4444; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; display: block; text-align: left; margin-bottom: 1px;">Ações Rápidas de Emergência</span>
                         
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                             <!-- Chamar Contato de Emergência -->
-                            <a id="btn-alert-call-contact" href="tel:" class="btn-emergency-contact" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(239, 68, 68, 0.05); color: #ef4444; border: 2px dashed rgba(239, 68, 68, 0.2); padding: 12px; border-radius: 16px; font-weight: 800; font-size: 0.8rem; text-decoration: none; transition: all 0.2s; text-align: center;">
-                                <i data-lucide="phone" class="w-4 h-4"></i>
+                            <a id="btn-alert-call-contact" href="tel:" class="btn-emergency-contact" style="display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(239, 68, 68, 0.05); color: #ef4444; border: 2px dashed rgba(239, 68, 68, 0.2); padding: 10px; border-radius: 12px; font-weight: 800; font-size: 0.78rem; text-decoration: none; transition: all 0.2s; text-align: center;">
+                                <i data-lucide="phone" class="w-3.5 h-3.5"></i>
                                 <span id="lbl-alert-call-contact">Chamar Contato</span>
                             </a>
                             
                             <!-- Chamar SAMU 192 -->
-                            <a href="tel:192" class="btn-emergency-samu" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #ef4444; color: white; padding: 12px; border-radius: 16px; font-weight: 800; font-size: 0.85rem; text-decoration: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); transition: all 0.2s; text-align: center;">
-                                <i data-lucide="ambulance" class="w-4 h-4 text-white"></i>
+                            <a href="tel:192" class="btn-emergency-samu" style="display: flex; align-items: center; justify-content: center; gap: 6px; background: #ef4444; color: white; padding: 10px; border-radius: 12px; font-weight: 800; font-size: 0.78rem; text-decoration: none; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.15); transition: all 0.2s; text-align: center;">
+                                <i data-lucide="ambulance" class="w-3.5 h-3.5 text-white"></i>
                                 <span>Discar SAMU 192</span>
                             </a>
                         </div>
                     </div>
 
-                    <button onclick="closeModal('biomedical-alert-modal')" class="btn-primary btn-large w-full shadow-glow" style="margin-top: 15px;">Fechar</button>
+                    <button onclick="closeModal('biomedical-alert-modal')" class="btn-primary w-full shadow-glow" style="margin-top: 10px; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 0.95rem;">Fechar</button>
                 </div>
             </div>
         </div>
