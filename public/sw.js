@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tumtum-pwa-v1';
+const CACHE_NAME = 'tumtum-pwa-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -26,6 +26,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
+            console.log('Limpando cache antigo:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -34,7 +35,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Interceptação de requisições (Cache First, falling back to Network)
+// Interceptação de requisições: Network First (Tenta rede primeiro. Se offline, vai para o cache)
 self.addEventListener('fetch', (event) => {
   // Ignora requisições de outras origens (ex: Firebase, Google APIs)
   if (!event.request.url.startsWith(self.location.origin)) {
@@ -42,10 +43,20 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then((response) => {
-        // Retorna do cache se encontrar, senão vai para a rede
-        return response || fetch(event.request);
+        // Se a resposta for válida, salva/atualiza no cache
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        // Sem internet: fallback para o cache
+        return caches.match(event.request);
       })
   );
 });
