@@ -942,4 +942,202 @@ body {
     font-size: 1rem;
 }
 
+/* ==========================================
+   ESTILOS PREMIUM PARA A TELA DE PERFIL
+   ========================================== */
+.profile-user-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 20px;
+    border-radius: 24px;
+    gap: 20px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+}
+
+.profile-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+}
+
+.profile-user-name {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.profile-user-email {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.btn-edit-profile {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 16px;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.4);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.btn-edit-profile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px -5px rgba(239, 68, 68, 0.55);
+}
+
+.btn-edit-profile:active {
+    transform: scale(0.98);
+}
+
+.profile-section-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--gray-medium);
+    padding-bottom: 10px;
+}
+
+.profile-section-title i {
+    width: 20px;
+    height: 20px;
+}
+
+.profile-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.profile-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: rgba(15, 23, 42, 0.02);
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(15, 23, 42, 0.04);
+    text-align: left;
+}
+
+.profile-detail-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+
+.profile-detail-value {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.profile-detail-value-highlight {
+    background: rgba(239, 68, 68, 0.06);
+    color: var(--primary);
+    padding: 4px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(239, 68, 68, 0.12);
+    font-weight: 800;
+    display: inline-block;
+    font-size: 0.88rem;
+}
+
+.profile-pills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.profile-pill-item {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+}
+
+.profile-pill-history {
+    background: rgba(15, 23, 42, 0.05);
+    color: #334155;
+    border-color: rgba(15, 23, 42, 0.08);
+}
+
+.profile-pill-symptom {
+    background: rgba(239, 68, 68, 0.05);
+    color: var(--primary);
+    border-color: rgba(239, 68, 68, 0.1);
+}
+
+.profile-emergency-link {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 9999px;
+    background: rgba(239, 68, 68, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.12);
+    text-decoration: none;
+    transition: all 0.2s;
+    margin-top: 6px;
+    width: fit-content;
+}
+
+.profile-emergency-link:hover {
+    background: rgba(239, 68, 68, 0.1);
+    transform: scale(1.02);
+}
+
+.btn-profile-logout {
+    width: 100%;
+    padding: 16px;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(239, 68, 68, 0.05);
+    color: var(--primary);
+    border: 2px dashed rgba(239, 68, 68, 0.2);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.btn-profile-logout:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--primary);
+}
+
 

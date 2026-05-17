@@ -135,7 +135,7 @@ function updateUserProfile(user, data = null) {
         const histPills = document.getElementById('p-historico-pills');
         if (histPills) {
             if (data.historico && data.historico.length > 0) {
-                histPills.innerHTML = data.historico.map(h => `<span style="background: rgba(15, 23, 42, 0.05); color: #334155; font-size: 0.78rem; font-weight: 600; padding: 4px 10px; border-radius: 9999px; border: 1px solid rgba(15, 23, 42, 0.08);">${h}</span>`).join('');
+                histPills.innerHTML = data.historico.map(h => `<span class="profile-pill-item profile-pill-history">${h}</span>`).join('');
             } else {
                 histPills.innerHTML = `<span style="font-size: 0.82rem; color: #94a3b8; font-style: italic;">Nenhum histórico selecionado</span>`;
             }
@@ -144,7 +144,7 @@ function updateUserProfile(user, data = null) {
         const sintPills = document.getElementById('p-sintomas-pills');
         if (sintPills) {
             if (data.sintomas && data.sintomas.length > 0) {
-                sintPills.innerHTML = data.sintomas.map(s => `<span style="background: rgba(239, 68, 68, 0.05); color: var(--primary); font-size: 0.78rem; font-weight: 600; padding: 4px 10px; border-radius: 9999px; border: 1px solid rgba(239, 68, 68, 0.1);">${s}</span>`).join('');
+                sintPills.innerHTML = data.sintomas.map(s => `<span class="profile-pill-item profile-pill-symptom">${s}</span>`).join('');
             } else {
                 sintPills.innerHTML = `<span style="font-size: 0.82rem; color: #94a3b8; font-style: italic;">Nenhum sintoma selecionado</span>`;
             }
