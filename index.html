@@ -350,17 +350,12 @@
 
                 <!-- Dicas de Saúde da Dra. Layana (Top Clean Highlight) -->
                 <div id="health-tip-container" style="text-align: center; margin: 10px 0 25px 0; padding: 0 15px; font-family: 'Plus Jakarta Sans', sans-serif;">
-                    <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-bottom: 6px;">
-                        <i data-lucide="sparkles" class="w-4 h-4 text-emerald-500 animate-pulse"></i>
-                        <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #10b981;">Minuto Saúde</span>
+                    <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #10b981;">Dica da Dra. Layana</span>
                     </div>
-                    <p id="health-tip-content" style="font-size: 0.8rem; color: #475569; margin: 0 auto; max-width: 90%; line-height: 1.45; font-weight: 500;">
-                        Carregando dica de saúde da Dra. Layana...
+                    <p id="health-tip-content" style="font-size: 0.8rem; color: #475569; margin: 0 auto; max-width: 92%; line-height: 1.45; font-weight: 500;">
+                        Carregando dica...
                     </p>
-                    <button onclick="nextHealthTip()" style="background: none; border: none; color: #64748b; font-size: 0.7rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; margin-top: 8px; padding: 4px 8px; border-radius: 20px; background: rgba(0,0,0,0.03); font-family: 'Plus Jakarta Sans', sans-serif;">
-                        <span>Próxima dica</span>
-                        <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-                    </button>
                 </div>
 
                 <!-- Botão Gigante de Registro com Linhas em Movimento -->
@@ -399,14 +394,9 @@
 
                 <!-- Painel de Emergência SOS (Exclusivo para Paciente com Assinatura Ativa) -->
                 <div id="patient-emergency-widget" class="emergency-widget card-premium glass mt-4 hidden">
-                    <div class="emergency-header">
-                        <div class="emergency-icon-glow">
-                            <i data-lucide="shield-alert" class="w-5 h-5 text-red-500 animate-pulse"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-sm" style="margin: 0; color: #ef4444; font-family: 'Plus Jakarta Sans', sans-serif;">SOS • Painel de Emergência</h3>
-                            <p class="text-xs text-slate-400" style="margin: 2px 0 0 0;">Ações de socorro rápido em caso de crise.</p>
-                        </div>
+                    <div class="emergency-header" style="display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 12px; width: 100%;">
+                        <i data-lucide="shield-alert" class="w-4.5 h-4.5 text-red-500 animate-pulse" style="flex-shrink: 0;"></i>
+                        <h3 class="font-bold text-xs" style="margin: 0; color: #ef4444; font-family: 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; gap: 4px;">SOS • Painel de Emergência</h3>
                     </div>
                     <div class="grid-3">
                         <a id="btn-widget-call-contact" href="#" class="btn-sos-call">

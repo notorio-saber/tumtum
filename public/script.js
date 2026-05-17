@@ -43,25 +43,21 @@ const HEALTH_TIPS = [
     "<strong>😴 Sono e Cortisol:</strong> Dormir mal eleva o cortisol, o hormônio do estresse, que sobe os batimentos e a pressão. Priorize 7 a 8 horas de repouso por noite."
 ];
 
-let currentTipIndex = 0;
+let currentTipIndex = -1;
 
-function showHealthTip() {
+function randomizeAndShowHealthTip() {
     const tipEl = document.getElementById('health-tip-content');
     if (tipEl) {
-        // Selecionar aleatoriamente no carregamento inicial
-        if (currentTipIndex === 0) {
-            currentTipIndex = Math.floor(Math.random() * HEALTH_TIPS.length);
+        let newIndex = Math.floor(Math.random() * HEALTH_TIPS.length);
+        if (HEALTH_TIPS.length > 1 && newIndex === currentTipIndex) {
+            newIndex = (newIndex + 1) % HEALTH_TIPS.length;
         }
+        currentTipIndex = newIndex;
         tipEl.innerHTML = HEALTH_TIPS[currentTipIndex];
     }
 }
-window.showHealthTip = showHealthTip;
-
-function nextHealthTip() {
-    currentTipIndex = (currentTipIndex + 1) % HEALTH_TIPS.length;
-    showHealthTip();
-}
-window.nextHealthTip = nextHealthTip;
+window.randomizeAndShowHealthTip = randomizeAndShowHealthTip;
+window.showHealthTip = randomizeAndShowHealthTip;
 
 // Utilitários
 const getPeriodo = (date = new Date()) => {
@@ -574,6 +570,9 @@ function showScreen(screenId) {
     if (screenId === 'dashboard-screen') {
         const btn = document.getElementById('nav-inicio');
         if (btn) btn.classList.add('active');
+        if (currentUserRole === 'paciente') {
+            randomizeAndShowHealthTip();
+        }
     } else if (screenId === 'history-screen') {
         const btn = document.getElementById('nav-historico');
         if (btn) btn.classList.add('active');
