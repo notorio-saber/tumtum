@@ -488,13 +488,22 @@ function sendEmergencyLocation(btn) {
     // Exibe feedback de progresso premium
     btn.innerHTML = `<span>🌐 Obtendo GPS...</span>`;
     
-    // Timer de fallback de 4 segundos: se o GPS travar ou demorar, abre o WhatsApp sem as coordenadas
+    // Feedback e verificação passiva de permissão de GPS
+    if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+            if (result.state === 'denied') {
+                showGlobalAlert("⚠️ GPS Bloqueado! Ative a permissão de localização do TumTum nas configurações do seu Android.", "warning");
+            }
+        }).catch(() => {});
+    }
+    
+    // Timer de fallback de 7 segundos: se o GPS travar ou demorar, abre o WhatsApp sem as coordenadas (mais robusto no Android)
     let fallbackTriggered = false;
     const fallbackTimeout = setTimeout(() => {
         fallbackTriggered = true;
         console.warn("Tempo limite de geolocalização atingido. Usando fallback sem GPS.");
         proceedWithLocation(null, null);
-    }, 4000);
+    }, 7000);
     
     if (!navigator.geolocation) {
         clearTimeout(fallbackTimeout);
@@ -517,9 +526,9 @@ function sendEmergencyLocation(btn) {
             proceedWithLocation(null, null);
         },
         {
-            enableHighAccuracy: false, // Muito mais rápido e confiável para triangulação interna
-            timeout: 3000,             // Tempo limite de resposta da API do navegador
-            maximumAge: 300000         // Permite usar coordenadas salvas de até 5 minutos
+            enableHighAccuracy: true,  // Força maior acurácia (necessário para pegar link no Android em rede móvel)
+            timeout: 6000,             // Tempo limite de resposta estendido para 6 segundos para evitar timeout precoce
+            maximumAge: 60000          // Cache de 1 minuto para coordenadas recentes
         }
     );
     
