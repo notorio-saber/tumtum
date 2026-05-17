@@ -693,15 +693,15 @@ body {
    ========================================================================== */
 .giant-measure-card {
     position: relative;
-    background: white;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     border-radius: 28px;
     padding: 32px 24px;
     text-align: center;
-    border: 2px dashed rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     cursor: pointer;
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.01);
+    box-shadow: 0 15px 35px -5px rgba(239, 68, 68, 0.4);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -716,7 +716,7 @@ body {
     inset: 0;
     border-radius: 28px;
     padding: 2px;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.01));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.02));
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
@@ -724,23 +724,23 @@ body {
 }
 
 .giant-measure-card:hover {
-    transform: translateY(-4px) scale(1.01);
-    border-color: var(--primary);
-    box-shadow: 0 20px 40px rgba(239, 68, 68, 0.08);
+    transform: translateY(-5px) scale(1.02);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 25px 45px -5px rgba(239, 68, 68, 0.55);
 }
 
 .giant-measure-card:active {
     transform: scale(0.98);
 }
 
-/* Animação dos Feixes de Luz (Linhas em Movimento) do Design System */
+/* Animação dos Feixes de Luz Brancos do Design System sobre fundo vermelho */
 .beam-h-card {
     position: absolute;
     height: 2px;
     width: 150px;
-    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    background: linear-gradient(90deg, transparent, #ffffff, transparent);
     z-index: 10;
-    opacity: 0.8;
+    opacity: 0.9;
     animation: beam-h-card-anim 4s infinite linear;
 }
 
@@ -748,9 +748,9 @@ body {
     position: absolute;
     width: 2px;
     height: 150px;
-    background: linear-gradient(180deg, transparent, var(--primary), transparent);
+    background: linear-gradient(180deg, transparent, #ffffff, transparent);
     z-index: 10;
-    opacity: 0.8;
+    opacity: 0.9;
     animation: beam-v-card-anim 4s infinite linear;
 }
 
@@ -776,7 +776,7 @@ body {
 .giant-plus-circle {
     width: 80px;
     height: 80px;
-    background: rgba(239, 68, 68, 0.06);
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -787,17 +787,17 @@ body {
 }
 
 .giant-plus-circle i {
-    color: var(--primary);
+    color: #ffffff;
     width: 44px;
     height: 44px;
 }
 
-/* Efeito de Pulso no Plus para indicar clique */
+/* Efeito de Pulso Branco no Plus */
 .giant-plus-pulse {
     position: absolute;
     inset: -6px;
     border-radius: 50%;
-    border: 2px solid rgba(239, 68, 68, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     animation: pulse-ring 2.5s infinite cubic-bezier(0.215, 0.610, 0.355, 1);
 }
 
@@ -808,25 +808,25 @@ body {
 }
 
 .giant-measure-card:hover .giant-plus-circle {
-    background: var(--primary);
-    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.08);
 }
 
 .giant-measure-card:hover .giant-plus-circle i {
-    color: white;
+    color: #ffffff;
 }
 
 .giant-measure-title {
     font-size: 1.5rem;
     font-weight: 800;
-    color: var(--text-main);
+    color: #ffffff;
     margin-bottom: 6px;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .giant-measure-desc {
     font-size: 0.95rem;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.85);
     font-weight: 500;
     max-width: 320px;
     line-height: 1.4;
@@ -838,9 +838,10 @@ body {
     color: var(--primary);
     margin-top: 16px;
     padding: 8px 16px;
-    background: rgba(239, 68, 68, 0.04);
+    background: #ffffff;
     border-radius: 20px;
-    border: 1px solid rgba(239, 68, 68, 0.08);
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
 }
 
