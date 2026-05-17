@@ -1,10 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    --primary: #0A2647;
-    --primary-light: #144272;
-    --secondary: #205295;
-    --accent: #2C74B3;
+    --primary: #ef4444; /* Vermelho principal */
+    --primary-light: #f87171;
+    --secondary: #dc2626; /* Vermelho escuro */
+    --accent: #b91c1c;
     --white: #ffffff;
     --gray-light: #f8fafc;
     --gray-medium: #e2e8f0;
@@ -13,10 +13,10 @@
     
     --success: #10b981;
     --warning: #f59e0b;
-    --danger: #ef4444;
+    --danger: #b91c1c;
     
-    --glass: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.4);
 }
 
 * {
@@ -28,7 +28,7 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #0A2647 0%, #144272 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     color: var(--text-main);
     min-height: 100vh;
     overflow-x: hidden;
@@ -42,7 +42,7 @@ body {
     margin: 0 auto;
     position: relative;
     padding: 20px;
-    background: var(--gray-light);
+    background: transparent;
 }
 
 .screen.active {
@@ -53,14 +53,14 @@ body {
 /* Glassmorphism */
 .glass {
     background: var(--glass);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
 }
 
 .glass-heavy {
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
@@ -68,9 +68,9 @@ body {
 
 /* Auth Screen */
 #login-screen {
-    background: linear-gradient(180deg, #0A2647 0%, #205295 100%);
+    background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
     justify-content: center;
-    color: white;
+    color: var(--text-main);
 }
 
 .auth-container {
@@ -129,8 +129,9 @@ body {
     gap: 12px;
     width: 100%;
     background: white;
-    color: #444;
-    border: none;
+    color: var(--text-main);
+    border: 1px solid var(--gray-medium);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     padding: 16px;
     border-radius: 14px;
     font-size: 1.1rem;
