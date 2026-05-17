@@ -2610,22 +2610,57 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// Verifica parâmetros da URL ao carregar a página
-window.addEventListener('DOMContentLoaded', () => {
+// Verifica parâmetros da URL ao carregar a página e ao focar no app
+function checkUrlParamsAndTrigger() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('action') === 'register') {
+        console.log("Gatilho ?action=register detectado. Exibindo formulário de medição!");
         setTimeout(() => {
-            // Toca som e vibração
+            // Toca som e vibração de imediato
             playHeartbeatSound();
             if (navigator.vibrate) {
                 navigator.vibrate([100, 50, 100]);
             }
+            // Abre o modal de novo registro
             showModal('new-record-modal');
-            // Limpa o parâmetro da URL de forma elegante
+            
+            // Limpa o parâmetro da URL de forma limpa e elegante para evitar loops
             window.history.replaceState({}, document.title, window.location.pathname);
-        }, 1200);
+        }, 300);
+    }
+}
+window.addEventListener('DOMContentLoaded', checkUrlParamsAndTrigger);
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        checkUrlParamsAndTrigger();
     }
 });
+
+// Gatilho Afetivo da Primeira Interação (Contorna política de autoplay do navegador ao abrir)
+let appOpenedWelcomePlayed = false;
+function playWelcomeHeartbeatOnFirstTouch() {
+    if (appOpenedWelcomePlayed) return;
+    
+    // Executa apenas se o usuário já estiver logado no dashboard principal
+    const dashboard = document.getElementById('dashboard-screen');
+    if (dashboard && dashboard.classList.contains('active')) {
+        appOpenedWelcomePlayed = true;
+        
+        // Desinscreve os listeners para otimização de memória
+        document.removeEventListener('click', playWelcomeHeartbeatOnFirstTouch);
+        document.removeEventListener('touchstart', playWelcomeHeartbeatOnFirstTouch);
+        
+        console.log("Primeira interação após abertura do app: reproduzindo batidas afetivas!");
+        setTimeout(() => {
+            playHeartbeatSound();
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]); // Batida cardíaca nativa no primeiro toque
+            }
+        }, 150);
+    }
+}
+document.addEventListener('click', playWelcomeHeartbeatOnFirstTouch, { passive: true });
+document.addEventListener('touchstart', playWelcomeHeartbeatOnFirstTouch, { passive: true });
 
 // Compartilhamento global e desbloqueio do contexto de áudio em navegadores mobile
 let sharedAudioContext = null;

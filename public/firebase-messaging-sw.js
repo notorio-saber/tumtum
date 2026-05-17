@@ -36,26 +36,39 @@ messaging.onBackgroundMessage((payload) => {
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Manipula o clique na notificação push
 self.addEventListener('notificationclick', (event) => {
     console.log('[firebase-messaging-sw.js] Notificação clicada: ', event.notification);
     event.notification.close();
 
+    const targetUrl = new URL('/?action=register', self.location.origin).href;
+
     // Tenta focar em uma janela existente ou abre uma nova
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-            // Se o app já estiver aberto, envia um sinal postMessage e foca
+            // Procura por um cliente aberto que corresponda ao nosso domínio
+            let matchingClient = null;
             for (let i = 0; i < clientList.length; i++) {
                 const client = clientList[i];
-                if ('focus' in client) {
-                    client.postMessage({ action: 'open-register-modal' });
-                    return client.focus();
+                if (client.url.indexOf(self.location.origin) === 0) {
+                    matchingClient = client;
+                    break;
                 }
             }
             
-            // Se o app estiver fechado, abre uma nova janela com a ação de registro
-            if (clients.openWindow) {
-                return clients.openWindow('/?action=register');
+            if (matchingClient) {
+                // Envia sinal postMessage
+                matchingClient.postMessage({ action: 'open-register-modal' });
+                
+                // Força navegação para garantir que o parâmetro de URL seja processado ao focar (iOS & Android)
+                if ('navigate' in matchingClient) {
+                    matchingClient.navigate(targetUrl);
+                }
+                return matchingClient.focus();
+            } else {
+                // Se o app estiver fechado, abre uma nova janela do PWA com a ação de registro
+                if (clients.openWindow) {
+                    return clients.openWindow(targetUrl);
+                }
             }
         })
     );
