@@ -1224,4 +1224,110 @@ body {
 .border-danger { border-left-color: #ef4444 !important; border-left-width: 5px !important; }
 .border-crisis { border-left-color: #7f1d1d !important; border-left-width: 5px !important; }
 
+/* ==========================================================================
+   Estilos Adicionais: Acompanhantes & Painel Admin (TumTum App)
+   ========================================================================== */
+
+/* Badges Exclusivos de Papel de Usuário */
+.badge-role-paciente {
+    background: rgba(239, 68, 68, 0.08) !important;
+    color: #ef4444 !important;
+    border: 1px solid rgba(239, 68, 68, 0.15) !important;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    text-transform: uppercase;
+}
+
+.badge-role-familiar {
+    background: rgba(59, 130, 246, 0.08) !important;
+    color: #3b82f6 !important;
+    border: 1px solid rgba(59, 130, 246, 0.15) !important;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    text-transform: uppercase;
+}
+
+.badge-role-medico {
+    background: rgba(16, 185, 129, 0.08) !important;
+    color: #10b981 !important;
+    border: 1px solid rgba(16, 185, 129, 0.15) !important;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    text-transform: uppercase;
+}
+
+/* Card de Conta no Painel Admin */
+.admin-user-card {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    border-radius: 18px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-user-card:hover {
+    background: white;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    border-color: rgba(15, 23, 42, 0.1);
+}
+
+/* Botão Alternador de Status da Assinatura */
+.btn-status-toggle {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+    text-align: center;
+}
+
+.btn-status-toggle.active {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.btn-status-toggle.inactive {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.btn-status-toggle:hover {
+    transform: scale(1.03);
+}
+
+/* Botão de Excluir Conta Admin */
+.btn-delete-admin {
+    background: rgba(239, 68, 68, 0.05);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.1);
+    padding: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-delete-admin:hover {
+    background: #ef4444;
+    color: white;
+    transform: scale(1.05);
+}
+
 

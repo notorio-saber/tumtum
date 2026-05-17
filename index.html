@@ -37,7 +37,28 @@
                 </div>
                 
                 <div class="auth-card glass">
-                    <p class="auth-text">Registre sua pressão de forma simples e acompanhe sua evolução.</p>
+                    <p class="auth-text" style="margin-bottom: 15px;">Registre sua pressão de forma simples e acompanhe sua evolução.</p>
+                    
+                    <!-- Seletor Premium de Papéis -->
+                    <div style="margin-bottom: 20px; text-align: left;">
+                        <span style="font-size: 0.72rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 8px;">Entrar no aplicativo como:</span>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                            <button type="button" id="role-paciente" class="choice-card selected" onclick="selectLoginRole('paciente')" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; border-radius: 14px; font-size: 0.78rem; font-weight: 800; min-height: 72px;">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                                <span>Paciente</span>
+                            </button>
+                            <button type="button" id="role-familiar" class="choice-card" onclick="selectLoginRole('familiar')" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; border-radius: 14px; font-size: 0.78rem; font-weight: 800; min-height: 72px;">
+                                <i data-lucide="home" class="w-4 h-4"></i>
+                                <span>Familiar</span>
+                            </button>
+                            <button type="button" id="role-medico" class="choice-card" onclick="selectLoginRole('medico')" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; border-radius: 14px; font-size: 0.78rem; font-weight: 800; min-height: 72px;">
+                                <i data-lucide="briefcase" class="w-4 h-4"></i>
+                                <span>Médico</span>
+                            </button>
+                        </div>
+                        <input type="hidden" id="login-role" value="paciente">
+                    </div>
+                    
                     <button id="btn-login-google" class="btn-google">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
                         Entrar com Google
@@ -289,8 +310,46 @@
             </header>
 
             <main class="dashboard-content pb-24">
+                <!-- Banner de Acompanhamento (Leitura Restrita) -->
+                <div id="companion-viewing-banner" class="hidden" style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.15); border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; text-align: left; width: 100%;">
+                    <i data-lucide="info" class="w-5 h-5 text-blue-500" style="flex-shrink: 0;"></i>
+                    <span style="font-size: 0.88rem; color: #1e3a8a; font-weight: 700; line-height: 1.3;">
+                        Visualizando como <span id="companion-banner-role" style="text-transform: capitalize;">Acompanhante</span> de: <span id="companion-banner-name" style="color: var(--primary);">--</span> (Modo Leitura)
+                    </span>
+                </div>
+
+                <!-- Painel Estatístico Clínico Avançado (Exclusivo para Médicos) -->
+                <div id="medical-stats-card" class="card-premium glass hidden" style="border: 1px solid rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.01); margin-bottom: 15px; text-align: left; width: 100%;">
+                    <h4 class="profile-section-title" style="color: #10b981; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <i data-lucide="activity" class="w-5 h-5"></i>
+                        <span>Métricas Clínicas de Estabilidade</span>
+                    </h4>
+                    <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div style="background: var(--gray-light); padding: 10px; border-radius: 12px; border: 1px solid var(--gray-medium);">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block;">Índice de Estabilidade</span>
+                            <span id="med-stability-rate" style="font-weight: 800; font-size: 1.1rem; color: #10b981;">--%</span>
+                            <span style="font-size: 0.6rem; color: #94a3b8; display: block; margin-top: 1px;">Leituras normais/seguras</span>
+                        </div>
+                        <div style="background: var(--gray-light); padding: 10px; border-radius: 12px; border: 1px solid var(--gray-medium);">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block;">Variabilidade (DP)</span>
+                            <span id="med-standard-deviation" style="font-weight: 800; font-size: 1.1rem; color: var(--text-main);">± --</span>
+                            <span style="font-size: 0.6rem; color: #94a3b8; display: block; margin-top: 1px;">Desvio sistólico padrão</span>
+                        </div>
+                        <div style="background: var(--gray-light); padding: 10px; border-radius: 12px; border: 1px solid var(--gray-medium);">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block;">Sistólica Máxima</span>
+                            <span id="med-max-sys" style="font-weight: 800; font-size: 1.1rem; color: #ef4444;">-- mmHg</span>
+                            <span style="font-size: 0.6rem; color: #94a3b8; display: block; margin-top: 1px;">Maior pico registrado</span>
+                        </div>
+                        <div style="background: var(--gray-light); padding: 10px; border-radius: 12px; border: 1px solid var(--gray-medium);">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block;">Aferições Totais</span>
+                            <span id="med-total-count" style="font-weight: 800; font-size: 1.1rem; color: var(--text-main);">--</span>
+                            <span style="font-size: 0.6rem; color: #94a3b8; display: block; margin-top: 1px;">Registros no banco de dados</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Botão Gigante de Registro com Linhas em Movimento -->
-                <div class="giant-measure-card" onclick="showModal('new-record-modal')">
+                <div id="patient-giant-card-wrapper" class="giant-measure-card" onclick="showModal('new-record-modal')">
                     <!-- Linhas em Movimento do Design System -->
                     <div class="beam-h-card"></div>
                     <div class="beam-v-card" style="animation-delay: 2s;"></div>
@@ -514,11 +573,118 @@
                     </div>
                 </div>
 
+                <!-- Seção Exclusiva de Admin (Apenas para UID etSpfstGkKSKmTfBploZqVMMVKu2) -->
+                <div id="admin-panel-section" class="card-premium glass hidden" style="border: 2px dashed #10b981; background: rgba(16, 185, 129, 0.02); text-align: left; margin-bottom: 20px;">
+                    <h4 class="profile-section-title" style="color: #10b981; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                        <span>⚙️ Painel Controle Admin</span>
+                    </h4>
+                    <p class="text-xs text-slate-500 mb-4" style="line-height: 1.4;">Controle total de licenças e acesso de usuários em tempo real.</p>
+                    <button onclick="openAdminModal()" class="btn-primary w-full shadow-glow" style="background: #10b981; border-color: #10b981; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 0.9rem;">
+                        Gerenciar Contas de Usuários
+                    </button>
+                </div>
+
                 <!-- Botão de Sair -->
                 <button onclick="handleLogout()" class="btn-profile-logout">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                     <span>Sair da Conta</span>
                 </button>
+            </main>
+        </section>
+
+        <!-- Tela de Acompanhantes -->
+        <section id="companions-screen" class="screen">
+            <header class="app-header glass">
+                <div class="user-info w-full text-center">
+                    <h2 class="font-bold text-xl">Acompanhamento</h2>
+                    <p class="text-xs text-slate-500 mt-1">Monitore e compartilhe saúde em tempo real</p>
+                </div>
+            </header>
+
+            <main class="dashboard-content pb-24 mt-6">
+                <!-- Seção para Paciente -->
+                <div id="patient-companions-view" class="space-y-6">
+                    <div class="card-premium glass">
+                        <h4 class="profile-section-title" style="display: flex; align-items: center; gap: 8px; text-align: left;">
+                            <i data-lucide="share-2" class="text-primary w-5 h-5"></i>
+                            <span>Meu Código de Compartilhamento</span>
+                        </h4>
+                        <p class="text-sm text-slate-500 mb-4" style="line-height: 1.4; text-align: left;">Copie seu código ou digite o e-mail de quem deseja que acompanhe suas aferições.</p>
+                        <div style="display: flex; gap: 10px; align-items: center; background: rgba(15, 23, 42, 0.03); padding: 12px; border-radius: 14px; border: 1px dashed rgba(15, 23, 42, 0.08);">
+                            <span id="my-patient-code" class="font-mono text-sm font-bold truncate select-all" style="color: var(--text-main); flex-grow: 1; text-align: left;">Carregando código...</span>
+                            <button onclick="copyPatientCode()" class="btn-primary" style="padding: 8px 12px; font-size: 0.8rem; border-radius: 8px; width: auto; font-weight: 800; white-space: nowrap;">Copiar</button>
+                        </div>
+                    </div>
+
+                    <div class="card-premium glass">
+                        <h4 class="profile-section-title" style="display: flex; align-items: center; gap: 8px; text-align: left;">
+                            <i data-lucide="plus-circle" class="text-primary w-5 h-5"></i>
+                            <span>Adicionar Acompanhante / Médico</span>
+                        </h4>
+                        <div class="space-y-4" style="text-align: left;">
+                            <div class="input-field">
+                                <label>E-mail do Convidado</label>
+                                <input type="email" id="invite-email" placeholder="email@exemplo.com" class="text-lg">
+                            </div>
+                            <div class="input-field">
+                                <label>Grau de Acesso / Papel</label>
+                                <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <button type="button" id="invite-role-familiar-btn" class="choice-card selected" onclick="selectInviteRole('familiar')" style="padding: 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 800;">Familiar</button>
+                                    <button type="button" id="invite-role-medico-btn" class="choice-card" onclick="selectInviteRole('medico')" style="padding: 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 800;">Médico</button>
+                                </div>
+                                <input type="hidden" id="invite-role" value="familiar">
+                            </div>
+                            <button onclick="handleAddCompanion()" class="btn-primary w-full shadow-glow" style="padding: 14px; border-radius: 14px; font-weight: 800;">Vincular Acompanhante</button>
+                            
+                            <div style="text-align: center; margin-top: 15px;">
+                                <span style="font-size: 0.72rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 8px;">Ou convide pelo Gmail</span>
+                                <button onclick="shareCompanionGmail()" class="btn-secondary w-full" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 14px; background: rgba(239, 68, 68, 0.05); color: var(--primary); border: 1px solid rgba(239, 68, 68, 0.1); font-weight: 800; font-size: 0.9rem; width: 100%;">
+                                    <i data-lucide="mail" class="w-4 h-4"></i>
+                                    <span>Convidar por Gmail</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-premium glass">
+                        <h4 class="profile-section-title" style="display: flex; align-items: center; gap: 8px; text-align: left;">
+                            <i data-lucide="users" class="text-primary w-5 h-5"></i>
+                            <span>Pessoas que me acompanham</span>
+                        </h4>
+                        <div id="companions-list" class="space-y-3" style="text-align: left;">
+                            <p class="text-sm text-slate-400 text-center py-4">Nenhum acompanhante cadastrado.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção para Familiar / Médico -->
+                <div id="companion-patients-view" class="space-y-6 hidden">
+                    <div class="card-premium glass">
+                        <h4 class="profile-section-title" style="display: flex; align-items: center; gap: 8px; text-align: left;">
+                            <i data-lucide="plus-circle" class="text-primary w-5 h-5"></i>
+                            <span>Vincular Novo Paciente</span>
+                        </h4>
+                        <p class="text-sm text-slate-500 mb-4" style="line-height: 1.4; text-align: left;">Digite o e-mail ou o código do paciente que você deseja monitorar os registros.</p>
+                        <div class="space-y-4" style="text-align: left;">
+                            <div class="input-field">
+                                <label>E-mail ou Código do Paciente</label>
+                                <input type="text" id="target-patient-input" placeholder="Ex: paciente@exemplo.com ou código UID" class="text-lg">
+                            </div>
+                            <button onclick="handleAddPatient()" class="btn-primary w-full shadow-glow" style="padding: 14px; border-radius: 14px; font-weight: 800;">Adicionar Paciente</button>
+                        </div>
+                    </div>
+
+                    <div class="card-premium glass">
+                        <h4 class="profile-section-title" style="display: flex; align-items: center; gap: 8px; text-align: left;">
+                            <i data-lucide="user-check" class="text-primary w-5 h-5"></i>
+                            <span>Pacientes que Acompanho</span>
+                        </h4>
+                        <div id="accompanied-patients-list" class="space-y-3" style="text-align: left;">
+                            <p class="text-sm text-slate-400 text-center py-4">Você ainda não acompanha nenhum paciente.</p>
+                        </div>
+                    </div>
+                </div>
             </main>
         </section>
 
@@ -531,6 +697,10 @@
             <button class="nav-item" onclick="showScreen('history-screen')">
                 <i data-lucide="history"></i>
                 <span>Histórico</span>
+            </button>
+            <button class="nav-item" onclick="showScreen('companions-screen')">
+                <i data-lucide="heart-handshake"></i>
+                <span>Acompanhar</span>
             </button>
             <button class="nav-item" onclick="showScreen('profile-screen')">
                 <i data-lucide="user"></i>
@@ -675,6 +845,61 @@
                     <button onclick="closeModal('biomedical-alert-modal')" class="btn-primary w-full shadow-glow" style="margin-top: 10px; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 0.95rem;">Fechar</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal de Gerenciamento de Usuários (Admin) -->
+    <div id="admin-users-modal" class="modal">
+        <div class="modal-overlay" onclick="closeModal('admin-users-modal')"></div>
+        <div class="modal-body glass-heavy" style="max-width: 550px; width: 92%; max-height: 85dvh; border-radius: 28px; padding: 24px;">
+            <div class="modal-header" style="border-bottom: 1px solid var(--gray-medium); padding-bottom: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+                <h2 class="text-xl font-bold flex items-center gap-2" style="color: #10b981; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;">
+                    <i data-lucide="shield" class="w-6 h-6 inline"></i> Gerenciamento de Contas
+                </h2>
+                <button onclick="closeModal('admin-users-modal')" class="close-btn" style="background: transparent; border: none; cursor: pointer; color: var(--text-main);"><i data-lucide="x"></i></button>
+            </div>
+            
+            <p class="text-sm text-slate-500 mb-4 text-left" style="line-height: 1.4;">Altere o status das assinaturas ou exclua contas diretamente com 1 clique.</p>
+            
+            <!-- Lista de Usuários Admin -->
+            <div id="admin-users-container" class="space-y-4" style="overflow-y: auto; max-height: 55dvh; padding-right: 4px; display: flex; flex-direction: column; gap: 12px;">
+                <p class="text-sm text-slate-400 text-center py-8">Buscando contas no Firestore...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay de Paywall Premium (Assinatura Inativa do Paciente) -->
+    <div id="paywall-overlay" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div class="card-premium glass-heavy" style="max-width: 400px; width: 100%; text-align: center; border-radius: 32px; padding: 35px 25px; border: 1px solid rgba(239, 68, 68, 0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center;">
+            <div class="icon-circle shadow-glow" style="width: 64px; height: 64px; margin: 0 auto 20px auto; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="shield-alert" class="w-8 h-8 text-primary"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-3" style="color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif;">Monitoramento Suspenso</h2>
+            <p class="text-sm text-slate-400 mb-6" style="line-height: 1.5; text-align: center;">O plano de monitoramento da sua conta expirou. Para registrar novas aferições de pressão e restabelecer o compartilhamento com seus familiares ou médicos, realize a ativação.</p>
+            
+            <a href="https://wa.me/5547920015676?text=Ol%C3%A1%20Dra.%20Layana%2C%20gostaria%20de%20ativar%20a%20minha%20assinatura%20no%20TumTum%20App!" target="_blank" class="btn-primary w-full shadow-glow" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px; border-radius: 16px; background: #10b981; border: none; font-weight: 800; font-size: 1rem; text-decoration: none; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); color: white; cursor: pointer; width: 100%;">
+                <i data-lucide="phone" class="w-5 h-5 text-white"></i>
+                <span>Falar com Dra. Layana</span>
+            </a>
+            
+            <button onclick="handleLogout()" class="btn-secondary w-full mt-4" style="padding: 14px; border-radius: 16px; font-weight: 700; border: 1px solid var(--gray-medium); width: 100%; cursor: pointer;">
+                Sair da Conta
+            </button>
+        </div>
+    </div>
+
+    <!-- Overlay de Bloqueio do Acompanhante / Médico (Assinatura Inativa do Paciente) -->
+    <div id="companion-lock-screen" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div class="card-premium glass-heavy" style="max-width: 400px; width: 100%; text-align: center; border-radius: 32px; padding: 35px 25px; border: 1px solid rgba(239, 68, 68, 0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center;">
+            <div class="icon-circle shadow-glow" style="width: 64px; height: 64px; margin: 0 auto 20px auto; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="lock" class="w-8 h-8 text-primary"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-3" style="color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif;">Acesso Temporariamente Suspenso</h2>
+            <p class="text-sm text-slate-400 mb-6" style="line-height: 1.5; text-align: center;">A assinatura do paciente que você acompanha está inativa no momento. Entre em contato com ele para que ele possa regularizar a conta no aplicativo.</p>
+            
+            <button onclick="handleLogout()" class="btn-primary w-full shadow-glow" style="padding: 16px; border-radius: 16px; font-weight: 800; width: 100%; cursor: pointer;">
+                Sair da Conta
+            </button>
         </div>
     </div>
 

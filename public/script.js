@@ -829,6 +829,422 @@ async function finishAnamnese() {
 }
 
 // Eventos
+// --- Global Roles & Subscription State ---
+let selectedLoginRole = 'paciente';
+let selectedInviteRole = 'familiar';
+let currentUserRole = 'paciente';
+let activePatientUid = null;
+let subscriptionActive = true;
+
+// Expor seletores para o HTML
+window.selectLoginRole = (role) => {
+    selectedLoginRole = role;
+    const loginRoleEl = document.getElementById('login-role');
+    if (loginRoleEl) loginRoleEl.value = role;
+    
+    // Switch visual ativo
+    document.querySelectorAll('#login-screen .choice-card').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    const targetBtn = document.getElementById(`role-${role}`);
+    if (targetBtn) targetBtn.classList.add('selected');
+};
+
+window.selectInviteRole = (role) => {
+    selectedInviteRole = role;
+    const inviteRoleEl = document.getElementById('invite-role');
+    if (inviteRoleEl) inviteRoleEl.value = role;
+    
+    document.querySelectorAll('#invite-role-familiar-btn, #invite-role-medico-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    if (role === 'familiar') {
+        const famBtn = document.getElementById('invite-role-familiar-btn');
+        if (famBtn) famBtn.classList.add('selected');
+    } else {
+        const medBtn = document.getElementById('invite-role-medico-btn');
+        if (medBtn) medBtn.classList.add('selected');
+    }
+};
+
+// Funções de Acompanhamento (Paciente)
+window.copyPatientCode = () => {
+    const codeSpan = document.getElementById('my-patient-code');
+    if (codeSpan) {
+        const text = codeSpan.innerText;
+        if (text && text !== "Carregando código...") {
+            navigator.clipboard.writeText(text)
+                .then(() => alert("📋 Código copiado para a área de transferência!"))
+                .catch(err => alert("Erro ao copiar código: " + err));
+        }
+    }
+};
+
+window.shareCompanionGmail = () => {
+    const user = window.auth.currentUser;
+    if (!user) return;
+    const code = user.uid;
+    const subject = encodeURIComponent("Convite para me acompanhar no TumTum App");
+    const body = encodeURIComponent(`Olá! Gostaria de te convidar para acompanhar minhas aferições de pressão no TumTum App.\n\nCódigo do Paciente: ${code}\nInstale o app e adicione meu e-mail (${user.email}) ou meu código na aba Acompanhar!\n\nTumTum App - Saúde em dia, vida tranquila.`);
+    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+};
+
+window.handleAddCompanion = async () => {
+    const emailInput = document.getElementById('invite-email');
+    const email = emailInput ? emailInput.value.trim().toLowerCase() : "";
+    const role = document.getElementById('invite-role').value;
+    
+    if (!email) {
+        alert("Por favor, digite o e-mail do acompanhante!");
+        return;
+    }
+    
+    const user = window.auth.currentUser;
+    if (!user) return;
+    
+    try {
+        const snap = await window.db.collection('users').where('email', '==', email).get();
+        if (snap.empty) {
+            alert("⚠️ Usuário não encontrado! Certifique-se de que o acompanhante já entrou no app pelo menos uma vez com o Google.");
+            return;
+        }
+        
+        const targetDoc = snap.docs[0];
+        const targetUid = targetDoc.id;
+        const targetData = targetDoc.data();
+        
+        // Atualizar o documento do Paciente (adicionar o acompanhante)
+        const myDocRef = window.db.collection('users').doc(user.uid);
+        const myDoc = await myDocRef.get();
+        const myData = myDoc.data();
+        
+        const companions = myData.companions || {};
+        companions[targetUid] = {
+            uid: targetUid,
+            name: targetData.nome || targetData.displayName || "Sem Nome",
+            email: email,
+            role: role
+        };
+        await myDocRef.update({ companions });
+        
+        // Atualizar o documento do Acompanhante (adicionar o paciente)
+        const targetDocRef = window.db.collection('users').doc(targetUid);
+        const targetPatients = targetData.patients || {};
+        targetPatients[user.uid] = {
+            uid: user.uid,
+            name: myData.nome || user.displayName || "Paciente",
+            email: user.email
+        };
+        await targetDocRef.update({ patients: targetPatients, role: role });
+        
+        alert("✨ Acompanhante vinculado com sucesso!");
+        emailInput.value = "";
+        window.loadCompanionsPage();
+    } catch (e) {
+        console.error("Erro ao vincular acompanhante:", e);
+        alert("Erro ao vincular: " + e.message);
+    }
+};
+
+window.handleAddPatient = async () => {
+    const inputEl = document.getElementById('target-patient-input');
+    const searchVal = inputEl ? inputEl.value.trim() : "";
+    
+    if (!searchVal) {
+        alert("Por favor, digite o e-mail ou código do paciente!");
+        return;
+    }
+    
+    const user = window.auth.currentUser;
+    if (!user) return;
+    
+    try {
+        let patientUid = "";
+        let patientData = null;
+        
+        if (searchVal.includes('@')) {
+            const snap = await window.db.collection('users').where('email', '==', searchVal.toLowerCase()).get();
+            if (snap.empty) {
+                alert("⚠️ Paciente não encontrado pelo e-mail! Certifique-se de que ele já fez login no app.");
+                return;
+            }
+            patientUid = snap.docs[0].id;
+            patientData = snap.docs[0].data();
+        } else {
+            const doc = await window.db.collection('users').doc(searchVal).get();
+            if (!doc.exists) {
+                alert("⚠️ Código de paciente não encontrado!");
+                return;
+            }
+            patientUid = doc.id;
+            patientData = doc.data();
+        }
+        
+        // Atualizar o documento do paciente (adicionar eu como acompanhante)
+        const myDocRef = window.db.collection('users').doc(user.uid);
+        const myDoc = await myDocRef.get();
+        const myData = myDoc.data();
+        const myRole = myData.role || 'familiar';
+        
+        const targetDocRef = window.db.collection('users').doc(patientUid);
+        const companions = patientData.companions || {};
+        companions[user.uid] = {
+            uid: user.uid,
+            name: myData.nome || user.displayName || "Acompanhante",
+            email: user.email,
+            role: myRole
+        };
+        await targetDocRef.update({ companions });
+        
+        // Atualizar meu próprio documento (adicionar o paciente)
+        const myPatients = myData.patients || {};
+        myPatients[patientUid] = {
+            uid: patientUid,
+            name: patientData.nome || "Paciente",
+            email: patientData.email || ""
+        };
+        await myDocRef.update({ patients: myPatients });
+        
+        alert("✨ Paciente vinculado com sucesso!");
+        inputEl.value = "";
+        
+        localStorage.setItem(`active_patient_uid_${user.uid}`, patientUid);
+        window.loadCompanionsPage();
+        location.reload();
+    } catch (e) {
+        console.error("Erro ao vincular paciente:", e);
+        alert("Erro ao vincular: " + e.message);
+    }
+};
+
+window.removeCompanion = async (companionUid) => {
+    const user = window.auth.currentUser;
+    if (!user) return;
+    if (!confirm("Deseja realmente desvincular este acompanhante?")) return;
+    
+    try {
+        const myDocRef = window.db.collection('users').doc(user.uid);
+        const myDoc = await myDocRef.get();
+        const companions = myDoc.data().companions || {};
+        delete companions[companionUid];
+        await myDocRef.update({ companions });
+        
+        // Remove no lado do companheiro também
+        await window.db.collection('users').doc(companionUid).get().then(async (doc) => {
+            if (doc.exists) {
+                const p = doc.data().patients || {};
+                delete p[user.uid];
+                await window.db.collection('users').doc(companionUid).update({ patients: p });
+            }
+        });
+        
+        alert("Acompanhante desvinculado com sucesso!");
+        window.loadCompanionsPage();
+    } catch (e) {
+        alert("Erro ao remover: " + e.message);
+    }
+};
+
+window.removePatient = async (patientUid) => {
+    const user = window.auth.currentUser;
+    if (!user) return;
+    if (!confirm("Deseja realmente desvincular este paciente?")) return;
+    
+    try {
+        const myDocRef = window.db.collection('users').doc(user.uid);
+        const myDoc = await myDocRef.get();
+        const p = myDoc.data().patients || {};
+        delete p[patientUid];
+        await myDocRef.update({ patients: p });
+        
+        // Remove no lado do paciente
+        await window.db.collection('users').doc(patientUid).get().then(async (doc) => {
+            if (doc.exists) {
+                const companions = doc.data().companions || {};
+                delete companions[user.uid];
+                await window.db.collection('users').doc(patientUid).update({ companions });
+            }
+        });
+        
+        if (localStorage.getItem(`active_patient_uid_${user.uid}`) === patientUid) {
+            localStorage.removeItem(`active_patient_uid_${user.uid}`);
+        }
+        
+        alert("Paciente desvinculado com sucesso!");
+        window.loadCompanionsPage();
+        location.reload();
+    } catch (e) {
+        alert("Erro ao remover: " + e.message);
+    }
+};
+
+window.setActivePatient = (patientUid) => {
+    const user = window.auth.currentUser;
+    if (!user) return;
+    localStorage.setItem(`active_patient_uid_${user.uid}`, patientUid);
+    location.reload();
+};
+
+window.loadCompanionsPage = async () => {
+    const user = window.auth.currentUser;
+    if (!user) return;
+    
+    try {
+        const doc = await window.db.collection('users').doc(user.uid).get();
+        if (!doc.exists) return;
+        
+        const data = doc.data();
+        const role = data.role || 'paciente';
+        
+        if (role === 'paciente') {
+            document.getElementById('patient-companions-view').classList.remove('hidden');
+            document.getElementById('companion-patients-view').classList.add('hidden');
+            
+            // Código do paciente
+            const myPatientCodeEl = document.getElementById('my-patient-code');
+            if (myPatientCodeEl) myPatientCodeEl.innerText = user.uid;
+            
+            // Lista de acompanhantes
+            const listContainer = document.getElementById('companions-list');
+            if (listContainer) {
+                listContainer.innerHTML = "";
+                const companions = data.companions || {};
+                const keys = Object.keys(companions);
+                
+                if (keys.length === 0) {
+                    listContainer.innerHTML = `<p class="text-sm text-slate-400 text-center py-4">Nenhum acompanhante cadastrado.</p>`;
+                } else {
+                    keys.forEach(k => {
+                        const comp = companions[k];
+                        const displayRole = comp.role === 'medico' ? 'Médico' : 'Familiar';
+                        const badgeClass = comp.role === 'medico' ? 'badge-role-medico' : 'badge-role-familiar';
+                        
+                        listContainer.innerHTML += `
+                            <div class="admin-user-card" style="padding: 10px 14px;">
+                                <div style="text-align: left;">
+                                    <h4 class="font-bold text-sm" style="margin: 0;">${comp.name}</h4>
+                                    <span class="${badgeClass}" style="margin-top: 4px; display: inline-block;">${displayRole}</span>
+                                </div>
+                                <button onclick="removeCompanion('${comp.uid}')" style="background: transparent; border: none; cursor: pointer; color: #ef4444;">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+                }
+            }
+        } else {
+            // Familiar ou Médico
+            document.getElementById('patient-companions-view').classList.add('hidden');
+            document.getElementById('companion-patients-view').classList.remove('hidden');
+            
+            const listContainer = document.getElementById('accompanied-patients-list');
+            if (listContainer) {
+                listContainer.innerHTML = "";
+                const patients = data.patients || {};
+                const keys = Object.keys(patients);
+                const activeId = localStorage.getItem(`active_patient_uid_${user.uid}`);
+                
+                if (keys.length === 0) {
+                    listContainer.innerHTML = `<p class="text-sm text-slate-400 text-center py-4">Você ainda não acompanha nenhum paciente.</p>`;
+                } else {
+                    keys.forEach(k => {
+                        const pat = patients[k];
+                        const isActive = pat.uid === activeId;
+                        
+                        listContainer.innerHTML += `
+                            <div class="admin-user-card" style="padding: 12px 14px; border: ${isActive ? '2px solid var(--primary)' : '1px solid rgba(15, 23, 42, 0.06)'}; background: ${isActive ? 'white' : 'rgba(255, 255, 255, 0.6)'};">
+                                <div style="text-align: left; cursor: pointer; flex-grow: 1;" onclick="setActivePatient('${pat.uid}')">
+                                    <h4 class="font-bold text-sm" style="margin: 0; display: flex; align-items: center; gap: 6px;">
+                                        ${pat.name} ${isActive ? '<span style="font-size: 0.6rem; background: var(--primary); color: white; padding: 2px 6px; border-radius: 6px; text-transform: uppercase;">Ativo</span>' : ''}
+                                    </h4>
+                                    <p class="text-xs text-slate-400" style="margin-top: 2px;">${pat.email}</p>
+                                </div>
+                                <button onclick="removePatient('${pat.uid}')" style="background: transparent; border: none; cursor: pointer; color: #ef4444; margin-left: 10px;">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+                }
+            }
+        }
+        lucide.createIcons();
+    } catch (e) {
+        console.error("Erro ao carregar página de acompanhantes:", e);
+    }
+};
+
+// Funções de Painel Admin (Dra. Layana - etSpfstGkKSKmTfBploZqVMMVKu2)
+window.openAdminModal = () => {
+    showModal('admin-users-modal');
+    window.loadAdminUsers();
+};
+
+window.loadAdminUsers = async () => {
+    const container = document.getElementById('admin-users-container');
+    if (!container) return;
+    
+    try {
+        container.innerHTML = `<p class="text-sm text-slate-400 text-center py-8">Carregando usuários do banco...</p>`;
+        const snap = await window.db.collection('users').get();
+        container.innerHTML = "";
+        
+        snap.forEach(doc => {
+            const user = doc.data();
+            const userId = doc.id;
+            const subActive = user.subscriptionActive !== false; // true por padrão
+            const displayRole = user.role || 'paciente';
+            
+            container.innerHTML += `
+                <div class="admin-user-card">
+                    <div style="text-align: left; max-width: 60%;">
+                        <h4 class="font-bold text-sm" style="margin: 0; color: var(--text-main);">${user.nome || user.displayName || 'Sem Nome'}</h4>
+                        <p class="text-xs text-slate-400 truncate" style="margin: 2px 0 0 0;">${user.email || 'Sem e-mail'}</p>
+                        <div style="margin-top: 6px;">
+                            <span class="badge-role-${displayRole}">${displayRole}</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="btn-status-toggle ${subActive ? 'active' : 'inactive'}" onclick="toggleUserSubscription('${userId}', ${subActive})">
+                            ${subActive ? 'Ativo' : 'Inativo'}
+                        </button>
+                        <button class="btn-delete-admin" onclick="deleteUserAccount('${userId}')" title="Excluir Conta">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        lucide.createIcons();
+    } catch (e) {
+        console.error("Erro ao carregar usuários admin:", e);
+        container.innerHTML = `<p class="text-sm text-red-500 text-center py-8">Erro ao carregar: ${e.message}</p>`;
+    }
+};
+
+window.toggleUserSubscription = async (userId, currentStatus) => {
+    try {
+        await window.db.collection('users').doc(userId).update({
+            subscriptionActive: !currentStatus
+        });
+        window.loadAdminUsers();
+    } catch (e) {
+        alert("Erro ao alterar assinatura: " + e.message);
+    }
+};
+
+window.deleteUserAccount = async (userId) => {
+    if (!confirm("Tem certeza de que deseja excluir permanentemente esta conta?")) return;
+    try {
+        await window.db.collection('users').doc(userId).delete();
+        alert("Conta removida com sucesso!");
+        window.loadAdminUsers();
+    } catch (e) {
+        alert("Erro ao excluir conta: " + e.message);
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     // Carrega registros de convidado (guest) se existirem
     const guestRecords = localStorage.getItem('records_guest');
@@ -848,12 +1264,13 @@ document.addEventListener('DOMContentLoaded', () => {
         loginBtn.addEventListener('click', async () => {
             loginBtn.innerHTML = "Entrando...";
             try {
+                // Salva a role selecionada temporariamente para gravar na criação do doc
+                localStorage.setItem('temp_login_role', selectedLoginRole);
                 await window.auth.signInWithPopup(window.googleProvider);
-                // A navegação será feita pelo onAuthStateChanged
             } catch (error) {
                 console.error("Erro no login:", error);
                 alert("Erro ao tentar fazer login: " + error.message);
-                loginBtn.innerHTML = originalBtnHtml; // Reset button
+                loginBtn.innerHTML = originalBtnHtml;
             }
         });
     }
@@ -861,46 +1278,203 @@ document.addEventListener('DOMContentLoaded', () => {
     // Monitorar estado de autenticação
     window.auth.onAuthStateChanged(async (user) => {
         if (user) {
-            // Atualiza de imediato com dados disponíveis do Google Auth (evita exibir "Carregando...")
+            // Atualiza com dados do Google Auth
             updateUserProfile(user);
             
-            // Carrega os registros salvos localmente específicos para este usuário logado
-            const localRecords = localStorage.getItem(`records_${user.uid}`);
-            if (localRecords) {
-                try {
-                    mockRecords = JSON.parse(localRecords);
-                } catch (e) {
-                    console.error("Erro ao carregar registros locais do usuário:", e);
-                }
-            } else {
-                // Se for o primeiro acesso e não houver histórico, cria o default local
-                localStorage.setItem(`records_${user.uid}`, JSON.stringify(mockRecords));
-            }
-            
             try {
-                const doc = await window.db.collection('users').doc(user.uid).get();
-                if (doc.exists && doc.data().completedAt) {
-                    // Salva sinalizador local e carrega o painel
-                    localStorage.setItem(`anamnese_completed_${user.uid}`, 'true');
-                    const data = doc.data();
-                    updateUserProfile(user, data);
+                // 1. Verificar/Carregar documento do Usuário no Firestore
+                let doc = await window.db.collection('users').doc(user.uid).get();
+                
+                if (!doc.exists) {
+                    // Novo usuário! Criamos o perfil inicial
+                    const tempRole = localStorage.getItem('temp_login_role') || 'paciente';
+                    const initialData = {
+                        uid: user.uid,
+                        email: user.email || "",
+                        displayName: user.displayName || "",
+                        role: tempRole,
+                        // Paciente novo começa INATIVO para forçar o Paywall do WhatsApp (exceto a Dra. Layana!)
+                        subscriptionActive: (user.uid === 'etSpfstGkKSKmTfBploZqVMMVKu2') ? true : (tempRole === 'paciente' ? false : true),
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
                     
-                    showScreen('dashboard-screen');
-                    initChart();
-                } else {
-                    // Novo usuário, precisa preencher
-                    document.getElementById('a-nome').value = user.displayName || "";
-                    showScreen('anamnese-screen');
-                    currentStep = 1;
-                    updateProgress();
+                    await window.db.collection('users').doc(user.uid).set(initialData, { merge: true });
+                    doc = await window.db.collection('users').doc(user.uid).get();
+                    localStorage.removeItem('temp_login_role');
                 }
+                
+                const data = doc.data();
+                currentUserRole = data.role || 'paciente';
+                
+                // Forçar assinatura ativa definitiva para a Dra. Layana
+                if (user.uid === 'etSpfstGkKSKmTfBploZqVMMVKu2') {
+                    subscriptionActive = true;
+                    // Exibir painel Admin secreto
+                    const adminPanelSec = document.getElementById('admin-panel-section');
+                    if (adminPanelSec) adminPanelSec.classList.remove('hidden');
+                } else {
+                    subscriptionActive = data.subscriptionActive !== false;
+                }
+                
+                // Carregar aba de Acompanhamento
+                window.loadCompanionsPage();
+                
+                if (currentUserRole === 'paciente') {
+                    // --- FLUXO DO PACIENTE ---
+                    if (!subscriptionActive) {
+                        // BLOQUEADO: Exibir Paywall do WhatsApp da Dra. Layana
+                        document.getElementById('paywall-overlay').classList.remove('hidden');
+                        return;
+                    } else {
+                        document.getElementById('paywall-overlay').classList.add('hidden');
+                    }
+                    
+                    // Dados locais específicos do paciente
+                    const localRecords = localStorage.getItem(`records_${user.uid}`);
+                    if (localRecords) {
+                        try {
+                            mockRecords = JSON.parse(localRecords);
+                        } catch (e) {
+                            console.error("Erro ao carregar registros locais do usuário:", e);
+                        }
+                    } else {
+                        localStorage.setItem(`records_${user.uid}`, JSON.stringify(mockRecords));
+                    }
+                    
+                    // Verifica se completou Anamnese
+                    if (data.completedAt) {
+                        localStorage.setItem(`anamnese_completed_${user.uid}`, 'true');
+                        updateUserProfile(user, data);
+                        showScreen('dashboard-screen');
+                        initChart();
+                    } else {
+                        document.getElementById('a-nome').value = user.displayName || "";
+                        showScreen('anamnese-screen');
+                        currentStep = 1;
+                        updateProgress();
+                    }
+                    
+                } else {
+                    // --- FLUXO DO ACOMPANHANTE / MÉDICO ---
+                    document.getElementById('paywall-overlay').classList.add('hidden');
+                    
+                    // Checar paciente ativo a acompanhar
+                    activePatientUid = localStorage.getItem(`active_patient_uid_${user.uid}`);
+                    
+                    // Se não tiver UID ativo, pega o primeiro da lista se houver
+                    if (!activePatientUid && data.patients) {
+                        const keys = Object.keys(data.patients);
+                        if (keys.length > 0) {
+                            activePatientUid = keys[0];
+                            localStorage.setItem(`active_patient_uid_${user.uid}`, activePatientUid);
+                        }
+                    }
+                    
+                    if (activePatientUid) {
+                        // Carregar dados do paciente acompanhado
+                        const patDoc = await window.db.collection('users').doc(activePatientUid).get();
+                        if (patDoc.exists) {
+                            const patData = patDoc.data();
+                            
+                            // Verificar se o paciente acompanhado possui assinatura ativa!
+                            const patSubActive = patData.subscriptionActive !== false;
+                            
+                            if (!patSubActive) {
+                                // BLOQUEADO: Acesso Suspenso devido a plano expirado do paciente
+                                document.getElementById('companion-lock-screen').classList.remove('hidden');
+                                return;
+                            } else {
+                                document.getElementById('companion-lock-screen').classList.add('hidden');
+                            }
+                            
+                            // Ocultar card de adicionar novas aferições (modo leitura)
+                            const giantCardWrapper = document.getElementById('patient-giant-card-wrapper');
+                            if (giantCardWrapper) giantCardWrapper.style.display = 'none';
+                            
+                            // Exibir banner superior de acompanhamento
+                            const viewingBanner = document.getElementById('companion-viewing-banner');
+                            if (viewingBanner) {
+                                viewingBanner.classList.remove('hidden');
+                                document.getElementById('companion-banner-role').innerText = currentUserRole === 'medico' ? 'Médico' : 'Familiar';
+                                document.getElementById('companion-banner-name').innerText = patData.nome || patData.displayName || "Paciente";
+                            }
+                            
+                            // Atualizar greeting no dashboard para saudar com dados do paciente
+                            const greetEl = document.querySelector('.greeting');
+                            if (greetEl) {
+                                greetEl.innerText = currentUserRole === 'medico' ? 'Paciente:' : 'Acompanhando:';
+                            }
+                            const nameEl = document.getElementById('display-name');
+                            if (nameEl) nameEl.innerText = patData.nome || patData.displayName || "Paciente";
+                            
+                            // Carrega os registros específicos do paciente
+                            const patRecordsSnap = await window.db.collection('users').doc(activePatientUid).collection('records').orderBy('createdAt', 'desc').limit(50).get();
+                            mockRecords = [];
+                            patRecordsSnap.forEach(rDoc => {
+                                const r = rDoc.data();
+                                mockRecords.push({
+                                    id: rDoc.id,
+                                    sys: r.sys,
+                                    dia: r.dia,
+                                    bpm: r.bpm,
+                                    date: r.date || "Hoje",
+                                    time: r.time || "00:00",
+                                    period: r.period || "Tarde",
+                                    condicao: r.condicao || "Repouso"
+                                });
+                            });
+                            
+                            // Injetar visualizações exclusivas do Perfil Médico
+                            if (currentUserRole === 'medico') {
+                                const medStatsCard = document.getElementById('medical-stats-card');
+                                if (medStatsCard) {
+                                    medStatsCard.classList.remove('hidden');
+                                    
+                                    const totalCount = mockRecords.length;
+                                    document.getElementById('med-total-count').innerText = totalCount;
+                                    
+                                    if (totalCount > 0) {
+                                        // Picos
+                                        const sysValues = mockRecords.map(r => parseInt(r.sys) || 0);
+                                        const maxSys = Math.max(...sysValues);
+                                        document.getElementById('med-max-sys').innerText = `${maxSys} mmHg`;
+                                        
+                                        // Estabilidade (Registros normais/atenção vs hipertensão)
+                                        const stableCount = mockRecords.filter(r => {
+                                            const s = parseInt(r.sys) || 0;
+                                            const d = parseInt(r.dia) || 0;
+                                            return s < 140 && d < 90; // Exclui estágios 1, 2 e crise
+                                        }).length;
+                                        const stabilityRate = Math.round((stableCount / totalCount) * 100);
+                                        document.getElementById('med-stability-rate').innerText = `${stabilityRate}%`;
+                                        
+                                        // Variabilidade (Desvio Padrão)
+                                        const meanSys = sysValues.reduce((a, b) => a + b, 0) / totalCount;
+                                        const varianceSys = sysValues.reduce((a, b) => a + Math.pow(b - meanSys, 2), 0) / totalCount;
+                                        const stdDevSys = Math.sqrt(varianceSys).toFixed(1);
+                                        document.getElementById('med-standard-deviation').innerText = `± ${stdDevSys}`;
+                                    }
+                                }
+                            }
+                            
+                            showScreen('dashboard-screen');
+                            initChart();
+                        } else {
+                            // Paciente desvinculado ou ausente
+                            alert("⚠️ O paciente vinculado não foi encontrado!");
+                            showScreen('companions-screen');
+                        }
+                    } else {
+                        // Sem paciente vinculado: força a tela de vincular
+                        showScreen('companions-screen');
+                    }
+                }
+                
             } catch(e) {
-                console.error("Erro ao verificar perfil", e);
-                // Se falhar a conexão com o Firestore, tentamos checar localmente se já preencheu.
-                // Se não houver registro local de conclusão, abrimos a anamnese por segurança!
+                console.error("Erro completo ao verificar perfil no Firestore:", e);
+                // Fallback offline (se já completou anamnese localmente)
                 const localCompleted = localStorage.getItem(`anamnese_completed_${user.uid}`);
                 if (localCompleted === 'true') {
-                    updateUserProfile(user);
                     showScreen('dashboard-screen');
                     initChart();
                 } else {
@@ -1036,6 +1610,7 @@ async function handleLogout() {
         }
     }
 }
+window.handleLogout = handleLogout;
 
 // Função para Iniciar Edição da Ficha de Saúde (Anamnese)
 function startEditAnamnese() {
