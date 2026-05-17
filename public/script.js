@@ -1731,7 +1731,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Erro completo ao verificar perfil no Firestore:", e);
                 
                 // Tentar recuperar o papel do cache local antes de assumir paciente por padrão
-                const cachedRole = localStorage.getItem(`user_role_${user.uid}`);
+                const cachedRole = localStorage.getItem(`user_role_${user.uid}`) || localStorage.getItem('temp_login_role') || localStorage.getItem('admin_override_role');
                 if (cachedRole) {
                     currentUserRole = cachedRole;
                 }
