@@ -312,6 +312,8 @@ body {
     border-radius: 24px;
     z-index: 100;
     padding: 0 10px;
+    border: 1.5px solid rgba(239, 68, 68, 0.18) !important; /* Borda vermelha fina, discreta e extremamente elegante */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(239, 68, 68, 0.02) !important;
 }
 
 /* Ocultar bottom-nav na tela de Login e durante a Anamnese inicial */
