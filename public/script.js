@@ -2552,6 +2552,12 @@ window.exportarCSV = exportarCSV;
 window.handleLogout = handleLogout;
 window.startEditAnamnese = startEditAnamnese;
 
+// Função de Alerta Global do aplicativo (toast ou fallback)
+function showGlobalAlert(message, type = 'info') {
+    alert(message);
+}
+window.showGlobalAlert = showGlobalAlert;
+
 // --- SISTEMA DE NOTIFICAÇÕES PUSH (FCM) & FEEDBACKS ---
 
 // Chave VAPID para Web Push do seu Console do Firebase -> Cloud Messaging -> Configuração da Web
