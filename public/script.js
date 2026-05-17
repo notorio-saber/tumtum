@@ -2700,17 +2700,17 @@ function playHeartbeatSound() {
             sharedAudioContext.resume();
         }
         
-        // Primeiro "Tum" (grave e abafado)
+        // Primeiro "Tum" (grave e abafado - ajustado para 140Hz audível em alto-falantes mobile)
         setTimeout(() => {
             if (sharedAudioContext) {
-                playBeat(sharedAudioContext, 58, 0.20); // Frequência ligeiramente mais baixa, duração mais suave de 0.20s
+                playBeat(sharedAudioContext, 140, 0.20); 
             }
         }, 0);
         
-        // Segundo "Tum" (segundo batimento ligeiramente mais espaçado - Lub-Dub natural)
+        // Segundo "Tum" (segundo batimento ligeiramente mais espaçado - 120Hz Lub-Dub natural)
         setTimeout(() => {
             if (sharedAudioContext) {
-                playBeat(sharedAudioContext, 52, 0.24); // Frequência de 52Hz, duração de 0.24s
+                playBeat(sharedAudioContext, 120, 0.24); 
             }
         }, 240); // Espaçamento de 240ms para um batimento mais calmo, lento e natural
         
@@ -2730,10 +2730,10 @@ function playBeat(ctx, freq, duration) {
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(10, ctx.currentTime + duration);
     
-    // Suaviza a curva de ganho (Fade-In de 20ms e Fade-Out de duration) para evitar estouro/pop digital
+    // Suaviza a curva de ganho (Fade-In linear rápido e Fade-Out linear suave) para evitar estouro e otimizar volume em celulares
     gain.gain.setValueAtTime(0.001, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    gain.gain.linearRampToValueAtTime(0.8, ctx.currentTime + 0.015); // Ganho robusto de 0.8 com rampa de 15ms
+    gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + duration);
     
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + duration);
