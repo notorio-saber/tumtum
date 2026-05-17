@@ -529,11 +529,11 @@ function initChart() {
     const hasData = mockRecords && mockRecords.length > 0;
     
     // Se não houver registros, os arrays de dados ficam vazios para não desenhar nenhuma linha
-    const sysData = hasData ? [120, 122, 118, 124, 120, 119, 121] : [];
-    const diaData = hasData ? [80, 81, 78, 83, 80, 79, 81] : [];
+    const sysData = hasData ? [null, null, null, null, null, null, null] : [];
+    const diaData = hasData ? [null, null, null, null, null, null, null] : [];
     
     // Contadores para computar a média caso haja múltiplos registros no mesmo dia
-    const counts = [1, 1, 1, 1, 1, 1, 1];
+    const counts = [0, 0, 0, 0, 0, 0, 0];
     
     if (hasData) {
         // Mapeia registros reais para o dia da semana correspondente
@@ -543,12 +543,13 @@ function initChart() {
                 const recordDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
                 const dayOfWeek = recordDate.getDay(); // 0 = Domingo, 6 = Sábado
                 
-                if (counts[dayOfWeek] === 1 && sysData[dayOfWeek] === 120 && diaData[dayOfWeek] === 80) {
-                    // Substitui valor default pelo real
+                if (counts[dayOfWeek] === 0) {
+                    // Primeiro registro do dia
                     sysData[dayOfWeek] = r.sys;
                     diaData[dayOfWeek] = r.dia;
+                    counts[dayOfWeek] = 1;
                 } else {
-                    // Acumula média
+                    // Acumula média do dia
                     sysData[dayOfWeek] = ((sysData[dayOfWeek] * counts[dayOfWeek]) + r.sys) / (counts[dayOfWeek] + 1);
                     diaData[dayOfWeek] = ((diaData[dayOfWeek] * counts[dayOfWeek]) + r.dia) / (counts[dayOfWeek] + 1);
                     counts[dayOfWeek]++;
@@ -560,8 +561,10 @@ function initChart() {
 
         // Arredonda valores finais das médias dos dias
         for (let i = 0; i < 7; i++) {
-            sysData[i] = Math.round(sysData[i]);
-            diaData[i] = Math.round(diaData[i]);
+            if (counts[i] > 0) {
+                sysData[i] = Math.round(sysData[i]);
+                diaData[i] = Math.round(diaData[i]);
+            }
         }
     }
 
@@ -579,7 +582,8 @@ function initChart() {
                 backgroundColor: gradient,
                 pointBackgroundColor: '#ef4444',
                 pointRadius: 4,
-                pointHoverRadius: 6
+                pointHoverRadius: 6,
+                spanGaps: true
             },
             {
                 label: 'Diastólica',
@@ -591,7 +595,8 @@ function initChart() {
                 borderDash: [5, 5],
                 pointBackgroundColor: '#fca5a5',
                 pointRadius: 3,
-                pointHoverRadius: 5
+                pointHoverRadius: 5,
+                spanGaps: true
             }]
         },
         options: {
@@ -1095,6 +1100,10 @@ window.loadCompanionsPage = async () => {
     const user = window.auth.currentUser;
     if (!user) return;
     
+    // Define o código do paciente IMEDIATAMENTE (sem esperar o Firestore) para evitar travamentos de 'Carregando...'
+    const myPatientCodeEl = document.getElementById('my-patient-code');
+    if (myPatientCodeEl) myPatientCodeEl.innerText = user.uid;
+    
     try {
         const doc = await window.db.collection('users').doc(user.uid).get();
         if (!doc.exists) return;
@@ -1311,6 +1320,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const data = doc.data();
                 currentUserRole = data.role || 'paciente';
+                
+                // Atualizar o rótulo do menu bottom-nav dinamicamente conforme o papel
+                const companionsNavLabel = document.getElementById('companions-nav-label');
+                if (companionsNavLabel) {
+                    companionsNavLabel.innerText = currentUserRole === 'paciente' ? "Acompanhantes" : "Acompanhar";
+                }
                 
                 // Forçar assinatura ativa definitiva para a Dra. Layana
                 if (user.uid === 'etSpfstGkKSKmTfBploZqVMMVKu2') {
