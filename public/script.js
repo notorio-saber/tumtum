@@ -492,7 +492,7 @@ function sendEmergencyLocation(btn) {
     if (navigator.permissions && navigator.permissions.query) {
         navigator.permissions.query({ name: 'geolocation' }).then((result) => {
             if (result.state === 'denied') {
-                showGlobalAlert("⚠️ GPS Bloqueado! Ative a permissão de localização do TumTum nas configurações do seu Android.", "warning");
+                showGlobalAlert("⚠️ GPS Bloqueado! Toque no ícone de 'Cadeado' ou 'Configurações' ao lado do endereço do site e mude 'Localização' para 'Permitir'.", "warning");
             }
         }).catch(() => {});
     }
@@ -522,7 +522,12 @@ function sendEmergencyLocation(btn) {
         (error) => {
             if (fallbackTriggered) return;
             clearTimeout(fallbackTimeout);
-            console.error("Erro na geolocalização, usando fallback imediato sem GPS:", error);
+            console.error("Erro na geolocalização:", error);
+            
+            // Fornece aviso inteligente apenas se a permissão foi negada explicitamente
+            if (error.code === error.PERMISSION_DENIED) {
+                showGlobalAlert("⚠️ GPS Bloqueado! Toque no ícone de 'Cadeado' ao lado do endereço do site e ative a 'Localização'.", "warning");
+            }
             proceedWithLocation(null, null);
         },
         {

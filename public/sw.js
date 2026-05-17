@@ -126,20 +126,8 @@ self.addEventListener('notificationclick', (event) => {
                     console.error("Erro ao enviar postMessage:", e);
                 }
                 
-                let navPromise = Promise.resolve();
-                if ('navigate' in matchingClient) {
-                    try {
-                        navPromise = matchingClient.navigate(targetUrl);
-                    } catch(e) {
-                        console.error("Erro ao navegar cliente:", e);
-                    }
-                }
-                
-                return navPromise.then(() => {
-                    return matchingClient.focus();
-                }).catch(() => {
-                    return matchingClient.focus();
-                });
+                // Traz o aplicativo imediatamente para o primeiro plano (foreground) no Android e iOS
+                return matchingClient.focus();
             } else {
                 if (clients.openWindow) {
                     return clients.openWindow(targetUrl);
