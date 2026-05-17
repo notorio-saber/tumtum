@@ -699,7 +699,7 @@ body {
     position: relative;
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     border-radius: 28px;
-    padding: 32px 24px;
+    padding: 24px 20px;
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.15);
     cursor: pointer;
@@ -710,8 +710,8 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 220px;
-    margin: 20px 0;
+    min-height: 195px;
+    margin: 8px 0 14px 0;
 }
 
 .giant-measure-card::before {
@@ -782,14 +782,14 @@ body {
 
 /* Grande Plus Circular */
 .giant-plus-circle {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     background: rgba(255, 255, 255, 0.15);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
     position: relative;
     transition: all 0.3s ease;
 }
