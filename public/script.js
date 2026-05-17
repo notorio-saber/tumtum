@@ -1463,7 +1463,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         doc = await window.db.collection('users').doc(user.uid).get();
                     }
                 } else {
-                    // Usuário Comum: Fluxo padrão seguro com Firestore
+                    // Usuário Comum: Fluxo padrão seguro com Firestore (Bloqueado contra alterações de papel acidentais no login)
                     if (!doc.exists) {
                         const finalRole = tempRole || 'paciente';
                         const initialData = {
@@ -1476,24 +1476,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         };
                         await window.db.collection('users').doc(user.uid).set(initialData, { merge: true });
                         doc = await window.db.collection('users').doc(user.uid).get();
-                    } else {
-                        const existingData = doc.data();
-                        if (tempRole && tempRole !== existingData.role) {
-                            const updates = { role: tempRole };
-                            if (tempRole === 'paciente') {
-                                updates.subscriptionActive = false;
-                            } else {
-                                updates.subscriptionActive = true;
-                            }
-                            await window.db.collection('users').doc(user.uid).update(updates);
-                            doc = await window.db.collection('users').doc(user.uid).get();
-                        }
                     }
                 }
                 localStorage.removeItem('temp_login_role');
                 
                 const data = doc.data() || {};
                 currentUserRole = data.role || 'paciente';
+                
+                // Salvar o papel de usuário carregado em cache para fallbacks offline/segurança
+                localStorage.setItem(`user_role_${user.uid}`, currentUserRole);
                 
                 // Aplicar override de papel local para o administrador (Dra. Layana) para testes rápidos e sem erro de permissões
                 if (user.uid === 'etSpfstGkKSKmTfBploZqVMMVKu2') {
@@ -1738,6 +1729,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 
             } catch(e) {
                 console.error("Erro completo ao verificar perfil no Firestore:", e);
+                
+                // Tentar recuperar o papel do cache local antes de assumir paciente por padrão
+                const cachedRole = localStorage.getItem(`user_role_${user.uid}`);
+                if (cachedRole) {
+                    currentUserRole = cachedRole;
+                }
+                
                 // Fallback offline (se já completou anamnese localmente ou se for médico/acompanhante)
                 const localCompleted = localStorage.getItem(`anamnese_completed_${user.uid}`);
                 if (localCompleted === 'true' || currentUserRole !== 'paciente') {
