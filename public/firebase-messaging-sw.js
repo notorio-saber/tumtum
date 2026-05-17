@@ -23,8 +23,8 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification.title || 'TumTum 💙';
     const notificationOptions = {
         body: payload.notification.body || 'Está na hora de aferir sua pressão.',
-        icon: '/logo ok.png',
-        badge: '/logo ok.png',
+        icon: '/logo.png',
+        badge: '/logo.png',
         tag: 'tumtum-reminder',
         renotify: true,
         vibrate: [100, 50, 100], // Pulsação de batimento cardíaco

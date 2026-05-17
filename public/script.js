@@ -636,6 +636,18 @@ function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     
+    // Gatilho tátil e acústico premium "Tum-Tum" de marca ao transicionar telas
+    try {
+        if (typeof playHeartbeatSound === 'function') {
+            playHeartbeatSound();
+        }
+        if (navigator.vibrate) {
+            navigator.vibrate([60, 40, 60]); // Batida dupla curta e sutil para resposta tátil premium
+        }
+    } catch (e) {
+        // Silencia políticas de restrição iniciais
+    }
+    
     // Resetar navegação inferior
     document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
     
@@ -2615,21 +2627,56 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Compartilhamento global e desbloqueio do contexto de áudio em navegadores mobile
+let sharedAudioContext = null;
+
+function unlockAudioContext() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        if (!sharedAudioContext) {
+            sharedAudioContext = new AudioContext();
+            console.log("AudioContext inicializado com sucesso.");
+        }
+        if (sharedAudioContext.state === 'suspended') {
+            sharedAudioContext.resume().then(() => {
+                console.log("AudioContext desbloqueado e ativo.");
+            });
+        }
+    } catch (e) {
+        console.warn("Erro ao tentar desbloquear contexto de áudio:", e);
+    }
+}
+// Escuta o primeiro clique ou toque na tela para desbloquear o áudio nativo do navegador
+document.addEventListener('click', unlockAudioContext, { once: false, passive: true });
+document.addEventListener('touchstart', unlockAudioContext, { once: false, passive: true });
+
 // Sintetiza som de batimento cardíaco "Tum-Tum" em tempo real usando Web Audio API
 function playHeartbeatSound() {
     try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         if (!AudioContext) return;
-        const ctx = new AudioContext();
+        
+        if (!sharedAudioContext) {
+            sharedAudioContext = new AudioContext();
+        }
+        
+        if (sharedAudioContext.state === 'suspended') {
+            sharedAudioContext.resume();
+        }
         
         // Primeiro "Tum" (grave e abafado)
         setTimeout(() => {
-            playBeat(ctx, 60, 0.15); // Frequência de 60Hz, duração de 0.15s
+            if (sharedAudioContext) {
+                playBeat(sharedAudioContext, 60, 0.15); // Frequência de 60Hz, duração de 0.15s
+            }
         }, 0);
         
         // Segundo "Tum" (ligeiramente mais forte e curto)
         setTimeout(() => {
-            playBeat(ctx, 55, 0.18); // Frequência de 55Hz, duração de 0.18s
+            if (sharedAudioContext) {
+                playBeat(sharedAudioContext, 55, 0.18); // Frequência de 55Hz, duração de 0.18s
+            }
         }, 150);
         
     } catch (e) {
@@ -2773,15 +2820,14 @@ function testLocalPushNotification() {
                 navigator.vibrate([100, 50, 100]);
             }
             showModal('new-record-modal');
-            showGlobalAlert("Aferir Pressão! Está na hora de registrar no TumTum. 💙", "info");
         } else {
             // Em segundo plano: Dispara uma notificação nativa local usando o Service Worker
             try {
                 const reg = await navigator.serviceWorker.ready;
                 reg.showNotification('TumTum 💙 (Teste)', {
                     body: 'Este é o seu lembrete de teste! Clique aqui para registrar sua pressão.',
-                    icon: '/logo ok.png',
-                    badge: '/logo ok.png',
+                    icon: '/logo.png',
+                    badge: '/logo.png',
                     tag: 'tumtum-test',
                     vibrate: [100, 50, 100],
                     data: {

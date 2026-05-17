@@ -1,0 +1,66 @@
+1. Status automático do registro
+
+Criar classificação automática:
+
+Normal
+Atenção
+Elevada
+Muito elevada
+
+Sem usar linguagem diagnóstica.
+
+Exemplo:
+
+Verde
+Amarelo
+Laranja
+Vermelho
+
+Isso melhora MUITO os gráficos.
+
+2. Detecção de tendência
+
+Isso é MUITO poderoso.
+
+Exemplo:
+
+“Nas últimas 2 semanas suas médias noturnas aumentaram.”
+
+Ou:
+
+“Os maiores registros estão acontecendo no período da manhã.”
+
+Isso transforma o app em algo MUITO mais útil para médico.
+
+3. Widget de emergência
+
+Muito importante para idosos.
+
+Botão fixo:
+
+ligar para familiar
+ligar 192
+enviar localização
+4. Assinatura
+
+O modelo está excelente.
+
+Mas eu faria:
+
+paciente gratuito limitado
+compartilhamento familiar premium
+
+Porque o valor emocional está no acompanhamento.
+
+5. Estrutura perfeita para escalar depois
+
+Vocês já têm base para:
+
+glicemia
+medicação
+sono
+peso
+oxigenação
+ECG bluetooth
+smartwatch
+IA de tendências
