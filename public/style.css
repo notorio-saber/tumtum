@@ -515,6 +515,10 @@ body {
 .text-slate-500 { color: var(--text-muted); }
 .w-full { width: 100%; }
 
+.dashboard-content {
+    padding-bottom: 120px !important;
+}
+
 /* Anamnese Onboarding Styles */
 .step-container {
     display: none;
