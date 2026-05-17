@@ -305,10 +305,11 @@ function updateUserProfile(user, data = null) {
         if (isPatient) {
             sosWidget.classList.remove('hidden');
             
-            // Adicionar tag premium dinâmica ao título se for paciente trial
+            // Adicionar tag premium dinâmica ao título se for paciente trial e tiver atingido o limite
             const headerTitle = sosWidget.querySelector('h3');
             if (headerTitle) {
-                if (!subscriptionActive) {
+                const isPremiumLocked = !subscriptionActive && mockRecords && mockRecords.length >= 4;
+                if (isPremiumLocked) {
                     headerTitle.innerHTML = 'SOS • Painel de Emergência <span style="font-size: 0.65rem; background: rgba(59, 130, 246, 0.1); color: #3b82f6; padding: 2px 6px; border-radius: 8px; margin-left: 6px; border: 1px solid rgba(59, 130, 246, 0.15); font-weight: 700; font-family: \'Plus Jakarta Sans\', sans-serif;">Premium 👑</span>';
                 } else {
                     headerTitle.innerHTML = 'SOS • Painel de Emergência';
@@ -328,8 +329,9 @@ function updateUserProfile(user, data = null) {
             const callLbl = document.getElementById('lbl-widget-call-contact');
             
             if (callBtn) {
-                if (!subscriptionActive) {
-                    // Direcionar para o Paywall no plano grátis
+                const isPremiumLocked = !subscriptionActive && mockRecords && mockRecords.length >= 4;
+                if (isPremiumLocked) {
+                    // Direcionar para o Paywall no plano grátis após o limite de 4 registros
                     callBtn.href = "javascript:showPaywall()";
                     callBtn.style.opacity = '1';
                     callBtn.style.pointerEvents = 'auto';
@@ -395,8 +397,9 @@ function updateUserProfile(user, data = null) {
 function sendEmergencyLocation(btn) {
     if (!btn) return;
     
-    // FREEMIUM GATING: Bloquear envio de localização no plano grátis
-    if (!subscriptionActive) {
+    // FREEMIUM GATING: Bloquear envio de localização no plano grátis após atingir o limite
+    const isPremiumLocked = !subscriptionActive && mockRecords && mockRecords.length >= 4;
+    if (isPremiumLocked) {
         showPaywall();
         return;
     }
@@ -553,8 +556,9 @@ function updateNavigationByRole() {
 window.updateNavigationByRole = updateNavigationByRole;
 
 function showScreen(screenId) {
-    // FREEMIUM GATING: Bloquear acesso a Histórico ou Acompanhantes no plano grátis
-    if (currentUserRole === 'paciente' && !subscriptionActive) {
+    // FREEMIUM GATING: Bloquear acesso a Histórico ou Acompanhantes no plano grátis após o limite de 4 registros
+    const isPremiumLocked = !subscriptionActive && mockRecords && mockRecords.length >= 4;
+    if (currentUserRole === 'paciente' && isPremiumLocked) {
         if (screenId === 'history-screen' || screenId === 'companions-screen') {
             showPaywall();
             return;
@@ -593,8 +597,8 @@ function showScreen(screenId) {
 }
 
 function showModal(modalId) {
-    // FREEMIUM CHECK: Se tentar abrir o modal de novo registro e já atingiu o limite grátis de 3 registros
-    if (modalId === 'new-record-modal' && currentUserRole === 'paciente' && !subscriptionActive && mockRecords && mockRecords.length >= 3) {
+    // FREEMIUM CHECK: Se tentar abrir o modal de novo registro e já atingiu o limite grátis de 4 registros
+    if (modalId === 'new-record-modal' && currentUserRole === 'paciente' && !subscriptionActive && mockRecords && mockRecords.length >= 4) {
         showPaywall();
         return;
     }
@@ -615,7 +619,7 @@ function showPaywall() {
     // Atualiza dinamicamente o botão de fechar baseado no estado do trial
     const closeBtn = document.getElementById('btn-paywall-close');
     if (closeBtn) {
-        if (currentUserRole === 'paciente' && !subscriptionActive && mockRecords && mockRecords.length >= 3) {
+        if (currentUserRole === 'paciente' && !subscriptionActive && mockRecords && mockRecords.length >= 4) {
             closeBtn.innerText = "Voltar para o Dashboard (Modo Leitura)";
         } else {
             closeBtn.innerText = "Voltar para o Teste Grátis";
@@ -2128,8 +2132,8 @@ document.addEventListener('DOMContentLoaded', () => {
         recordForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
-            // FREEMIUM CHECK: Bloquear salvamento do 4º registro no plano grátis
-            if (currentUserRole === 'paciente' && !subscriptionActive && mockRecords && mockRecords.length >= 3) {
+            // FREEMIUM CHECK: Bloquear salvamento do 5º registro no plano grátis
+            if (currentUserRole === 'paciente' && !subscriptionActive && mockRecords && mockRecords.length >= 4) {
                 closeModal('new-record-modal');
                 recordForm.reset();
                 showPaywall();
