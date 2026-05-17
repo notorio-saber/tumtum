@@ -109,6 +109,10 @@
                     </div>
 
                     <p class="disclaimer mt-6">Este aplicativo não substitui avaliação médica. Em caso de sintomas, procure ajuda.</p>
+                    <p style="font-size: 0.65rem; color: #94a3b8; text-align: center; margin-top: 15px; line-height: 1.45; padding: 0 10px;">
+                        Ao cadastrar uma conta ou entrar no aplicativo, você concorda e aceita integralmente nossos 
+                        <a href="#" onclick="showModal('terms-modal')" style="color: var(--primary); font-weight: 700; text-decoration: underline;">Termos de Uso e Políticas de Privacidade</a>.
+                    </p>
                 </div>
             </div>
         </section>
@@ -1146,6 +1150,59 @@
             <button id="mismatch-modal-btn" class="btn-primary w-full shadow-glow" style="padding: 16px; border-radius: 16px; font-weight: 800; width: 100%; cursor: pointer;">
                 Ir para o aplicativo
             </button>
+        </div>
+    </div>
+
+    <!-- Modal de Termos de Uso e Políticas de Privacidade -->
+    <div id="terms-modal" class="modal">
+        <div class="modal-overlay" onclick="closeModal('terms-modal')"></div>
+        <div class="modal-body glass-heavy" style="max-width: 520px; width: 92%; max-height: 80dvh; border-radius: 28px; padding: 24px; display: flex; flex-direction: column; text-align: left;">
+            <div class="modal-header" style="border-bottom: 1px solid var(--gray-medium); padding-bottom: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="shield-check" class="text-primary w-5 h-5"></i>
+                    <h2 class="text-lg font-bold" style="color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; margin: 0;">Termos e Políticas</h2>
+                </div>
+                <button onclick="closeModal('terms-modal')" class="close-btn" style="background: transparent; border: none; cursor: pointer; color: var(--text-main);"><i data-lucide="x"></i></button>
+            </div>
+            
+            <!-- Conteúdo scrollável com proteção legal avançada -->
+            <div style="overflow-y: auto; flex-grow: 1; padding-right: 8px; font-size: 0.8rem; line-height: 1.6; color: #475569;" class="custom-scrollbar">
+                <p style="margin-top: 0; font-weight: 700; color: var(--text-main); font-size: 0.88rem;">Última atualização: Maio de 2026</p>
+                
+                <p>Seja bem-vindo ao <strong>TumTum App</strong>. Ao acessar, cadastrar ou utilizar nosso aplicativo, você declara ter lido e concordado com todos os Termos de Uso e Políticas descritos abaixo. Caso não concorde, recomendamos não utilizar a plataforma.</p>
+                
+                <h3 style="font-size: 0.9rem; font-weight: bold; color: var(--text-main); margin-top: 18px; margin-bottom: 6px;">1. Isenção de Responsabilidade Médica (Importante)</h3>
+                <p style="background: rgba(239, 68, 68, 0.04); border-left: 3px solid #ef4444; padding: 8px 12px; border-radius: 6px; color: #b91c1c; font-weight: 600; line-height: 1.45;">
+                    O TumTum App é uma ferramenta digital voltada exclusivamente para o registro pessoal de métricas de saúde (pressão arterial e frequência cardíaca). O aplicativo <strong>NÃO</strong> fornece aconselhamento médico profissional, diagnósticos, prognósticos, tratamentos ou prescrições médicas. 
+                </p>
+                <p>As informações aqui geradas não devem ser utilizadas para embasar automedicação ou substituição de consultas presenciais com cardiologistas ou outros médicos competentes. Sempre consulte o seu médico antes de realizar qualquer alteração em seu tratamento ou dieta.</p>
+                
+                <h3 style="font-size: 0.9rem; font-weight: bold; color: var(--text-main); margin-top: 18px; margin-bottom: 6px;">2. Termos do SOS de Emergência (Compartilhamento de Localização)</h3>
+                <p>O recurso de <strong>SOS Emergência (Localização em tempo real)</strong> é oferecido em caráter de <strong>"Melhor Esforço" (Best Effort)</strong>. A entrega correta das mensagens e coordenadas geográficas depende de fatores externos alheios ao controle dos desenvolvedores, incluindo:</p>
+                <ul style="margin: 6px 0; padding-left: 20px;">
+                    <li>Funcionamento adequado do sinal de GPS do aparelho do usuário;</li>
+                    <li>Conectividade ativa de rede celular ou internet móvel no momento do envio;</li>
+                    <li>Disponibilidade operacional do serviço externo do WhatsApp;</li>
+                    <li>A autorização explícita de permissão de geolocalização dada nas configurações do celular pelo usuário.</li>
+                </ul>
+                <p style="font-weight: 600;">O TumTum App e seus criadores NÃO se responsabilizam por eventuais falhas, atrasos ou indisponibilidade no envio da localização e não substituem de forma alguma o acionamento direto de canais oficiais de resgate públicos (como o SAMU 192 no Brasil ou o 112/911).</p>
+                
+                <h3 style="font-size: 0.9rem; font-weight: bold; color: var(--text-main); margin-top: 18px; margin-bottom: 6px;">3. Privacidade e Proteção de Dados (LGPD)</h3>
+                <p>Temos o compromisso inabalável com a privacidade dos seus dados clínicos:</p>
+                <ul style="margin: 6px 0; padding-left: 20px;">
+                    <li>Todos os seus registros de pressão e batimentos são criptografados e salvos de forma segura em servidores de nuvem de alta confiabilidade (Google Firebase).</li>
+                    <li>O acesso a essas informações é de direito exclusivo seu e das pessoas que você autorizar expressamente (seus Acompanhantes cadastrados na aba Perfil).</li>
+                    <li><strong>NUNCA</strong> comercializaremos, cederemos ou compartilharemos seus dados de saúde com terceiros, laboratórios ou indústrias farmacêuticas.</li>
+                </ul>
+                
+                <h3 style="font-size: 0.9rem; font-weight: bold; color: var(--text-main); margin-top: 18px; margin-bottom: 6px;">4. Limitação de Responsabilidade</h3>
+                <p>Em nenhum caso os criadores ou desenvolvedores do TumTum App serão responsáveis por quaisquer danos diretos, indiretos, incidentais ou consequentes resultantes do uso ou da incapacidade de usar o aplicativo, incluindo, mas não se limitando a, complicações clínicas decorrentes de interpretações errôneas das métricas exibidas.</p>
+                
+                <h3 style="font-size: 0.9rem; font-weight: bold; color: var(--text-main); margin-top: 18px; margin-bottom: 6px;">5. Propriedade Intelectual</h3>
+                <p>Toda a propriedade intelectual do aplicativo, incluindo designs, lógicas, algoritmos, logotipos e scripts, pertence integralmente aos criadores do TumTum App, estando protegida sob as leis internacionais de direitos autorais e software.</p>
+            </div>
+            
+            <button onclick="closeModal('terms-modal')" class="btn-primary w-full shadow-glow" style="margin-top: 20px; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 0.9rem;">Li e Concordo</button>
         </div>
     </div>
 
