@@ -630,6 +630,16 @@ function showPaywall() {
     
     paywallOverlay.classList.remove('hidden');
     
+    // Atualiza dinamicamente a descrição baseada no limite do trial
+    const descEl = document.getElementById('paywall-description');
+    if (descEl) {
+        if (currentUserRole === 'paciente' && !subscriptionActive && mockRecords && mockRecords.length >= 4) {
+            descEl.innerHTML = '<strong>Ops, você atingiu o limite de registros do plano grátis!</strong><br><span style="display: block; margin-top: 6px; font-size: 0.72rem; color: #64748b;">Clique no botão abaixo para assinar o aplicativo e ter todas as funcionalidades ilimitadas. O valor é apenas <strong>R$ 14,90/mês</strong> ou <strong>R$ 118/ano</strong>.</span>';
+        } else {
+            descEl.innerHTML = 'Cuide da sua saúde com monitoramento completo e acompanhamento clínico personalizado da <strong>Dra. Layana</strong>.<br><span style="display: block; margin-top: 6px; font-size: 0.72rem; color: #64748b;">Assine e garanta todos os recursos ilimitados por apenas <strong>R$ 14,90/mês</strong> ou <strong>R$ 118/ano</strong>!</span>';
+        }
+    }
+    
     // Atualiza dinamicamente o botão de fechar baseado no estado do trial
     const closeBtn = document.getElementById('btn-paywall-close');
     if (closeBtn) {
