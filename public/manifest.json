@@ -1,0 +1,22 @@
+{
+  "name": "TumTum App",
+  "short_name": "TumTum",
+  "description": "Aplicativo para acompanhamento de pressão arterial focado em saúde e bem-estar.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ef4444",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

@@ -8,6 +8,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ef4444">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TumTum">
+    <link rel="apple-touch-icon" href="logo.jpg">
+
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js -->
@@ -32,7 +41,17 @@
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
                         Entrar com Google
                     </button>
-                    <p class="disclaimer">Este aplicativo não substitui avaliação médica. Em caso de sintomas, procure ajuda.</p>
+                    
+                    <!-- PWA Install Banner (Android/Chrome) -->
+                    <div id="pwa-install-banner" class="hidden mt-6" style="background: var(--gray-light); padding: 16px; border-radius: 16px; border: 2px solid var(--primary);">
+                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                            <i data-lucide="smartphone" style="width: 36px; height: 36px; color: var(--primary);"></i>
+                            <h3 class="font-bold text-left" style="line-height: 1.2; font-size: 1.1rem;">Instale o app no seu celular para acessar mais rápido.</h3>
+                        </div>
+                        <button id="btn-install-pwa" class="btn-primary btn-large shadow-glow" style="padding: 14px;">Adicionar à tela inicial</button>
+                    </div>
+
+                    <p class="disclaimer mt-6">Este aplicativo não substitui avaliação médica. Em caso de sintomas, procure ajuda.</p>
                 </div>
             </div>
         </section>
@@ -413,6 +432,36 @@
                     </div>
                     <button type="submit" class="btn-primary btn-large">Salvar Registro</button>
                 </form>
+            </div>
+        </div>
+
+        <!-- Modal PWA iOS -->
+        <div id="ios-pwa-modal" class="modal">
+            <div class="modal-overlay" onclick="closeModal('ios-pwa-modal')"></div>
+            <div class="modal-body glass-heavy" style="text-align: center;">
+                <div class="modal-header">
+                    <h2 class="text-xl font-bold w-full">Instalar Aplicativo</h2>
+                    <button onclick="closeModal('ios-pwa-modal')" class="close-btn"><i data-lucide="x"></i></button>
+                </div>
+                <div class="space-y-6 text-lg">
+                    <p style="margin-bottom: 20px;">Para usar o TumTum como um aplicativo no seu iPhone ou iPad, siga os passos abaixo:</p>
+                    
+                    <div style="background: var(--gray-light); padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 15px; text-align: left; border: 1px solid var(--gray-medium);">
+                        <div style="background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            <i data-lucide="share" style="color: #007aff; width: 28px; height: 28px;"></i>
+                        </div>
+                        <p><strong>1.</strong> Toque no botão <b>Compartilhar</b> na barra inferior do Safari.</p>
+                    </div>
+
+                    <div style="background: var(--gray-light); padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 15px; text-align: left; border: 1px solid var(--gray-medium); margin-top: 15px;">
+                        <div style="background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            <i data-lucide="plus-square" style="color: #000; width: 28px; height: 28px;"></i>
+                        </div>
+                        <p><strong>2.</strong> Role para baixo e toque em <b>Adicionar à Tela de Início</b>.</p>
+                    </div>
+                    
+                    <button onclick="closeModal('ios-pwa-modal')" class="btn-primary btn-large w-full mt-6 shadow-glow">Entendi</button>
+                </div>
             </div>
         </div>
     </div>

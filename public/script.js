@@ -1,3 +1,24 @@
+// --- PWA Service Worker ---
+let deferredPrompt = null;
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registrado:', reg.scope))
+            .catch(err => console.error('Erro de Service Worker:', err));
+    });
+}
+
+// Detectar prompt de instalação (Android)
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const installBanner = document.getElementById('pwa-install-banner');
+    if (installBanner) {
+        installBanner.classList.remove('hidden');
+    }
+});
+
 // Utilitários
 const getPeriodo = (date = new Date()) => {
     const hora = date.getHours();
@@ -360,6 +381,34 @@ document.addEventListener('DOMContentLoaded', () => {
             closeModal('new-record-modal');
             recordForm.reset();
         });
+    }
+
+    // Lógica para clique no botão de instalação do Android/Chrome
+    const btnInstall = document.getElementById('btn-install-pwa');
+    if (btnInstall) {
+        btnInstall.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            // Mostra o prompt nativo
+            deferredPrompt.prompt();
+            // Espera pela resposta do usuário
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`PWA escolha do usuário: ${outcome}`);
+            deferredPrompt = null;
+            // Esconde o card
+            const installBanner = document.getElementById('pwa-install-banner');
+            if (installBanner) installBanner.classList.add('hidden');
+        });
+    }
+
+    // Detectar iOS para exibir tutorial amigável
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (isIos && !isStandalone) {
+        // Mostra o modal amigável de instalação para usuários do iPhone no Safari
+        setTimeout(() => {
+            showModal('ios-pwa-modal');
+        }, 2000); // 2 segundos após carregar o login, surge o tutorial didático
     }
 });
 
