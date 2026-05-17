@@ -263,13 +263,8 @@ function updateUserProfile(user, data = null) {
     }
 }
 
-// Dados Mockados para histórico
-let mockRecords = [
-    { id: 1, date: '2026-05-16', time: '08:20', sys: 120, dia: 80, bpm: 72, periodo: 'Manhã', condicao: 'Em repouso' },
-    { id: 2, date: '2026-05-15', time: '19:45', sys: 125, dia: 82, bpm: 75, periodo: 'Noite', condicao: 'Após estresse' },
-    { id: 3, date: '2026-05-14', time: '07:30', sys: 118, dia: 78, bpm: 68, periodo: 'Manhã', condicao: 'Antes do medicamento' },
-    { id: 4, date: '2026-05-13', time: '14:10', sys: 130, dia: 85, bpm: 80, periodo: 'Tarde', condicao: 'Após café' }
-];
+// Dados do histórico do aplicativo (inicia zerado para novas contas de acordo com as regras de negócio)
+let mockRecords = [];
 
 // Navegação de Telas
 function showScreen(screenId) {
