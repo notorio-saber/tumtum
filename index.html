@@ -362,6 +362,26 @@
                     <p class="giant-measure-desc">Toque em qualquer lugar desta caixa para registrar sua pressão agora</p>
                 </div>
 
+                <!-- Banner de Instalação do Aplicativo (PWA Promo Card) -->
+                <div id="pwa-install-banner" class="card-premium glass mt-4 hidden" style="border: 1px dashed rgba(59, 130, 246, 0.25); background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(30, 41, 59, 0.02) 100%);">
+                    <div style="display: flex; gap: 14px; align-items: flex-start;">
+                        <div class="emergency-icon-glow" style="background: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.15); color: #3b82f6; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i data-lucide="smartphone" class="w-5 h-5 animate-bounce" style="animation-duration: 2.5s;"></i>
+                        </div>
+                        <div style="flex-grow: 1; text-align: left;">
+                            <h4 class="font-bold text-sm" style="margin: 0 0 3px 0; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; display: flex; justify-content: space-between; align-items: center;">
+                                <span>Instalar o TumTum App</span>
+                                <button onclick="dismissPwaBanner()" style="background: none; border: none; padding: 0; cursor: pointer; color: #94a3b8;"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            </h4>
+                            <p class="text-xs text-slate-500" style="margin: 0 0 12px 0; line-height: 1.3;">Adicione o TumTum na tela do seu celular para monitorar sua saúde instantaneamente a qualquer momento!</p>
+                            <button id="btn-dashboard-install-pwa" class="btn-primary" style="padding: 10px 16px; border-radius: 10px; font-weight: 800; font-size: 0.78rem; width: auto; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);">
+                                <i data-lucide="download" class="w-3.5 h-3.5 text-white"></i>
+                                <span>Instalar Aplicativo</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Painel de Emergência SOS (Exclusivo para Paciente com Assinatura Ativa) -->
                 <div id="patient-emergency-widget" class="emergency-widget card-premium glass mt-4 hidden">
                     <div class="emergency-header">
@@ -923,21 +943,60 @@
 
     <!-- Overlay de Paywall Premium (Assinatura Inativa do Paciente) -->
     <div id="paywall-overlay" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;">
-        <div class="card-premium glass-heavy" style="max-width: 400px; width: 100%; text-align: center; border-radius: 32px; padding: 35px 25px; border: 1px solid rgba(239, 68, 68, 0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center;">
-            <div class="icon-circle shadow-glow" style="width: 64px; height: 64px; margin: 0 auto 20px auto; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center;">
-                <i data-lucide="shield-alert" class="w-8 h-8 text-primary"></i>
+        <div class="card-premium glass-heavy" style="max-width: 420px; width: 100%; text-align: center; border-radius: 32px; padding: 32px 24px; border: 1px solid rgba(59, 130, 246, 0.15); box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center;">
+            <div class="icon-circle shadow-glow" style="width: 56px; height: 56px; margin: 0 auto 16px auto; background: rgba(59, 130, 246, 0.05); border-color: rgba(59, 130, 246, 0.15); display: flex; align-items: center; justify-content: center; color: #3b82f6;">
+                <i data-lucide="crown" class="w-7 h-7 animate-pulse" style="stroke-width: 2.5;"></i>
             </div>
-            <h2 class="text-2xl font-bold mb-3" style="color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif;">Monitoramento Suspenso</h2>
-            <p class="text-sm text-slate-400 mb-6" style="line-height: 1.5; text-align: center;">O plano de monitoramento da sua conta expirou. Para registrar novas aferições de pressão e restabelecer o compartilhamento com seus familiares ou médicos, realize a ativação.</p>
             
-            <a href="https://wa.me/5547920015676?text=Ol%C3%A1%20Dra.%20Layana%2C%20gostaria%20de%20ativar%20a%20minha%20assinatura%20no%20TumTum%20App!" target="_blank" class="btn-primary w-full shadow-glow" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px; border-radius: 16px; background: #10b981; border: none; font-weight: 800; font-size: 1rem; text-decoration: none; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); color: white; cursor: pointer; width: 100%;">
-                <i data-lucide="phone" class="w-5 h-5 text-white"></i>
-                <span>Falar com Dra. Layana</span>
+            <h2 class="text-xl font-bold mb-2" style="color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 900; letter-spacing: -0.02em;">TumTum Premium 👑</h2>
+            <p class="text-xs text-slate-500 mb-6" style="line-height: 1.4;">Cuide da sua saúde com monitoramento completo e acompanhamento clínico personalizado da <strong>Dra. Layana</strong>.</p>
+            
+            <!-- Benefícios em Destaque -->
+            <div style="width: 100%; text-align: left; background: rgba(15, 23, 42, 0.02); border: 1px solid rgba(15, 23, 42, 0.04); border-radius: 20px; padding: 18px 16px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <div style="color: #10b981; margin-top: 2px;"><i data-lucide="check-circle-2" class="w-4 h-4" style="stroke-width: 3;"></i></div>
+                    <div>
+                        <h4 class="font-bold text-xs" style="color: var(--text-main); margin: 0 0 2px 0; font-weight: 800;">Pressão & Batimentos Ilimitados</h4>
+                        <p style="font-size: 0.68rem; color: #64748b; margin: 0; line-height: 1.3;">Grave quantas aferições desejar e tenha o controle total da sua curva de saúde.</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <div style="color: #10b981; margin-top: 2px;"><i data-lucide="check-circle-2" class="w-4 h-4" style="stroke-width: 3;"></i></div>
+                    <div>
+                        <h4 class="font-bold text-xs" style="color: var(--text-main); margin: 0 0 2px 0; font-weight: 800;">Gráficos de Análise & Relatórios PDF</h4>
+                        <p style="font-size: 0.68rem; color: #64748b; margin: 0; line-height: 1.3;">Acesse médias de 7 dias, gráficos de evolução e laudos exportáveis para levar nas consultas.</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <div style="color: #10b981; margin-top: 2px;"><i data-lucide="check-circle-2" class="w-4 h-4" style="stroke-width: 3;"></i></div>
+                    <div>
+                        <h4 class="font-bold text-xs" style="color: var(--text-main); margin: 0 0 2px 0; font-weight: 800;">SOS Ativo com GPS em Tempo Real</h4>
+                        <p style="font-size: 0.68rem; color: #64748b; margin: 0; line-height: 1.3;">Envie alertas imediatos com mapa de localização para familiares e médicos em caso de picos de pressão.</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <div style="color: #10b981; margin-top: 2px;"><i data-lucide="check-circle-2" class="w-4 h-4" style="stroke-width: 3;"></i></div>
+                    <div>
+                        <h4 class="font-bold text-xs" style="color: var(--text-main); margin: 0 0 2px 0; font-weight: 800;">Compartilhamento Familiar Sincronizado</h4>
+                        <p style="font-size: 0.68rem; color: #64748b; margin: 0; line-height: 1.3;">Deixe seus filhos ou cuidadores acompanharem sua saúde de longe, em tempo real.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botão de Vendas principal -->
+            <a href="https://wa.me/5547920015676?text=Ol%C3%A1%20Dra.%20Layana%2C%20adorei%20o%20TumTum%20App%20e%20gostaria%20de%20ativar%20meu%20plano%20premium%20de%20monitoramento!" target="_blank" class="btn-primary w-full shadow-glow" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: 14px; background: #10b981; border: none; font-weight: 800; font-size: 0.88rem; text-decoration: none; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25); color: white; cursor: pointer; width: 100%;">
+                <i data-lucide="message-circle" class="w-4 h-4 text-white" style="stroke-width: 2.5;"></i>
+                <span>Ativar Plano Premium</span>
             </a>
             
-            <button onclick="handleLogout()" class="btn-secondary w-full mt-4" style="padding: 14px; border-radius: 16px; font-weight: 700; border: 1px solid var(--gray-medium); width: 100%; cursor: pointer;">
-                Sair da Conta
-            </button>
+            <div style="display: flex; flex-direction: column; width: 100%; gap: 10px; margin-top: 15px;">
+                <button id="btn-paywall-close" onclick="closePaywall()" class="btn-secondary" style="padding: 10px; border-radius: 12px; font-weight: 700; font-size: 0.78rem; border: 1px solid rgba(15, 23, 42, 0.08); background: transparent; cursor: pointer; width: 100%; color: #64748b;">
+                    Voltar para o Teste Grátis
+                </button>
+                <button onclick="handleLogout()" style="background: none; border: none; color: #94a3b8; font-size: 0.72rem; font-weight: 700; cursor: pointer; text-decoration: underline; margin-top: 4px;">
+                    Sair da Conta
+                </button>
+            </div>
         </div>
     </div>
 

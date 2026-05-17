@@ -9,15 +9,29 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// Detectar prompt de instalação (Android)
+// Detectar prompt de instalação (Android/Chrome)
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    const installBanner = document.getElementById('pwa-install-banner');
-    if (installBanner) {
-        installBanner.classList.remove('hidden');
+    
+    // FREEMIUM UX: Exibir o banner de instalação apenas se não foi dispensado anteriormente
+    if (localStorage.getItem('pwa_banner_dismissed') !== 'true') {
+        const installBanner = document.getElementById('pwa-install-banner');
+        if (installBanner) {
+            installBanner.classList.remove('hidden');
+        }
     }
 });
+
+// Fechar e ignorar banner de instalação do PWA
+function dismissPwaBanner() {
+    const installBanner = document.getElementById('pwa-install-banner');
+    if (installBanner) {
+        installBanner.classList.add('hidden');
+    }
+    localStorage.setItem('pwa_banner_dismissed', 'true');
+}
+window.dismissPwaBanner = dismissPwaBanner;
 
 // Utilitários
 const getPeriodo = (date = new Date()) => {
@@ -261,10 +275,19 @@ function updateUserProfile(user, data = null) {
     const sosWidget = document.getElementById('patient-emergency-widget');
     if (sosWidget) {
         const isPatient = currentUserRole === 'paciente';
-        const subActive = subscriptionActive !== false;
         
-        if (isPatient && subActive) {
+        if (isPatient) {
             sosWidget.classList.remove('hidden');
+            
+            // Adicionar tag premium dinâmica ao título se for paciente trial
+            const headerTitle = sosWidget.querySelector('h3');
+            if (headerTitle) {
+                if (!subscriptionActive) {
+                    headerTitle.innerHTML = 'SOS • Painel de Emergência <span style="font-size: 0.65rem; background: rgba(59, 130, 246, 0.1); color: #3b82f6; padding: 2px 6px; border-radius: 8px; margin-left: 6px; border: 1px solid rgba(59, 130, 246, 0.15); font-weight: 700; font-family: \'Plus Jakarta Sans\', sans-serif;">Premium 👑</span>';
+                } else {
+                    headerTitle.innerHTML = 'SOS • Painel de Emergência';
+                }
+            }
             
             let emergNome = "Familiar";
             let emergTel = "";
@@ -279,7 +302,12 @@ function updateUserProfile(user, data = null) {
             const callLbl = document.getElementById('lbl-widget-call-contact');
             
             if (callBtn) {
-                if (cleanTel) {
+                if (!subscriptionActive) {
+                    // Direcionar para o Paywall no plano grátis
+                    callBtn.href = "javascript:showPaywall()";
+                    callBtn.style.opacity = '1';
+                    callBtn.style.pointerEvents = 'auto';
+                } else if (cleanTel) {
                     callBtn.href = `tel:${cleanTel}`;
                     callBtn.style.opacity = '1';
                     callBtn.style.pointerEvents = 'auto';
@@ -335,6 +363,12 @@ function updateUserProfile(user, data = null) {
 // Função global para enviar localização de emergência via WhatsApp
 function sendEmergencyLocation(btn) {
     if (!btn) return;
+    
+    // FREEMIUM GATING: Bloquear envio de localização no plano grátis
+    if (!subscriptionActive) {
+        showPaywall();
+        return;
+    }
     
     const originalHtml = btn.innerHTML;
     btn.classList.add('btn-loading');
@@ -488,6 +522,13 @@ function updateNavigationByRole() {
 window.updateNavigationByRole = updateNavigationByRole;
 
 function showScreen(screenId) {
+    // FREEMIUM GATING: Bloquear acesso a Histórico ou Acompanhantes no plano grátis
+    if (currentUserRole === 'paciente' && !subscriptionActive) {
+        if (screenId === 'history-screen' || screenId === 'companions-screen') {
+            showPaywall();
+            return;
+        }
+    }
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     
@@ -518,12 +559,44 @@ function showScreen(screenId) {
 }
 
 function showModal(modalId) {
+    // FREEMIUM CHECK: Se tentar abrir o modal de novo registro e já atingiu o limite grátis de 3 registros
+    if (modalId === 'new-record-modal' && currentUserRole === 'paciente' && !subscriptionActive && mockRecords && mockRecords.length >= 3) {
+        showPaywall();
+        return;
+    }
     document.getElementById(modalId).classList.add('active');
 }
 
 function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
 }
+
+// Funções globais para exibir e ocultar o Paywall Premium
+function showPaywall() {
+    const paywallOverlay = document.getElementById('paywall-overlay');
+    if (!paywallOverlay) return;
+    
+    paywallOverlay.classList.remove('hidden');
+    
+    // Atualiza dinamicamente o botão de fechar baseado no estado do trial
+    const closeBtn = document.getElementById('btn-paywall-close');
+    if (closeBtn) {
+        if (currentUserRole === 'paciente' && !subscriptionActive && mockRecords && mockRecords.length >= 3) {
+            closeBtn.innerText = "Voltar para o Dashboard (Modo Leitura)";
+        } else {
+            closeBtn.innerText = "Voltar para o Teste Grátis";
+        }
+    }
+}
+window.showPaywall = showPaywall;
+
+function closePaywall() {
+    const paywallOverlay = document.getElementById('paywall-overlay');
+    if (paywallOverlay) {
+        paywallOverlay.classList.add('hidden');
+    }
+}
+window.closePaywall = closePaywall;
 
 function renderHistory(records) {
     const list = document.getElementById('history-list');
@@ -1768,13 +1841,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const medicalStatsCard = document.getElementById('medical-stats-card');
                     if (medicalStatsCard) medicalStatsCard.classList.add('hidden');
                     
-                    if (!subscriptionActive) {
-                        // BLOQUEADO: Exibir Paywall do WhatsApp da Dra. Layana
-                        document.getElementById('paywall-overlay').classList.remove('hidden');
-                        return;
-                    } else {
-                        document.getElementById('paywall-overlay').classList.add('hidden');
-                    }
+                    // FREEMIUM: Permitir entrada de usuário com assinatura pendente/inativa para período de testes
+                    document.getElementById('paywall-overlay').classList.add('hidden');
                     
                     // Dados locais específicos do paciente
                     const localRecords = localStorage.getItem(`records_${user.uid}`);
@@ -1979,6 +2047,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (recordForm) {
         recordForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            
+            // FREEMIUM CHECK: Bloquear salvamento do 4º registro no plano grátis
+            if (currentUserRole === 'paciente' && !subscriptionActive && mockRecords && mockRecords.length >= 3) {
+                closeModal('new-record-modal');
+                recordForm.reset();
+                showPaywall();
+                return;
+            }
+            
             const sys = document.getElementById('reg-sys').value;
             const dia = document.getElementById('reg-dia').value;
             const bpm = document.getElementById('reg-bpm').value;
@@ -2051,7 +2128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Lógica para clique no botão de instalação do Android/Chrome
+    // Lógica para clique no botão de instalação do Android/Chrome (Login Screen)
     const btnInstall = document.getElementById('btn-install-pwa');
     if (btnInstall) {
         btnInstall.addEventListener('click', async () => {
@@ -2063,6 +2140,20 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`PWA escolha do usuário: ${outcome}`);
             deferredPrompt = null;
             // Esconde o card
+            const installBanner = document.getElementById('pwa-install-banner');
+            if (installBanner) installBanner.classList.add('hidden');
+        });
+    }
+
+    // Lógica para clique no botão de instalação do Dashboard (PWA Promo Card)
+    const btnDashInstall = document.getElementById('btn-dashboard-install-pwa');
+    if (btnDashInstall) {
+        btnDashInstall.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`PWA escolha do usuário no Dashboard: ${outcome}`);
+            deferredPrompt = null;
             const installBanner = document.getElementById('pwa-install-banner');
             if (installBanner) installBanner.classList.add('hidden');
         });
