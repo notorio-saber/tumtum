@@ -321,41 +321,43 @@ function sendEmergencyLocation(btn) {
     
     const originalHtml = btn.innerHTML;
     btn.classList.add('btn-loading');
+    btn.disabled = true;
     
     // Exibe feedback de progresso premium
     btn.innerHTML = `<span>🌐 Obtendo GPS...</span>`;
     
+    // Timer de fallback de 4 segundos: se o GPS travar ou demorar, abre o WhatsApp sem as coordenadas
+    let fallbackTriggered = false;
+    const fallbackTimeout = setTimeout(() => {
+        fallbackTriggered = true;
+        console.warn("Tempo limite de geolocalização atingido. Usando fallback sem GPS.");
+        proceedWithLocation(null, null);
+    }, 4000);
+    
     if (!navigator.geolocation) {
-        alert("⚠️ Desculpe, seu navegador não suporta a função de geolocalização.");
-        resetBtn();
+        clearTimeout(fallbackTimeout);
+        proceedWithLocation(null, null);
         return;
     }
     
     navigator.geolocation.getCurrentPosition(
         (position) => {
+            if (fallbackTriggered) return;
+            clearTimeout(fallbackTimeout);
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
             proceedWithLocation(lat, lng);
         },
         (error) => {
-            console.error("Erro na geolocalização:", error);
-            let errorMsg = "Não foi possível obter sua localização. Por favor, verifique se o seu GPS está ativo e se concedeu permissão de localização ao navegador.";
-            if (error.code === error.PERMISSION_DENIED) {
-                errorMsg = "Permissão de geolocalização recusada pelo navegador. Ative as permissões nas configurações para usar o SOS.";
-            }
-            alert("⚠️ " + errorMsg);
-            
-            // Fallback amigável de envio de SOS sem geolocalização
-            if (confirm("Deseja abrir o WhatsApp para notificar seu contato de emergência mesmo sem o mapa da sua localização atual?")) {
-                proceedWithLocation(null, null);
-            } else {
-                resetBtn();
-            }
+            if (fallbackTriggered) return;
+            clearTimeout(fallbackTimeout);
+            console.error("Erro na geolocalização, usando fallback imediato sem GPS:", error);
+            proceedWithLocation(null, null);
         },
         {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
+            enableHighAccuracy: false, // Muito mais rápido e confiável para triangulação interna
+            timeout: 3000,             // Tempo limite de resposta da API do navegador
+            maximumAge: 300000         // Permite usar coordenadas salvas de até 5 minutos
         }
     );
     
@@ -436,6 +438,7 @@ function sendEmergencyLocation(btn) {
     function resetBtn() {
         btn.innerHTML = originalHtml;
         btn.classList.remove('btn-loading');
+        btn.disabled = false;
     }
 }
 window.sendEmergencyLocation = sendEmergencyLocation;
