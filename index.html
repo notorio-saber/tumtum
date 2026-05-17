@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="logo ok.png">
     
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -15,7 +16,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="TumTum">
-    <link rel="apple-touch-icon" href="logo.jpg">
+    <link rel="apple-touch-icon" href="logo ok.png">
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -29,7 +30,7 @@
             <div class="auth-container">
                 <div class="logo-area">
                     <div class="icon-circle shadow-glow" style="overflow: hidden; padding: 0;">
-                        <img src="logo.jpg" alt="TumTum App" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                        <img src="logo ok.png" alt="TumTum App" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                     </div>
                     <h1>TumTum App</h1>
                     <p class="mote">Saúde em dia, vida tranquila.</p>
@@ -310,22 +311,22 @@
                     <p class="giant-measure-desc">Toque em qualquer lugar desta caixa para registrar sua pressão agora</p>
                 </div>
 
-                <!-- Gráfico Rápido Semanal Simplificado com Médias Integradas (Evita Rolagem) -->
-                <div class="chart-card card-premium glass mt-6" style="padding: 15px 15px 10px 15px;">
-                    <div class="flex justify-between items-center mb-3" style="gap: 8px;">
-                        <h3 class="font-bold text-base" style="margin: 0; white-space: nowrap;">Gráfico Semanal</h3>
-                        <div class="flex gap-2" style="display: flex; gap: 6px;">
-                            <div class="avg-pill" style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(15, 23, 42, 0.06); border-radius: 10px; padding: 4px 8px; display: flex; align-items: center; gap: 4px; white-space: nowrap;">
-                                <span style="font-size: 8px; color: #94a3b8; font-weight: 800; text-transform: uppercase; line-height: 1;">Média 7d:</span>
-                                <span id="avg-7d" style="font-weight: 800; font-size: 0.78rem; color: #334155; line-height: 1;">--/--</span>
+                <!-- Gráfico Rápido Semanal com Médias Integradas (Mais Alto e Espaçoso) -->
+                <div class="chart-card card-premium glass mt-6" style="padding: 20px 20px 15px 20px;">
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px;">
+                        <h3 class="font-bold text-lg" style="margin: 0; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif;">Gráfico Semanal</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <div class="avg-pill" style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(15, 23, 42, 0.06); border-radius: 10px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                                <span style="font-size: 9px; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1;">Média 7d</span>
+                                <span id="avg-7d" style="font-weight: 800; font-size: 0.85rem; color: #334155; line-height: 1;">--/--</span>
                             </div>
-                            <div class="avg-pill" style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(15, 23, 42, 0.06); border-radius: 10px; padding: 4px 8px; display: flex; align-items: center; gap: 4px; white-space: nowrap;">
-                                <span style="font-size: 8px; color: #94a3b8; font-weight: 800; text-transform: uppercase; line-height: 1;">Média 30d:</span>
-                                <span id="avg-30d" style="font-weight: 800; font-size: 0.78rem; color: #334155; line-height: 1;">--/--</span>
+                            <div class="avg-pill" style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(15, 23, 42, 0.06); border-radius: 10px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                                <span style="font-size: 9px; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1;">Média 30d</span>
+                                <span id="avg-30d" style="font-weight: 800; font-size: 0.85rem; color: #334155; line-height: 1;">--/--</span>
                             </div>
                         </div>
                     </div>
-                    <div class="chart-container" style="height: 165px; position: relative; width: 100%;">
+                    <div class="chart-container" style="height: 220px; position: relative; width: 100%;">
                         <canvas id="mainChart"></canvas>
                     </div>
                 </div>
@@ -660,7 +661,26 @@
                         </div>
                     </div>
 
-                    <button onclick="closeModal('biomedical-alert-modal')" class="btn-primary btn-large w-full shadow-glow">Fechar</button>
+                    <!-- Zona de Emergência Dinâmica (Exibida apenas em Coral, Vermelho e Crise) -->
+                    <div id="alert-emergency-zone" style="display: none; flex-direction: column; gap: 10px; margin-top: 15px;">
+                        <span style="font-size: 0.72rem; color: #ef4444; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; display: block; text-align: left; margin-bottom: 2px;">Ações Rápidas de Emergência</span>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <!-- Chamar Contato de Emergência -->
+                            <a id="btn-alert-call-contact" href="tel:" class="btn-emergency-contact" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(239, 68, 68, 0.05); color: #ef4444; border: 2px dashed rgba(239, 68, 68, 0.2); padding: 12px; border-radius: 16px; font-weight: 800; font-size: 0.8rem; text-decoration: none; transition: all 0.2s; text-align: center;">
+                                <i data-lucide="phone" class="w-4 h-4"></i>
+                                <span id="lbl-alert-call-contact">Chamar Contato</span>
+                            </a>
+                            
+                            <!-- Chamar SAMU 192 -->
+                            <a href="tel:192" class="btn-emergency-samu" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #ef4444; color: white; padding: 12px; border-radius: 16px; font-weight: 800; font-size: 0.85rem; text-decoration: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); transition: all 0.2s; text-align: center;">
+                                <i data-lucide="ambulance" class="w-4 h-4 text-white"></i>
+                                <span>Discar SAMU 192</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <button onclick="closeModal('biomedical-alert-modal')" class="btn-primary btn-large w-full shadow-glow" style="margin-top: 15px;">Fechar</button>
                 </div>
             </div>
         </div>

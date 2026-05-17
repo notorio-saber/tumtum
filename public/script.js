@@ -28,18 +28,48 @@ const getPeriodo = (date = new Date()) => {
     return "Noite";
 };
 
+const CLINICAL_MESSAGES = {
+    crisis: [
+        "ATENÇÃO: Valores extremamente elevados com risco imediato! Procure ajuda especializada agora!",
+        "Alerta de emergência! Sente-se imediatamente, tente manter a calma e acione o SAMU 192 de imediato.",
+        "Sua pressão atingiu um patamar crítico. Por favor, evite esforços e acione o suporte médico com urgência."
+    ],
+    danger: [
+        "Sua pressão está significativamente elevada (Estágio 2). É recomendável deitar-se em local calmo e avisar alguém próximo.",
+        "Alerta importante: reduza qualquer agitação agora. Se houver sintomas como dor de cabeça forte ou falta de ar, busque atendimento.",
+        "Aferição preocupante. Repouse por 15 minutos em silêncio absoluto e faça uma nova medição para controle."
+    ],
+    coral: [
+        "Sua pressão está alta (Estágio 1). Procure sentar-se de forma confortável, relaxe os ombros e respire profundamente.",
+        "Alerta de cuidado: tente desacelerar o ritmo do seu dia hoje. Considere repetir a aferição em repouso mais tarde.",
+        "Valores moderadamente elevados. Fique atento à sua hidratação, evite estresses desnecessários e descanse um pouco."
+    ],
+    warning: [
+        "Sua pressão está levemente elevada (Atenção). Que tal beber um copo de água gelada e repousar por 10 minutos?",
+        "Um sinal amarelo para a rotina de hoje: reduza o consumo de sal e dê preferência a alimentos leves e naturais.",
+        "Leitura com ligeira elevação. Tire um momento para alongar o pescoço, controle a respiração e evite cafeína por agora."
+    ],
+    success: [
+        "Tudo sob controle! Seu coração está batendo no ritmo ideal. Mantenha os seus ótimos hábitos!",
+        "Excelente resultado! Sua dedicação com a alimentação e exercícios está se refletindo no painel.",
+        "Pressão perfeita dentro da faixa segura de saúde! Continue assim e mantenha seu registro em dia."
+    ]
+};
+
 const getStatus = (sys, dia) => {
     sys = parseInt(sys) || 0;
     dia = parseInt(dia) || 0;
+    
+    const getRandomMsg = (list) => list[Math.floor(Math.random() * list.length)];
     
     if (sys >= 180 || dia >= 120) {
         return {
             label: 'Crise Hipertensiva',
             class: 'badge-crisis',
             border: 'border-crisis',
-            message: 'Procure atendimento médico imediatamente.',
+            message: getRandomMsg(CLINICAL_MESSAGES.crisis),
             risk: 'Muito Alto',
-            action: 'Ligue para a emergência ou vá ao pronto-socorro mais próximo.'
+            action: 'Acione socorro médico imediatamente!'
         };
     }
     if (sys >= 160 || dia >= 100) {
@@ -47,9 +77,9 @@ const getStatus = (sys, dia) => {
             label: 'Hipertensão Estágio 2',
             class: 'badge-danger',
             border: 'border-danger',
-            message: 'Pressão muito elevada.',
+            message: getRandomMsg(CLINICAL_MESSAGES.danger),
             risk: 'Alto',
-            action: 'Repita a aferição após alguns minutos de repouso, observe sintomas e busque orientação médica.'
+            action: 'Descanse em repouso e monitore os sintomas.'
         };
     }
     if (sys >= 140 || dia >= 90) {
@@ -57,9 +87,9 @@ const getStatus = (sys, dia) => {
             label: 'Hipertensão Estágio 1',
             class: 'badge-coral',
             border: 'border-coral',
-            message: 'Sua pressão está elevada.',
+            message: getRandomMsg(CLINICAL_MESSAGES.coral),
             risk: 'Moderado',
-            action: 'Faça um acompanhamento médico regular e meça novamente após um breve período de repouso.'
+            action: 'Evite esforços e meça novamente em 20 min.'
         };
     }
     if (sys >= 120 || dia >= 80) {
@@ -67,18 +97,18 @@ const getStatus = (sys, dia) => {
             label: 'Elevada / Atenção',
             class: 'badge-warning',
             border: 'border-warning',
-            message: 'Sua pressão merece acompanhamento.',
+            message: getRandomMsg(CLINICAL_MESSAGES.warning),
             risk: 'Leve/Moderado',
-            action: 'Monitore sua rotina, reduza o consumo de sal e repita a aferição periodicamente.'
+            action: 'Evite sal/gordura e beba bastante água.'
         };
     }
     return {
         label: 'Normal',
         class: 'badge-success',
         border: 'border-success',
-        message: 'Sua pressão está dentro da faixa ideal.',
+        message: getRandomMsg(CLINICAL_MESSAGES.success),
         risk: 'Baixo',
-        action: 'Parabéns! Mantenha hábitos de vida saudáveis e continue registrando regularmente.'
+        action: 'Excelente! Mantenha seus bons hábitos de vida.'
     };
 };
 
@@ -350,6 +380,68 @@ function showBiomedicalAlert(sys, dia) {
     const action = document.getElementById('alert-action');
     if (action) action.innerText = status.action;
     
+    // Lógica da Zona de Emergência Dinâmica (Exibida em Coral, Vermelho e Crise)
+    const emergencyZone = document.getElementById('alert-emergency-zone');
+    if (emergencyZone) {
+        const isEmergency = ['Hipertensão Estágio 1', 'Hipertensão Estágio 2', 'Crise Hipertensiva'].includes(status.label);
+        
+        if (isEmergency) {
+            emergencyZone.style.display = 'flex';
+            
+            // Tenta obter o número do contato de emergência do usuário
+            let emergTel = "";
+            let emergNome = "Contato";
+            
+            const user = window.auth ? window.auth.currentUser : null;
+            if (user) {
+                const localAnamnese = localStorage.getItem(`anamnese_data_${user.uid}`);
+                if (localAnamnese) {
+                    try {
+                        const data = JSON.parse(localAnamnese);
+                        emergTel = data.emergenciaTel || "";
+                        emergNome = data.emergenciaNome || "Contato";
+                    } catch(e) {}
+                }
+            }
+            
+            // Fallback para ler do elemento renderizado na tela de perfil se necessário
+            const emergLinkEl = document.getElementById('p-emerg-tel');
+            if (emergLinkEl && (!emergTel || emergTel === "--")) {
+                const spanEl = emergLinkEl.querySelector('span');
+                if (spanEl && spanEl.innerText !== "--") {
+                    emergTel = spanEl.innerText;
+                }
+                const nameEl = document.getElementById('p-emerg-nome');
+                if (nameEl && nameEl.innerText !== "--") {
+                    emergNome = nameEl.innerText;
+                }
+            }
+            
+            // Higieniza o telefone (deixa apenas números para o protocolo tel:)
+            const cleanTel = emergTel.replace(/\D/g, "");
+            
+            const callBtn = document.getElementById('btn-alert-call-contact');
+            const callLbl = document.getElementById('lbl-alert-call-contact');
+            
+            if (callBtn) {
+                if (cleanTel) {
+                    callBtn.href = `tel:${cleanTel}`;
+                    callBtn.style.opacity = '1';
+                    callBtn.style.pointerEvents = 'auto';
+                } else {
+                    callBtn.href = "#";
+                    callBtn.style.opacity = '0.5';
+                    callBtn.style.pointerEvents = 'none'; // Desativa se não configurado
+                }
+            }
+            if (callLbl) {
+                callLbl.innerText = emergNome !== "Contato" ? `Ligar para ${emergNome.split(' ')[0]}` : "Chamar Contato";
+            }
+        } else {
+            emergencyZone.style.display = 'none';
+        }
+    }
+
     // Inicializa Lucide no modal dinâmico
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
