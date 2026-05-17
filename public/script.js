@@ -738,8 +738,6 @@ async function finishAnamnese() {
         const habColesterolEl = document.getElementById('a-hab-colesterol');
         
         const emergEl = document.getElementById('a-emergencia');
-        const emergNomeEl = document.getElementById('a-emerg-nome');
-        const emergTelEl = document.getElementById('a-emerg-tel');
         
         const situacaoEl = document.getElementById('a-situacao');
         
