@@ -314,6 +314,12 @@ body {
     padding: 0 10px;
 }
 
+/* Ocultar bottom-nav na tela de Login e durante a Anamnese inicial */
+#login-screen.active ~ .bottom-nav,
+#anamnese-screen.active ~ .bottom-nav {
+    display: none !important;
+}
+
 .nav-item {
     display: flex;
     flex-direction: column;
