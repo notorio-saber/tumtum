@@ -292,6 +292,23 @@ function updateUserProfile(user, data = null) {
             if (callLbl) {
                 callLbl.innerText = emergNome !== "Familiar" ? `Ligar p/ ${emergNome.split(' ')[0]}` : "Ligar Familiar";
             }
+            
+            // Solicitar permissão de localização preemptivamente ao carregar o dashboard
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        console.log("GPS pré-autorizado com sucesso para fluxos rápidos de SOS.");
+                    },
+                    (error) => {
+                        console.warn("Permissão de GPS recusada preemptivamente ou indisponível:", error);
+                    },
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 5000,
+                        maximumAge: 300000
+                    }
+                );
+            }
         } else {
             sosWidget.classList.add('hidden');
         }
@@ -428,9 +445,9 @@ function sendEmergencyLocation(btn) {
         
         message += `Por favor, entre em contato comigo ou venha ao meu encontro o mais rápido possível!`;
         
-        // Abrir link do WhatsApp
+        // Abrir link do WhatsApp usando redirecionamento local para evitar o Popup Blocker de callbacks assíncronos em navegadores móveis
         const waUrl = `https://wa.me/55${cleanTel}?text=${encodeURIComponent(message)}`;
-        window.open(waUrl, '_blank');
+        window.location.href = waUrl;
         
         resetBtn();
     }
