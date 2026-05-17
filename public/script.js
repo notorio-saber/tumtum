@@ -1379,17 +1379,9 @@ window.handleAddCompanion = async () => {
         };
         await myDocRef.update({ companions });
         
-        // Atualizar o documento do Acompanhante (adicionar o paciente)
-        const targetDocRef = window.db.collection('users').doc(targetUid);
-        const targetPatients = targetData.patients || {};
-        targetPatients[user.uid] = {
-            uid: user.uid,
-            name: myData.nome || user.displayName || "Paciente",
-            email: user.email
-        };
-        await targetDocRef.update({ patients: targetPatients, role: role });
+        // NOTA: O acompanhante será vinculado automaticamente no próximo acesso dele via Sync Reverso
         
-        alert("✨ Acompanhante vinculado com sucesso!");
+        alert("✨ Convite enviado! O acompanhante será vinculado automaticamente no próximo acesso dele.");
         emailInput.value = "";
         window.loadCompanionsPage();
     } catch (e) {
@@ -1432,23 +1424,11 @@ window.handleAddPatient = async () => {
             patientData = doc.data();
         }
         
-        // Atualizar o documento do paciente (adicionar eu como acompanhante)
+        // Atualizar meu próprio documento (adicionar o paciente)
         const myDocRef = window.db.collection('users').doc(user.uid);
         const myDoc = await myDocRef.get();
         const myData = myDoc.data();
-        const myRole = myData.role || 'familiar';
         
-        const targetDocRef = window.db.collection('users').doc(patientUid);
-        const companions = patientData.companions || {};
-        companions[user.uid] = {
-            uid: user.uid,
-            name: myData.nome || user.displayName || "Acompanhante",
-            email: user.email,
-            role: myRole
-        };
-        await targetDocRef.update({ companions });
-        
-        // Atualizar meu próprio documento (adicionar o paciente)
         const myPatients = myData.patients || {};
         myPatients[patientUid] = {
             uid: patientUid,
@@ -1457,7 +1437,9 @@ window.handleAddPatient = async () => {
         };
         await myDocRef.update({ patients: myPatients });
         
-        alert("✨ Paciente vinculado com sucesso!");
+        // NOTA: O paciente será vinculado automaticamente no próximo acesso dele via Sync Reverso
+        
+        alert("✨ Paciente vinculado com sucesso! Ele será atualizado de forma automática.");
         inputEl.value = "";
         
         localStorage.setItem(`active_patient_uid_${user.uid}`, patientUid);
@@ -1481,14 +1463,7 @@ window.removeCompanion = async (companionUid) => {
         delete companions[companionUid];
         await myDocRef.update({ companions });
         
-        // Remove no lado do companheiro também
-        await window.db.collection('users').doc(companionUid).get().then(async (doc) => {
-            if (doc.exists) {
-                const p = doc.data().patients || {};
-                delete p[user.uid];
-                await window.db.collection('users').doc(companionUid).update({ patients: p });
-            }
-        });
+        // NOTA: O acompanhante será removido automaticamente no próximo acesso dele via Sync Reverso
         
         alert("Acompanhante desvinculado com sucesso!");
         window.loadCompanionsPage();
@@ -1509,14 +1484,7 @@ window.removePatient = async (patientUid) => {
         delete p[patientUid];
         await myDocRef.update({ patients: p });
         
-        // Remove no lado do paciente
-        await window.db.collection('users').doc(patientUid).get().then(async (doc) => {
-            if (doc.exists) {
-                const companions = doc.data().companions || {};
-                delete companions[user.uid];
-                await window.db.collection('users').doc(patientUid).update({ companions });
-            }
-        });
+        // NOTA: O paciente será removido automaticamente no próximo acesso dele via Sync Reverso
         
         if (localStorage.getItem(`active_patient_uid_${user.uid}`) === patientUid) {
             localStorage.removeItem(`active_patient_uid_${user.uid}`);
@@ -1541,12 +1509,13 @@ window.loadCompanionsPage = async () => {
     const user = window.auth.currentUser;
     if (!user) return;
     
-    // Define o código do paciente IMEDIATAMENTE (sem esperar o Firestore) para evitar travamentos de 'Carregando...'
+    // Define o código do paciente IMEDIATAMENTE (sem esperar o Firestore) para evitar travamentos
     const myPatientCodeEl = document.getElementById('my-patient-code');
     if (myPatientCodeEl) myPatientCodeEl.innerText = user.uid;
     
     try {
-        const doc = await window.db.collection('users').doc(user.uid).get();
+        const docRef = window.db.collection('users').doc(user.uid);
+        const doc = await docRef.get();
         if (!doc.exists) return;
         
         const data = doc.data();
@@ -1556,10 +1525,47 @@ window.loadCompanionsPage = async () => {
             document.getElementById('patient-companions-view').classList.remove('hidden');
             document.getElementById('companion-patients-view').classList.add('hidden');
             
-            // Código do paciente
-            const myPatientCodeEl = document.getElementById('my-patient-code');
-            if (myPatientCodeEl) myPatientCodeEl.innerText = user.uid;
+            // --- SYNC REVERSO (Seguro para Regras do Firestore) ---
+            const companionsQuery = await window.db.collection('users')
+                .where(`patients.${user.uid}.uid`, '==', user.uid)
+                .get();
+                
+            let hasSyncChanges = false;
+            const updatedCompanions = { ...(data.companions || {}) };
             
+            companionsQuery.forEach(cDoc => {
+                const cUid = cDoc.id;
+                const cData = cDoc.data();
+                const cRole = (cData.role && cData.role !== 'paciente') ? cData.role : 'familiar';
+                
+                if (!updatedCompanions[cUid]) {
+                    updatedCompanions[cUid] = {
+                        uid: cUid,
+                        name: cData.nome || cData.displayName || "Acompanhante",
+                        email: cData.email || "",
+                        role: cRole
+                    };
+                    hasSyncChanges = true;
+                }
+            });
+            
+            // Remover qualquer acompanhante que me removeu
+            if (companionsQuery.docs.length > 0) {
+                Object.keys(updatedCompanions).forEach(cUid => {
+                    const cDoc = companionsQuery.docs.find(d => d.id === cUid);
+                    if (!cDoc) {
+                        delete updatedCompanions[cUid];
+                        hasSyncChanges = true;
+                    }
+                });
+            }
+            
+            if (hasSyncChanges) {
+                await docRef.update({ companions: updatedCompanions });
+                data.companions = updatedCompanions;
+            }
+            // --- FIM SYNC REVERSO ---
+
             // Lista de acompanhantes
             const listContainer = document.getElementById('companions-list');
             if (listContainer) {
@@ -1582,7 +1588,7 @@ window.loadCompanionsPage = async () => {
                                     <span class="${badgeClass}" style="margin-top: 4px; display: inline-block;">${displayRole}</span>
                                 </div>
                                 <button onclick="removeCompanion('${comp.uid}')" style="background: transparent; border: none; cursor: pointer; color: #ef4444;">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
                                 </button>
                             </div>
                         `;
@@ -1594,6 +1600,45 @@ window.loadCompanionsPage = async () => {
             document.getElementById('patient-companions-view').classList.add('hidden');
             document.getElementById('companion-patients-view').classList.remove('hidden');
             
+            // --- SYNC REVERSO (Seguro para Regras do Firestore) ---
+            const patientsQuery = await window.db.collection('users')
+                .where(`companions.${user.uid}.uid`, '==', user.uid)
+                .get();
+                
+            let hasSyncChanges = false;
+            const updatedPatients = { ...(data.patients || {}) };
+            
+            patientsQuery.forEach(pDoc => {
+                const pUid = pDoc.id;
+                const pData = pDoc.data();
+                
+                if (!updatedPatients[pUid]) {
+                    updatedPatients[pUid] = {
+                        uid: pUid,
+                        name: pData.nome || pData.displayName || "Paciente",
+                        email: pData.email || ""
+                    };
+                    hasSyncChanges = true;
+                }
+            });
+            
+            // Remover qualquer paciente que me removeu
+            if (patientsQuery.docs.length > 0) {
+                Object.keys(updatedPatients).forEach(pUid => {
+                    const pDoc = patientsQuery.docs.find(d => d.id === pUid);
+                    if (!pDoc) {
+                        delete updatedPatients[pUid];
+                        hasSyncChanges = true;
+                    }
+                });
+            }
+            
+            if (hasSyncChanges) {
+                await docRef.update({ patients: updatedPatients });
+                data.patients = updatedPatients;
+            }
+            // --- FIM SYNC REVERSO ---
+
             const listContainer = document.getElementById('accompanied-patients-list');
             if (listContainer) {
                 listContainer.innerHTML = "";
@@ -1617,7 +1662,7 @@ window.loadCompanionsPage = async () => {
                                     <p class="text-xs text-slate-400" style="margin-top: 2px;">${pat.email}</p>
                                 </div>
                                 <button onclick="removePatient('${pat.uid}')" style="background: transparent; border: none; cursor: pointer; color: #ef4444; margin-left: 10px;">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
                                 </button>
                             </div>
                         `;
@@ -1625,7 +1670,9 @@ window.loadCompanionsPage = async () => {
                 }
             }
         }
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
     } catch (e) {
         console.error("Erro ao carregar página de acompanhantes:", e);
     }
