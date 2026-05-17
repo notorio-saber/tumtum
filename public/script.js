@@ -393,56 +393,42 @@ async function finishAnamnese() {
             throw new Error("Sua sessão expirou ou você não está logado. Faça login novamente.");
         }
         
-        // Salva no banco de dados Firestore
-        if (window.db) {
-            await window.db.collection('users').doc(user.uid).set(anamneseData, { merge: true });
-        } else {
-            console.warn("Firestore offline ou indisponível. Salvando localmente.");
-        }
-        
-        // Salva sinalizador local para dupla segurança (offline/erros)
+        // 1. Salva localmente de imediato (Garante velocidade instantânea e resiliência offline)
         localStorage.setItem(`anamnese_completed_${user.uid}`, 'true');
         localStorage.setItem(`anamnese_data_${user.uid}`, JSON.stringify(anamneseData));
         
-        // Atualiza a interface do usuário com os dados recém-salvos
+        // 2. Atualiza a interface do usuário com os dados recém-preenchidos
         updateUserProfile(user, anamneseData);
         
-        // Redireciona para a tela principal
+        // 3. Sincroniza em segundo plano no Firestore (Sem await para evitar Promises travadas por falta de rede ou regras)
+        if (window.db) {
+            window.db.collection('users').doc(user.uid).set(anamneseData, { merge: true })
+                .then(() => {
+                    console.log("Anamnese sincronizada com o Firestore com sucesso!");
+                })
+                .catch(err => {
+                    console.error("Erro em segundo plano ao salvar no Firestore:", err);
+                    // Dica amigável no console para o desenvolvedor
+                    if (err.message && (err.message.includes("permissions") || err.message.includes("permission") || err.message.includes("denied"))) {
+                        console.warn("DICA TUMTUM: As regras do Firestore estão bloqueando escrita. Ajuste-as no painel do Firebase.");
+                    }
+                });
+        } else {
+            console.warn("Firestore offline ou indisponível. Dados salvos localmente.");
+        }
+        
+        // 4. Redireciona imediatamente para a tela principal
         showScreen('dashboard-screen');
         
-        // Inicializa o gráfico de tendência semanal
+        // 5. Inicializa o gráfico de tendência semanal
         initChart();
         
     } catch (error) {
         console.error("Erro completo ao salvar anamnese:", error);
-        
-        // Verifica se é erro de permissão do Firebase Firestore
-        const isPermissionError = error.message && (
-            error.message.includes("permissions") || 
-            error.message.includes("permission") || 
-            error.message.includes("denied")
-        );
-        
-        const user = window.auth ? window.auth.currentUser : null;
-        
-        if (isPermissionError && user) {
-            // Salva sinalizadores locais para unblock imediato do usuário
-            localStorage.setItem(`anamnese_completed_${user.uid}`, 'true');
-            localStorage.setItem(`anamnese_data_${user.uid}`, JSON.stringify(anamneseData));
-            
-            // Atualiza a interface
-            updateUserProfile(user, anamneseData);
-            
-            alert("Cadastro Salvo Localmente! 📲\n\nDetectamos que as regras de segurança do seu banco de dados Firebase Firestore estão bloqueando a gravação (erro de permissões).\n\nPara que você e sua equipe possam testar o app normalmente, salvamos os dados localmente no seu aparelho. O painel e seu perfil já estão liberados e 100% funcionais!\n\n👉 Lembre-se de ajustar as regras de escrita do Firestore no Console do Firebase (para permitir gravação).");
-            
-            showScreen('dashboard-screen');
-            initChart();
-        } else {
-            alert("Ops! Houve um erro ao salvar suas informações: " + error.message);
-            if (btn) {
-                btn.innerText = "Concluir";
-                btn.disabled = false;
-            }
+        alert("Ops! Houve um erro ao salvar suas informações: " + (error.message || error));
+        if (btn) {
+            btn.innerText = "Concluir";
+            btn.disabled = false;
         }
     }
 }
