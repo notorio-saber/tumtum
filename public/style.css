@@ -870,6 +870,15 @@ body {
     overflow-y: auto; /* Permite rolar apenas se for uma tela muito minúscula */
 }
 
+/* Garante que o contêiner de cada etapa ativa use flexbox para centralizar seu conteúdo verticalmente */
+#anamnese-screen .step-container.active {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    min-height: 55vh; /* Ocupa o espaço livre de forma harmoniosa no meio da tela */
+}
+
 /* Reduzir espaçamentos de cards na anamnese */
 #anamnese-screen .card-premium {
     padding: 14px 16px;

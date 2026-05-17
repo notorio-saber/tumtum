@@ -46,6 +46,18 @@ function getInitials(name) {
 function updateUserProfile(user, data = null) {
     if (!user) return;
     
+    // Fallback: Se data for nulo, tenta carregar do localStorage
+    if (!data) {
+        const localData = localStorage.getItem(`anamnese_data_${user.uid}`);
+        if (localData) {
+            try {
+                data = JSON.parse(localData);
+            } catch (e) {
+                console.error("Erro ao fazer parse dos dados locais:", e);
+            }
+        }
+    }
+    
     // 1. Saudação baseada no horário
     const period = getPeriodo();
     let greetingText = "Olá,";
@@ -390,6 +402,7 @@ async function finishAnamnese() {
         
         // Salva sinalizador local para dupla segurança (offline/erros)
         localStorage.setItem(`anamnese_completed_${user.uid}`, 'true');
+        localStorage.setItem(`anamnese_data_${user.uid}`, JSON.stringify(anamneseData));
         
         // Atualiza a interface do usuário com os dados recém-salvos
         updateUserProfile(user, anamneseData);
@@ -402,10 +415,34 @@ async function finishAnamnese() {
         
     } catch (error) {
         console.error("Erro completo ao salvar anamnese:", error);
-        alert("Ops! Houve um erro ao salvar suas informações: " + error.message);
-        if (btn) {
-            btn.innerText = "Concluir";
-            btn.disabled = false;
+        
+        // Verifica se é erro de permissão do Firebase Firestore
+        const isPermissionError = error.message && (
+            error.message.includes("permissions") || 
+            error.message.includes("permission") || 
+            error.message.includes("denied")
+        );
+        
+        const user = window.auth ? window.auth.currentUser : null;
+        
+        if (isPermissionError && user) {
+            // Salva sinalizadores locais para unblock imediato do usuário
+            localStorage.setItem(`anamnese_completed_${user.uid}`, 'true');
+            localStorage.setItem(`anamnese_data_${user.uid}`, JSON.stringify(anamneseData));
+            
+            // Atualiza a interface
+            updateUserProfile(user, anamneseData);
+            
+            alert("Cadastro Salvo Localmente! 📲\n\nDetectamos que as regras de segurança do seu banco de dados Firebase Firestore estão bloqueando a gravação (erro de permissões).\n\nPara que você e sua equipe possam testar o app normalmente, salvamos os dados localmente no seu aparelho. O painel e seu perfil já estão liberados e 100% funcionais!\n\n👉 Lembre-se de ajustar as regras de escrita do Firestore no Console do Firebase (para permitir gravação).");
+            
+            showScreen('dashboard-screen');
+            initChart();
+        } else {
+            alert("Ops! Houve um erro ao salvar suas informações: " + error.message);
+            if (btn) {
+                btn.innerText = "Concluir";
+                btn.disabled = false;
+            }
         }
     }
 }
