@@ -1485,6 +1485,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Salvar o papel de usuário carregado em cache para fallbacks offline/segurança
                 localStorage.setItem(`user_role_${user.uid}`, currentUserRole);
+
+                // Exibe alerta amigável de papel de conta conflitante (mismatch)
+                if (tempRole && tempRole !== currentUserRole && user.uid !== 'etSpfstGkKSKmTfBploZqVMMVKu2') {
+                    const roleNames = {
+                        paciente: "Paciente",
+                        medico: "Médico",
+                        familiar: "Acompanhante"
+                    };
+                    const selectedName = roleNames[tempRole] || tempRole;
+                    const permanentName = roleNames[currentUserRole] || currentUserRole;
+                    
+                    const modalText = `Você tentou entrar como <strong>${selectedName}</strong>, mas identificamos uma conta de <strong>${permanentName}</strong> vinculada a este e-mail.`;
+                    
+                    const mismatchTextEl = document.getElementById('mismatch-modal-text');
+                    const mismatchBtnEl = document.getElementById('mismatch-modal-btn');
+                    
+                    if (mismatchTextEl) mismatchTextEl.innerHTML = modalText;
+                    if (mismatchBtnEl) {
+                        mismatchBtnEl.innerHTML = `Entrar como ${permanentName}`;
+                        mismatchBtnEl.onclick = () => {
+                            closeModal('role-mismatch-modal');
+                        };
+                    }
+                    
+                    showModal('role-mismatch-modal');
+                }
                 
                 // Aplicar override de papel local para o administrador (Dra. Layana) para testes rápidos e sem erro de permissões
                 if (user.uid === 'etSpfstGkKSKmTfBploZqVMMVKu2') {

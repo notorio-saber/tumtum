@@ -923,6 +923,23 @@
         </div>
     </div>
 
+    <!-- Modal de Papel Conflitante / Mismatch de Conta -->
+    <div id="role-mismatch-modal" class="modal">
+        <div class="modal-overlay" onclick="closeModal('role-mismatch-modal')"></div>
+        <div class="modal-body glass-heavy" style="text-align: center; border-radius: 28px; max-width: 420px; width: 90%; padding: 30px;">
+            <div class="icon-circle shadow-glow" style="width: 64px; height: 64px; margin: 0 auto 20px auto; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="shield-check" class="w-8 h-8 text-blue-500" style="color: #3b82f6;"></i>
+            </div>
+            
+            <h2 id="mismatch-modal-title" class="text-xl font-bold mb-3" style="color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif;">Conta Encontrada</h2>
+            <p id="mismatch-modal-text" class="text-sm text-slate-500 mb-6" style="line-height: 1.5; text-align: center; font-size: 0.95rem;"></p>
+            
+            <button id="mismatch-modal-btn" class="btn-primary w-full shadow-glow" style="padding: 16px; border-radius: 16px; font-weight: 800; width: 100%; cursor: pointer;">
+                Ir para o aplicativo
+            </button>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
