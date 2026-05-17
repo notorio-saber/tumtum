@@ -740,7 +740,9 @@ body {
     width: 150px;
     background: linear-gradient(90deg, transparent, #ffffff, transparent);
     z-index: 10;
-    opacity: 0.9;
+    opacity: 0;
+    left: -200px;
+    top: 0;
     animation: beam-h-card-anim 4s infinite linear;
 }
 
@@ -750,7 +752,9 @@ body {
     height: 150px;
     background: linear-gradient(180deg, transparent, #ffffff, transparent);
     z-index: 10;
-    opacity: 0.9;
+    opacity: 0;
+    right: 0;
+    top: -200px;
     animation: beam-v-card-anim 4s infinite linear;
 }
 
