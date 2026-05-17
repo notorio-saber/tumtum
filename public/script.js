@@ -265,49 +265,133 @@ function exportarCSV() {
 
 // Inicialização do Gráfico
 let mainChart;
+
+function updateAverages() {
+    if (!mockRecords || mockRecords.length === 0) return;
+    
+    // Média de 7 dias (ou registros da semana)
+    const recent7 = mockRecords.slice(0, 7);
+    const avgSys7 = Math.round(recent7.reduce((sum, r) => sum + r.sys, 0) / recent7.length);
+    const avgDia7 = Math.round(recent7.reduce((sum, r) => sum + r.dia, 0) / recent7.length);
+    
+    // Média de 30 dias (ou total se menor)
+    const recent30 = mockRecords.slice(0, 30);
+    const avgSys30 = Math.round(recent30.reduce((sum, r) => sum + r.sys, 0) / recent30.length);
+    const avgDia30 = Math.round(recent30.reduce((sum, r) => sum + r.dia, 0) / recent30.length);
+    
+    const avg7dEl = document.getElementById('avg-7d');
+    if (avg7dEl) avg7dEl.innerText = `${avgSys7}/${avgDia7}`;
+    
+    const avg30dEl = document.getElementById('avg-30d');
+    if (avg30dEl) avg30dEl.innerText = `${avgSys30}/${avgDia30}`;
+}
+
 function initChart() {
     const ctx = document.getElementById('mainChart').getContext('2d');
-    const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+    const gradient = ctx.createLinearGradient(0, 0, 0, 160);
     gradient.addColorStop(0, 'rgba(239, 68, 68, 0.15)');
     gradient.addColorStop(1, 'rgba(239, 68, 68, 0)');
 
     if (mainChart) mainChart.destroy();
 
+    // Dias da semana fixos de Domingo a Sábado
+    const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    
+    // Valores padrão saudáveis/médios de preenchimento do gráfico
+    const sysData = [120, 122, 118, 124, 120, 119, 121];
+    const diaData = [80, 81, 78, 83, 80, 79, 81];
+    
+    // Contadores para computar a média caso haja múltiplos registros no mesmo dia
+    const counts = [1, 1, 1, 1, 1, 1, 1];
+    
+    // Mapeia registros reais para o dia da semana correspondente
+    mockRecords.forEach(r => {
+        try {
+            const dateParts = r.date.split('-');
+            const recordDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+            const dayOfWeek = recordDate.getDay(); // 0 = Domingo, 6 = Sábado
+            
+            if (counts[dayOfWeek] === 1 && sysData[dayOfWeek] === 120 && diaData[dayOfWeek] === 80) {
+                // Substitui valor default pelo real
+                sysData[dayOfWeek] = r.sys;
+                diaData[dayOfWeek] = r.dia;
+            } else {
+                // Acumula média
+                sysData[dayOfWeek] = ((sysData[dayOfWeek] * counts[dayOfWeek]) + r.sys) / (counts[dayOfWeek] + 1);
+                diaData[dayOfWeek] = ((diaData[dayOfWeek] * counts[dayOfWeek]) + r.dia) / (counts[dayOfWeek] + 1);
+                counts[dayOfWeek]++;
+            }
+        } catch (e) {
+            console.error("Erro ao mapear dia da semana no gráfico:", e);
+        }
+    });
+
+    // Arredonda valores finais das médias dos dias
+    for (let i = 0; i < 7; i++) {
+        sysData[i] = Math.round(sysData[i]);
+        diaData[i] = Math.round(diaData[i]);
+    }
+
     mainChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: mockRecords.map(r => formatDate(r.date)).reverse(),
+            labels: labels,
             datasets: [{
                 label: 'Sistólica',
-                data: mockRecords.map(r => r.sys).reverse(),
+                data: sysData,
                 borderColor: '#ef4444',
                 borderWidth: 3,
                 tension: 0.4,
                 fill: true,
                 backgroundColor: gradient,
-                pointBackgroundColor: '#ef4444'
+                pointBackgroundColor: '#ef4444',
+                pointRadius: 4,
+                pointHoverRadius: 6
             },
             {
                 label: 'Diastólica',
-                data: mockRecords.map(r => r.dia).reverse(),
+                data: diaData,
                 borderColor: '#fca5a5',
-                borderWidth: 2,
+                borderWidth: 2.5,
                 tension: 0.4,
                 fill: false,
                 borderDash: [5, 5],
-                pointBackgroundColor: '#fca5a5'
+                pointBackgroundColor: '#fca5a5',
+                pointRadius: 3,
+                pointHoverRadius: 5
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: { 
+                legend: { display: false }
+            },
             scales: {
-                y: { display: false },
-                x: { grid: { display: false } }
+                y: { 
+                    display: true,
+                    grid: { 
+                        color: 'rgba(15, 23, 42, 0.04)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#64748b',
+                        font: { size: 9, weight: 'bold' }
+                    }
+                },
+                x: { 
+                    grid: { display: false },
+                    ticks: { 
+                        color: '#475569',
+                        font: { size: 10, weight: '800' } 
+                    }
+                }
             }
         }
     });
+    
+    // Atualiza os painéis de médias 7d e 30d
+    updateAverages();
 }
 
 // --- Anamnese Logic ---
@@ -561,14 +645,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const bpm = document.getElementById('reg-bpm').value;
             const condicao = document.getElementById('reg-condicao').options[document.getElementById('reg-condicao').selectedIndex].text;
             
-            // Atualiza Dashboard com o novo valor
-            document.getElementById('last-sys').innerText = sys;
-            document.getElementById('last-dia').innerText = dia;
-            document.getElementById('last-time').innerText = `Hoje, ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
+            // Atualiza Dashboard com o novo valor de forma segura (se existirem os elementos na tela)
+            const sysEl = document.getElementById('last-sys');
+            if (sysEl) sysEl.innerText = sys;
+            const diaEl = document.getElementById('last-dia');
+            if (diaEl) diaEl.innerText = dia;
+            const timeEl = document.getElementById('last-time');
+            if (timeEl) timeEl.innerText = `Hoje, ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
             
             const status = getStatus(sys, dia);
             
-            // Atualiza o pill de status no botão gigante
+            // Atualiza o pill de status no botão gigante se ele ainda existir
             const giantReading = document.getElementById('giant-last-reading');
             if (giantReading) {
                 if (status.label === 'Normal') {

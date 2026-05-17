@@ -308,33 +308,25 @@
                     </div>
                     <h3 class="giant-measure-title">Registrar Pressão</h3>
                     <p class="giant-measure-desc">Toque em qualquer lugar desta caixa para registrar sua pressão agora</p>
-                    
-                    <!-- Última Medição embutida no botão de forma limpa -->
-                    <div id="giant-last-reading" class="giant-last-reading-text">
-                        Última Medição: <span id="last-sys">--</span>/<span id="last-dia">--</span> mmHg • <span id="last-time">Sem registros</span>
-                    </div>
                 </div>
 
-                <!-- Gráfico Rápido Semanal Simplificado -->
-                <div class="chart-card card-premium glass mt-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-lg">Gráfico da Semana</h3>
-                        <i data-lucide="trending-up" class="text-primary"></i>
+                <!-- Gráfico Rápido Semanal Simplificado com Médias Integradas (Evita Rolagem) -->
+                <div class="chart-card card-premium glass mt-6" style="padding: 15px 15px 10px 15px;">
+                    <div class="flex justify-between items-center mb-3" style="gap: 8px;">
+                        <h3 class="font-bold text-base" style="margin: 0; white-space: nowrap;">Gráfico Semanal</h3>
+                        <div class="flex gap-2" style="display: flex; gap: 6px;">
+                            <div class="avg-pill" style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(15, 23, 42, 0.06); border-radius: 10px; padding: 4px 8px; text-align: center; min-width: 65px;">
+                                <span style="display: block; font-size: 8px; color: #94a3b8; font-weight: bold; text-transform: uppercase; line-height: 1;">Média 7d</span>
+                                <span id="avg-7d" style="font-weight: 800; font-size: 0.78rem; color: #334155; line-height: 1.1;">--/--</span>
+                            </div>
+                            <div class="avg-pill" style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(15, 23, 42, 0.06); border-radius: 10px; padding: 4px 8px; text-align: center; min-width: 65px;">
+                                <span style="display: block; font-size: 8px; color: #94a3b8; font-weight: bold; text-transform: uppercase; line-height: 1;">Média 30d</span>
+                                <span id="avg-30d" style="font-weight: 800; font-size: 0.78rem; color: #334155; line-height: 1.1;">--/--</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="chart-container">
+                    <div class="chart-container" style="height: 165px; position: relative; width: 100%;">
                         <canvas id="mainChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Médias Semanal e Mensal -->
-                <div class="grid-2 mt-6">
-                    <div class="mini-card glass">
-                        <span class="text-xs text-slate-500">Média 7 dias</span>
-                        <div class="text-xl font-bold">118 / 78</div>
-                    </div>
-                    <div class="mini-card glass">
-                        <span class="text-xs text-slate-500">Média 30 dias</span>
-                        <div class="text-xl font-bold">121 / 80</div>
                     </div>
                 </div>
             </main>

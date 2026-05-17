@@ -832,19 +832,6 @@ body {
     line-height: 1.4;
 }
 
-.giant-last-reading-text {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--primary);
-    margin-top: 16px;
-    padding: 8px 16px;
-    background: #ffffff;
-    border-radius: 20px;
-    border: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-}
-
 /* Compactação da Anamnese (Evita Rolagem Mobile) */
 #anamnese-screen {
     display: none; /* Mantém oculto por padrão como qualquer tela */
