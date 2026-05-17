@@ -484,7 +484,14 @@ function exportarCSV() {
 let mainChart;
 
 function updateAverages() {
-    if (!mockRecords || mockRecords.length === 0) return;
+    const avg7dEl = document.getElementById('avg-7d');
+    const avg30dEl = document.getElementById('avg-30d');
+    
+    if (!mockRecords || mockRecords.length === 0) {
+        if (avg7dEl) avg7dEl.innerText = '--/--';
+        if (avg30dEl) avg30dEl.innerText = '--/--';
+        return;
+    }
     
     // Média de 7 dias (ou registros da semana)
     const recent7 = mockRecords.slice(0, 7);
@@ -496,10 +503,7 @@ function updateAverages() {
     const avgSys30 = Math.round(recent30.reduce((sum, r) => sum + r.sys, 0) / recent30.length);
     const avgDia30 = Math.round(recent30.reduce((sum, r) => sum + r.dia, 0) / recent30.length);
     
-    const avg7dEl = document.getElementById('avg-7d');
     if (avg7dEl) avg7dEl.innerText = `${avgSys7}/${avgDia7}`;
-    
-    const avg30dEl = document.getElementById('avg-30d');
     if (avg30dEl) avg30dEl.innerText = `${avgSys30}/${avgDia30}`;
 }
 
@@ -514,39 +518,43 @@ function initChart() {
     // Dias da semana fixos de Domingo a Sábado
     const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     
-    // Valores padrão saudáveis/médios de preenchimento do gráfico
-    const sysData = [120, 122, 118, 124, 120, 119, 121];
-    const diaData = [80, 81, 78, 83, 80, 79, 81];
+    const hasData = mockRecords && mockRecords.length > 0;
+    
+    // Se não houver registros, os arrays de dados ficam vazios para não desenhar nenhuma linha
+    const sysData = hasData ? [120, 122, 118, 124, 120, 119, 121] : [];
+    const diaData = hasData ? [80, 81, 78, 83, 80, 79, 81] : [];
     
     // Contadores para computar a média caso haja múltiplos registros no mesmo dia
     const counts = [1, 1, 1, 1, 1, 1, 1];
     
-    // Mapeia registros reais para o dia da semana correspondente
-    mockRecords.forEach(r => {
-        try {
-            const dateParts = r.date.split('-');
-            const recordDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-            const dayOfWeek = recordDate.getDay(); // 0 = Domingo, 6 = Sábado
-            
-            if (counts[dayOfWeek] === 1 && sysData[dayOfWeek] === 120 && diaData[dayOfWeek] === 80) {
-                // Substitui valor default pelo real
-                sysData[dayOfWeek] = r.sys;
-                diaData[dayOfWeek] = r.dia;
-            } else {
-                // Acumula média
-                sysData[dayOfWeek] = ((sysData[dayOfWeek] * counts[dayOfWeek]) + r.sys) / (counts[dayOfWeek] + 1);
-                diaData[dayOfWeek] = ((diaData[dayOfWeek] * counts[dayOfWeek]) + r.dia) / (counts[dayOfWeek] + 1);
-                counts[dayOfWeek]++;
+    if (hasData) {
+        // Mapeia registros reais para o dia da semana correspondente
+        mockRecords.forEach(r => {
+            try {
+                const dateParts = r.date.split('-');
+                const recordDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                const dayOfWeek = recordDate.getDay(); // 0 = Domingo, 6 = Sábado
+                
+                if (counts[dayOfWeek] === 1 && sysData[dayOfWeek] === 120 && diaData[dayOfWeek] === 80) {
+                    // Substitui valor default pelo real
+                    sysData[dayOfWeek] = r.sys;
+                    diaData[dayOfWeek] = r.dia;
+                } else {
+                    // Acumula média
+                    sysData[dayOfWeek] = ((sysData[dayOfWeek] * counts[dayOfWeek]) + r.sys) / (counts[dayOfWeek] + 1);
+                    diaData[dayOfWeek] = ((diaData[dayOfWeek] * counts[dayOfWeek]) + r.dia) / (counts[dayOfWeek] + 1);
+                    counts[dayOfWeek]++;
+                }
+            } catch (e) {
+                console.error("Erro ao mapear dia da semana no gráfico:", e);
             }
-        } catch (e) {
-            console.error("Erro ao mapear dia da semana no gráfico:", e);
-        }
-    });
+        });
 
-    // Arredonda valores finais das médias dos dias
-    for (let i = 0; i < 7; i++) {
-        sysData[i] = Math.round(sysData[i]);
-        diaData[i] = Math.round(diaData[i]);
+        // Arredonda valores finais das médias dos dias
+        for (let i = 0; i < 7; i++) {
+            sysData[i] = Math.round(sysData[i]);
+            diaData[i] = Math.round(diaData[i]);
+        }
     }
 
     mainChart = new Chart(ctx, {
