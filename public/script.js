@@ -319,15 +319,10 @@ function updateUserProfile(user, data = null) {
         if (isPatient) {
             sosWidget.classList.remove('hidden');
             
-            // Adicionar tag premium dinâmica ao título se for paciente trial e tiver atingido o limite
+            // Cabeçalho limpo do painel de emergência
             const headerTitle = sosWidget.querySelector('h3');
             if (headerTitle) {
-                const isPremiumLocked = !subscriptionActive && mockRecords && mockRecords.length >= 4;
-                if (isPremiumLocked) {
-                    headerTitle.innerHTML = 'SOS • Painel de Emergência <span style="font-size: 0.65rem; background: rgba(59, 130, 246, 0.1); color: #3b82f6; padding: 2px 6px; border-radius: 8px; margin-left: 6px; border: 1px solid rgba(59, 130, 246, 0.15); font-weight: 700; font-family: \'Plus Jakarta Sans\', sans-serif;">Premium 👑</span>';
-                } else {
-                    headerTitle.innerHTML = 'SOS • Painel de Emergência';
-                }
+                headerTitle.innerHTML = 'SOS • Painel de Emergência';
             }
             
             let emergNome = "Familiar";
@@ -343,13 +338,7 @@ function updateUserProfile(user, data = null) {
             const callLbl = document.getElementById('lbl-widget-call-contact');
             
             if (callBtn) {
-                const isPremiumLocked = !subscriptionActive && mockRecords && mockRecords.length >= 4;
-                if (isPremiumLocked) {
-                    // Direcionar para o Paywall no plano grátis após o limite de 4 registros
-                    callBtn.href = "javascript:showPaywall()";
-                    callBtn.style.opacity = '1';
-                    callBtn.style.pointerEvents = 'auto';
-                } else if (cleanTel) {
+                if (cleanTel) {
                     callBtn.href = `tel:${cleanTel}`;
                     callBtn.style.opacity = '1';
                     callBtn.style.pointerEvents = 'auto';
@@ -410,13 +399,6 @@ function updateUserProfile(user, data = null) {
 // Função global para enviar localização de emergência via WhatsApp
 function sendEmergencyLocation(btn) {
     if (!btn) return;
-    
-    // FREEMIUM GATING: Bloquear envio de localização no plano grátis após atingir o limite
-    const isPremiumLocked = !subscriptionActive && mockRecords && mockRecords.length >= 4;
-    if (isPremiumLocked) {
-        showPaywall();
-        return;
-    }
     
     const originalHtml = btn.innerHTML;
     btn.classList.add('btn-loading');
