@@ -1336,9 +1336,8 @@ window.copyPatientCode = () => {
 window.shareCompanionGmail = () => {
     const user = window.auth.currentUser;
     if (!user) return;
-    const code = user.uid;
     const subject = encodeURIComponent("Convite para me acompanhar no TumTum App");
-    const body = encodeURIComponent(`Olá! Gostaria de te convidar para acompanhar minhas aferições de pressão no TumTum App.\n\nCódigo do Paciente: ${code}\nInstale o app e adicione meu e-mail (${user.email}) ou meu código na aba Acompanhar!\n\nTumTum App - Saúde em dia, vida tranquila.`);
+    const body = encodeURIComponent(`Olá! Gostaria de te convidar para acompanhar minhas aferições de pressão arterial no TumTum App.\n\nPara me acompanhar, basta instalar o app, criar uma conta e digitar meu e-mail (${user.email}) na aba Acompanhar!\n\nTumTum App - Saúde em dia, vida tranquila.`);
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
 };
 

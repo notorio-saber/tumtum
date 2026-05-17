@@ -677,18 +677,18 @@
             <main class="dashboard-content pb-24 mt-6">
                 <!-- Seção para Paciente -->
                 <div id="patient-companions-view" class="space-y-6">
+                    <!-- Pessoas que me acompanham (No topo!) -->
                     <div class="card-premium glass">
                         <h4 class="profile-section-title" style="display: flex; align-items: center; gap: 8px; text-align: left;">
-                            <i data-lucide="share-2" class="text-primary w-5 h-5"></i>
-                            <span>Meu Código de Compartilhamento</span>
+                            <i data-lucide="users" class="text-primary w-5 h-5"></i>
+                            <span>Pessoas que me acompanham</span>
                         </h4>
-                        <p class="text-sm text-slate-500 mb-4" style="line-height: 1.4; text-align: left;">Copie seu código ou digite o e-mail de quem deseja que acompanhe suas aferições.</p>
-                        <div style="display: flex; gap: 10px; align-items: center; background: rgba(15, 23, 42, 0.03); padding: 12px; border-radius: 14px; border: 1px dashed rgba(15, 23, 42, 0.08);">
-                            <span id="my-patient-code" class="font-mono text-sm font-bold truncate select-all" style="color: var(--text-main); flex-grow: 1; text-align: left;">Carregando código...</span>
-                            <button onclick="copyPatientCode()" class="btn-primary" style="padding: 8px 12px; font-size: 0.8rem; border-radius: 8px; width: auto; font-weight: 800; white-space: nowrap;">Copiar</button>
+                        <div id="companions-list" class="space-y-3" style="text-align: left;">
+                            <p class="text-sm text-slate-400 text-center py-4">Nenhum acompanhante cadastrado.</p>
                         </div>
                     </div>
 
+                    <!-- Adicionar Acompanhante / Médico -->
                     <div class="card-premium glass">
                         <h4 class="profile-section-title" style="display: flex; align-items: center; gap: 8px; text-align: left;">
                             <i data-lucide="plus-circle" class="text-primary w-5 h-5"></i>
@@ -716,16 +716,6 @@
                                     <span>Convidar por Gmail</span>
                                 </button>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="card-premium glass">
-                        <h4 class="profile-section-title" style="display: flex; align-items: center; gap: 8px; text-align: left;">
-                            <i data-lucide="users" class="text-primary w-5 h-5"></i>
-                            <span>Pessoas que me acompanham</span>
-                        </h4>
-                        <div id="companions-list" class="space-y-3" style="text-align: left;">
-                            <p class="text-sm text-slate-400 text-center py-4">Nenhum acompanhante cadastrado.</p>
                         </div>
                     </div>
                 </div>
