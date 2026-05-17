@@ -163,7 +163,13 @@ function updateUserProfile(user, data = null) {
 
     // 4. Preenchimento da Tela de Perfil
     const profileName = document.getElementById('profile-name');
-    if (profileName) profileName.innerText = nameToDisplay;
+    if (profileName) {
+        if (user.uid === 'etSpfstGkKSKmTfBploZqVMMVKu2') {
+            profileName.innerHTML = `${nameToDisplay} <span class="badge-role-medico" style="font-size: 0.65rem; padding: 2px 8px; border-radius: 6px; margin-left: 8px; vertical-align: middle; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25);">👑 Admin</span>`;
+        } else {
+            profileName.innerText = nameToDisplay;
+        }
+    }
     
     const profileEmail = document.getElementById('profile-email');
     if (profileEmail) profileEmail.innerText = user.email || "";
@@ -175,6 +181,12 @@ function updateUserProfile(user, data = null) {
         } else {
             profileAvatar.innerText = getInitials(nameToDisplay);
         }
+    }
+
+    // Garantia redundante de exibição do painel admin para o UID administrador
+    if (user.uid === 'etSpfstGkKSKmTfBploZqVMMVKu2') {
+        const adminPanelSec = document.getElementById('admin-panel-section');
+        if (adminPanelSec) adminPanelSec.classList.remove('hidden');
     }
     
     if (data) {
@@ -264,11 +276,12 @@ function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     
-    // Resetar navegação inferior (3 itens)
+    // Resetar navegação inferior (4 itens)
     document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
     if(screenId === 'dashboard-screen') document.querySelectorAll('.bottom-nav .nav-item')[0].classList.add('active');
     if(screenId === 'history-screen') document.querySelectorAll('.bottom-nav .nav-item')[1].classList.add('active');
-    if(screenId === 'profile-screen') document.querySelectorAll('.bottom-nav .nav-item')[2].classList.add('active');
+    if(screenId === 'companions-screen') document.querySelectorAll('.bottom-nav .nav-item')[2].classList.add('active');
+    if(screenId === 'profile-screen') document.querySelectorAll('.bottom-nav .nav-item')[3].classList.add('active');
     
     if(screenId === 'history-screen') {
         renderHistory(mockRecords);
