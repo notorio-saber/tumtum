@@ -305,56 +305,105 @@ function prevStep() {
 
 async function finishAnamnese() {
     const btn = document.getElementById('btn-next-step');
-    btn.innerText = "Salvando...";
-    btn.disabled = true;
+    if (btn) {
+        btn.innerText = "Salvando...";
+        btn.disabled = true;
+    }
     
-    // Gathers data
-    const anamneseData = {
-        nome: document.getElementById('a-nome').value,
-        sexo: document.getElementById('a-sexo').value,
-        idade: parseInt(document.getElementById('a-idade').value),
-        peso: parseInt(document.getElementById('a-peso').value),
-        altura: parseInt(document.getElementById('a-altura').value),
+    try {
+        // Obter elementos com segurança e usar fallbacks
+        const nomeEl = document.getElementById('a-nome');
+        const sexoEl = document.getElementById('a-sexo');
+        const idadeEl = document.getElementById('a-idade');
+        const pesoEl = document.getElementById('a-peso');
+        const alturaEl = document.getElementById('a-altura');
         
-        hipertensao: document.getElementById('a-hiper').value,
-        usaMedicamento: document.getElementById('a-med').value,
-        medicamentoNome: document.getElementById('a-med-nome').value,
-        medicamentoFreq: document.getElementById('a-med-freq').value,
+        const hiperEl = document.getElementById('a-hiper');
+        const medEl = document.getElementById('a-med');
+        const medNomeEl = document.getElementById('a-med-nome');
+        const medFreqEl = document.getElementById('a-med-freq');
         
-        // Multiples
-        historico: Array.from(document.querySelectorAll('#step-3 .choice-card.multi.selected')).filter(b => b.innerText.includes('Infarto') || b.innerText.includes('AVC') || b.innerText.includes('Arritmia') || b.innerText.includes('Cardíaca') || b.innerText.includes('Cardiopatia')).map(b => b.innerText),
-        sintomas:  Array.from(document.querySelectorAll('#step-3 .choice-card.multi.selected')).filter(b => b.innerText.includes('Dor') || b.innerText.includes('Falta') || b.innerText.includes('Tontura') || b.innerText.includes('Palpitação') || b.innerText.includes('Inchaço')).map(b => b.innerText),
+        const habFisicaEl = document.getElementById('a-hab-fisica');
+        const habFumaEl = document.getElementById('a-hab-fuma');
+        const habAlcoolEl = document.getElementById('a-hab-alcool');
+        const habSalEl = document.getElementById('a-hab-sal');
+        const habDiabetesEl = document.getElementById('a-hab-diabetes');
+        const habColesterolEl = document.getElementById('a-hab-colesterol');
         
-        habitos: {
-            fisica: document.getElementById('a-hab-fisica').value,
-            fuma: document.getElementById('a-hab-fuma').value,
-            alcool: document.getElementById('a-hab-alcool').value,
-            sal: document.getElementById('a-hab-sal').value,
-            diabetes: document.getElementById('a-hab-diabetes').value,
-            colesterol: document.getElementById('a-hab-colesterol').value
-        },
+        const emergEl = document.getElementById('a-emergencia');
+        const emergNomeEl = document.getElementById('a-emerg-nome');
+        const emergTelEl = document.getElementById('a-emerg-tel');
         
-        emergenciaFamiliar: document.getElementById('a-emergencia').value,
-        emergenciaNome: document.getElementById('a-emerg-nome').value,
-        emergenciaTel: document.getElementById('a-emerg-tel').value,
+        const situacaoEl = document.getElementById('a-situacao');
         
-        situacaoPressao: document.getElementById('a-situacao').value,
-        completedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    
-    const user = window.auth.currentUser;
-    if (user) {
-        try {
-            await window.db.collection('users').doc(user.uid).set(anamneseData, { merge: true });
-            // Salva sinalizador local para dupla segurança (offline/erros)
-            localStorage.setItem(`anamnese_completed_${user.uid}`, 'true');
-            updateUserProfile(user, anamneseData);
+        const anamneseData = {
+            nome: nomeEl ? nomeEl.value : "",
+            sexo: sexoEl ? sexoEl.value : "",
+            idade: idadeEl ? (parseInt(idadeEl.value) || 0) : 0,
+            peso: pesoEl ? (parseInt(pesoEl.value) || 0) : 0,
+            altura: alturaEl ? (parseInt(alturaEl.value) || 0) : 0,
             
-            showScreen('dashboard-screen');
-            initChart();
-        } catch (error) {
-            console.error("Erro ao salvar:", error);
-            alert("Houve um erro ao salvar seu perfil. Tente novamente.");
+            hipertensao: hiperEl ? hiperEl.value : "",
+            usaMedicamento: medEl ? medEl.value : "",
+            medicamentoNome: medNomeEl ? medNomeEl.value : "",
+            medicamentoFreq: medFreqEl ? (parseInt(medFreqEl.value) || 0) : 0,
+            
+            // Multiples
+            historico: Array.from(document.querySelectorAll('#step-3 .choice-card.multi.selected')).map(b => b.innerText.trim()),
+            sintomas:  Array.from(document.querySelectorAll('#step-3 .choice-card.multi.selected')).map(b => b.innerText.trim()),
+            
+            habitos: {
+                fisica: habFisicaEl ? habFisicaEl.value : "",
+                fuma: habFumaEl ? habFumaEl.value : "",
+                alcool: habAlcoolEl ? habAlcoolEl.value : "",
+                sal: habSalEl ? habSalEl.value : "",
+                diabetes: habDiabetesEl ? habDiabetesEl.value : "",
+                colesterol: habColesterolEl ? habColesterolEl.value : ""
+            },
+            
+            emergenciaFamiliar: emergEl ? emergEl.value : "",
+            emergenciaNome: emergNomeEl ? emergNomeEl.value : "",
+            emergenciaTel: emergTelEl ? emergTelEl.value : "",
+            
+            situacaoPressao: situacaoEl ? situacaoEl.value : ""
+        };
+
+        // Adiciona completedAt com fallback robusto
+        if (typeof firebase !== 'undefined' && firebase.firestore) {
+            anamneseData.completedAt = firebase.firestore.FieldValue.serverTimestamp();
+        } else {
+            anamneseData.completedAt = new Date().toISOString();
+        }
+        
+        // Verifica autenticação
+        const user = window.auth ? window.auth.currentUser : null;
+        if (!user) {
+            throw new Error("Sua sessão expirou ou você não está logado. Faça login novamente.");
+        }
+        
+        // Salva no banco de dados Firestore
+        if (window.db) {
+            await window.db.collection('users').doc(user.uid).set(anamneseData, { merge: true });
+        } else {
+            console.warn("Firestore offline ou indisponível. Salvando localmente.");
+        }
+        
+        // Salva sinalizador local para dupla segurança (offline/erros)
+        localStorage.setItem(`anamnese_completed_${user.uid}`, 'true');
+        
+        // Atualiza a interface do usuário com os dados recém-salvos
+        updateUserProfile(user, anamneseData);
+        
+        // Redireciona para a tela principal
+        showScreen('dashboard-screen');
+        
+        // Inicializa o gráfico de tendência semanal
+        initChart();
+        
+    } catch (error) {
+        console.error("Erro completo ao salvar anamnese:", error);
+        alert("Ops! Houve um erro ao salvar suas informações: " + error.message);
+        if (btn) {
             btn.innerText = "Concluir";
             btn.disabled = false;
         }
