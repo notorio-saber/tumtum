@@ -298,6 +298,33 @@ function updateUserProfile(user, data = null) {
     }
     
     if (data) {
+        // Notificações Push FCM Toggle sync
+        const pushToggle = document.getElementById('push-notification-toggle');
+        const pushStatus = document.getElementById('lbl-push-status');
+        const pushDesc = document.getElementById('lbl-push-desc');
+        const testBtn = document.getElementById('btn-test-notification');
+        const iosDisclaimer = document.getElementById('ios-push-disclaimer');
+        
+        if (pushToggle) {
+            const isPushActive = data.pushEnabled === true;
+            pushToggle.checked = isPushActive;
+            
+            if (pushStatus) pushStatus.innerText = isPushActive ? 'Lembretes Diários Ativos' : 'Lembretes Diários Desativados';
+            if (pushDesc) pushDesc.innerText = isPushActive ? 'Lembretes às 08:00 e 20:00' : 'Clique ao lado para ativar';
+            if (testBtn) testBtn.style.display = isPushActive ? 'flex' : 'none';
+        }
+
+        // Detectar iOS para exibir disclaimer amigável
+        if (iosDisclaimer) {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            if (isIOS && !isStandalone) {
+                iosDisclaimer.style.display = 'block';
+            } else {
+                iosDisclaimer.style.display = 'none';
+            }
+        }
+
         // Dados Clínicos
         if (document.getElementById('p-idade')) document.getElementById('p-idade').innerText = data.idade ? `${data.idade} anos` : '-- anos';
         if (document.getElementById('p-sexo')) document.getElementById('p-sexo').innerText = data.sexo || '--';
@@ -2010,6 +2037,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         updateUserProfile(user, data);
                         showScreen('dashboard-screen');
                         initChart();
+                        if (window.checkTodayRegistrationAndBadge) {
+                            window.checkTodayRegistrationAndBadge();
+                        }
                     } else {
                         document.getElementById('a-nome').value = user.displayName || "";
                         showScreen('anamnese-screen');
@@ -2273,6 +2303,9 @@ document.addEventListener('DOMContentLoaded', () => {
             closeModal('new-record-modal');
             recordForm.reset();
             
+            // Limpa o badge do PWA de pendência imediatamente
+            updateAppBadge(0);
+            
             // Exibe o modal dinâmico com orientações da Biomédica
             showBiomedicalAlert(newRecord.sys, newRecord.dia);
         });
@@ -2466,4 +2499,299 @@ window.filtrarHistorico = filtrarHistorico;
 window.exportarCSV = exportarCSV;
 window.handleLogout = handleLogout;
 window.startEditAnamnese = startEditAnamnese;
+
+// --- SISTEMA DE NOTIFICAÇÕES PUSH (FCM) & FEEDBACKS ---
+
+// Chave VAPID para Web Push do seu Console do Firebase -> Cloud Messaging -> Configuração da Web
+const FCM_VAPID_KEY = "SUA_CHAVE_VAPID_AQUI"; 
+
+let messagingInstance = null;
+
+// Inicializa FCM se suportado
+function initFirebaseMessaging() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        console.log('Este navegador não suporta notificações push.');
+        return null;
+    }
+    
+    try {
+        if (!messagingInstance && window.firebase) {
+            messagingInstance = window.firebase.messaging();
+        }
+    } catch (e) {
+        console.warn('Erro ao inicializar Firebase Messaging:', e);
+    }
+    return messagingInstance;
+}
+
+// Escuta redirecionamento/cliques de notificações no PWA ativo
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function(event) {
+        if (event.data && event.data.action === 'open-register-modal') {
+            console.log('Mensagem de clique em notificação recebida, abrindo formulário...');
+            // Toca som e vibração
+            playHeartbeatSound();
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+            // Abre o modal de novo registro
+            showModal('new-record-modal');
+        }
+    });
+}
+
+// Verifica parâmetros da URL ao carregar a página
+window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('action') === 'register') {
+        setTimeout(() => {
+            // Toca som e vibração
+            playHeartbeatSound();
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+            showModal('new-record-modal');
+            // Limpa o parâmetro da URL de forma elegante
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }, 1200);
+    }
+});
+
+// Sintetiza som de batimento cardíaco "Tum-Tum" em tempo real usando Web Audio API
+function playHeartbeatSound() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        
+        // Primeiro "Tum" (grave e abafado)
+        setTimeout(() => {
+            playBeat(ctx, 60, 0.15); // Frequência de 60Hz, duração de 0.15s
+        }, 0);
+        
+        // Segundo "Tum" (ligeiramente mais forte e curto)
+        setTimeout(() => {
+            playBeat(ctx, 55, 0.18); // Frequência de 55Hz, duração de 0.18s
+        }, 150);
+        
+    } catch (e) {
+        console.warn("Web Audio API não pôde reproduzir som:", e);
+    }
+}
+
+function playBeat(ctx, freq, duration) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(10, ctx.currentTime + duration);
+    
+    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+}
+
+// Liga/Desliga Notificações Push pelo Interruptor
+async function togglePushNotifications(toggleEl) {
+    const user = window.auth.currentUser;
+    if (!user) {
+        showGlobalAlert("Faça login para gerenciar suas notificações.", "error");
+        toggleEl.checked = !toggleEl.checked;
+        return;
+    }
+    
+    const pushStatus = document.getElementById('lbl-push-status');
+    const pushDesc = document.getElementById('lbl-push-desc');
+    const testBtn = document.getElementById('btn-test-notification');
+    
+    if (toggleEl.checked) {
+        // Fluxo de Ativação
+        try {
+            // 1. Solicita permissão
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                showGlobalAlert("Permissão de notificações negada. Ative nas configurações do navegador.", "warning");
+                toggleEl.checked = false;
+                return;
+            }
+            
+            // 2. Registra o service worker de mensagens se não estiver registrado
+            const messaging = initFirebaseMessaging();
+            if (!messaging) {
+                showGlobalAlert("Seu dispositivo ou navegador não suporta Notificações Push.", "warning");
+                toggleEl.checked = false;
+                return;
+            }
+            
+            // Registra explicitamente o SW de messaging
+            const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+            console.log('Service Worker do FCM registrado com sucesso!', reg);
+            
+            // 3. Obtém o Token FCM
+            let token;
+            if (FCM_VAPID_KEY === "SUA_CHAVE_VAPID_AQUI") {
+                console.warn("VAPID Key padrão encontrada. Gerando token básico...");
+                token = await messaging.getToken({ serviceWorkerRegistration: reg });
+            } else {
+                token = await messaging.getToken({ 
+                    serviceWorkerRegistration: reg,
+                    vapidKey: FCM_VAPID_KEY 
+                });
+            }
+            
+            if (token) {
+                console.log('Token FCM gerado com sucesso:', token);
+                
+                // 4. Salva no Firestore
+                await window.db.collection('users').doc(user.uid).update({
+                    pushEnabled: true,
+                    fcmTokens: firebase.firestore.FieldValue.arrayUnion(token)
+                });
+                
+                // 5. Atualiza a interface
+                if (pushStatus) pushStatus.innerText = 'Lembretes Diários Ativos';
+                if (pushDesc) pushDesc.innerText = 'Lembretes às 08:00 e 20:00';
+                if (testBtn) testBtn.style.display = 'flex';
+                
+                showGlobalAlert("Lembretes ativados com sucesso! 💙", "success");
+                
+                // Limpa o badge se eles já cadastraram hoje
+                checkTodayRegistrationAndBadge();
+            } else {
+                throw new Error("Nenhum token retornado pelo FCM.");
+            }
+            
+        } catch (error) {
+            console.error("Erro ao ativar notificações:", error);
+            showGlobalAlert("Erro ao configurar notificações: " + error.message, "error");
+            toggleEl.checked = false;
+        }
+    } else {
+        // Fluxo de Desativação
+        try {
+            await window.db.collection('users').doc(user.uid).update({
+                pushEnabled: false
+            });
+            
+            if (pushStatus) pushStatus.innerText = 'Lembretes Diários Desativados';
+            if (pushDesc) pushDesc.innerText = 'Clique ao lado para ativar';
+            if (testBtn) testBtn.style.display = 'none';
+            
+            // Limpa o badge do PWA
+            updateAppBadge(0);
+            
+            showGlobalAlert("Lembretes desativados.", "info");
+        } catch (error) {
+            console.error("Erro ao desativar notificações:", error);
+            showGlobalAlert("Erro ao salvar preferências.", "error");
+            toggleEl.checked = true;
+        }
+    }
+}
+window.togglePushNotifications = togglePushNotifications;
+
+// Envia Notificação Push de Teste local em tempo real
+function testLocalPushNotification() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+        showGlobalAlert("Permissão de notificações necessária para testar.", "warning");
+        return;
+    }
+    
+    // Mostra feedback visual
+    showGlobalAlert("Simulando lembrete em 3 segundos... Saia do app para ver a notificação de segundo plano!", "success");
+    
+    setTimeout(async () => {
+        // Se estiver focado, manda um postMessage interno para testar haptics e modal
+        if (document.visibilityState === 'visible') {
+            console.log('App visível: simulando notificação direta na interface.');
+            playHeartbeatSound();
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+            showModal('new-record-modal');
+            showGlobalAlert("Aferir Pressão! Está na hora de registrar no TumTum. 💙", "info");
+        } else {
+            // Em segundo plano: Dispara uma notificação nativa local usando o Service Worker
+            try {
+                const reg = await navigator.serviceWorker.ready;
+                reg.showNotification('TumTum 💙 (Teste)', {
+                    body: 'Este é o seu lembrete de teste! Clique aqui para registrar sua pressão.',
+                    icon: '/logo ok.png',
+                    badge: '/logo ok.png',
+                    tag: 'tumtum-test',
+                    vibrate: [100, 50, 100],
+                    data: {
+                        action: 'open-register'
+                    }
+                });
+            } catch (e) {
+                console.error("Erro ao disparar notificação local em background:", e);
+            }
+        }
+    }, 3000);
+}
+window.testLocalPushNotification = testLocalPushNotification;
+
+// --- INTEGRAÇÃO PWA APP BADGE API ---
+
+function updateAppBadge(count) {
+    if ('setAppBadge' in navigator) {
+        if (count > 0) {
+            navigator.setAppBadge(count).catch((error) => {
+                console.error("Erro ao definir badge do app:", error);
+            });
+        } else {
+            navigator.clearAppBadge().catch((error) => {
+                console.error("Erro ao limpar badge do app:", error);
+            });
+        }
+    }
+}
+window.updateAppBadge = updateAppBadge;
+
+// Verifica se já registrou hoje e atualiza o PWA Badge de pendência
+async function checkTodayRegistrationAndBadge() {
+    const user = window.auth.currentUser;
+    if (!user) return;
+    
+    try {
+        const recordsSnapshot = await window.db.collection('users').doc(user.uid).collection('records')
+            .orderBy('timestamp', 'desc')
+            .limit(10)
+            .get();
+            
+        let hasAfeiriedToday = false;
+        const todayStr = new Date().toDateString();
+        
+        recordsSnapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.timestamp) {
+                const dateObj = new Date(data.timestamp);
+                if (dateObj.toDateString() === todayStr) {
+                    hasAfeiriedToday = true;
+                }
+            }
+        });
+        
+        // Só define badge se o usuário ativou lembretes push, sinalizando que ele acompanha
+        const userDoc = await window.db.collection('users').doc(user.uid).get();
+        const userData = userDoc.data() || {};
+        
+        if (userData.pushEnabled === true && !hasAfeiriedToday) {
+            updateAppBadge(1); // Exibe 1 pendência vermelha
+        } else {
+            updateAppBadge(0); // Limpa o badge
+        }
+    } catch (e) {
+        console.warn("Erro ao checar badge diário:", e);
+    }
+}
+window.checkTodayRegistrationAndBadge = checkTodayRegistrationAndBadge;
+
 

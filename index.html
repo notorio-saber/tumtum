@@ -694,6 +694,46 @@
                     </button>
                 </div>
 
+                <!-- Configurações de Lembretes e Notificações (FCM) -->
+                <div class="card-premium glass" style="width: 100%;">
+                    <h4 class="profile-section-title" style="display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="bell" class="text-primary"></i>
+                        <span>Lembretes e Notificações</span>
+                    </h4>
+                    <p class="text-xs text-slate-500 mb-4" style="line-height: 1.4; text-align: left;">
+                        Receba lembretes diários às 08:00 e 20:00 para medir e registrar sua pressão arterial.
+                    </p>
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--gray-light); border-radius: 14px; border: 1px solid var(--gray-medium); margin-bottom: 12px;">
+                        <div style="text-align: left; display: flex; flex-direction: column; gap: 2px;">
+                            <span style="font-size: 0.82rem; font-weight: 800; color: var(--text-main);" id="lbl-push-status">Lembretes Diários Desativados</span>
+                            <span style="font-size: 0.65rem; color: #64748b;" id="lbl-push-desc">Clique ao lado para ativar</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="push-notification-toggle" onchange="togglePushNotifications(this)">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
+                    <!-- Botão de Testar Notificação e Suporte iOS -->
+                    <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                        <button type="button" id="btn-test-notification" onclick="testLocalPushNotification()" class="btn-secondary" style="padding: 10px; border-radius: 12px; font-weight: 700; font-size: 0.78rem; border: 1px solid rgba(15, 23, 42, 0.08); background: transparent; cursor: pointer; width: 100%; display: none; align-items: center; justify-content: center; gap: 6px;">
+                            <i data-lucide="bell-ring" class="w-4 h-4 text-primary"></i>
+                            <span>Enviar Notificação de Teste</span>
+                        </button>
+                        
+                        <!-- Aviso Amigável para iOS -->
+                        <div id="ios-push-disclaimer" style="display: none; background: rgba(59, 130, 246, 0.04); border: 1px dashed rgba(59, 130, 246, 0.15); border-radius: 12px; padding: 10px 12px; text-align: left; margin-top: 5px;">
+                            <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                <i data-lucide="info" class="w-4 h-4 text-blue-500" style="margin-top: 1px; flex-shrink: 0;"></i>
+                                <p style="font-size: 0.65rem; color: #475569; line-height: 1.45; margin: 0;">
+                                    <strong>Usuário Apple/iOS:</strong> Para receber lembretes no iPhone, adicione este aplicativo à sua tela inicial clicando no ícone de compartilhamento do Safari <i data-lucide="share" style="display: inline-block; width: 10px; height: 10px; margin: 0 1px;"></i> e selecionando <strong>"Adicionar à Tela de Início"</strong>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Botão de Sair -->
                 <button onclick="handleLogout()" class="btn-profile-logout">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
@@ -1083,6 +1123,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="script.js"></script>
     <script>
