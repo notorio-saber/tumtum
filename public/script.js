@@ -29,9 +29,57 @@ const getPeriodo = (date = new Date()) => {
 };
 
 const getStatus = (sys, dia) => {
-    if (sys < 130 && dia < 85) return { label: 'Normal', class: 'badge-success', border: 'border-success' };
-    if (sys < 140 && dia < 90) return { label: 'Atenção', class: 'badge-warning', border: 'border-warning' };
-    return { label: 'Elevada', class: 'badge-danger', border: 'border-danger' };
+    sys = parseInt(sys) || 0;
+    dia = parseInt(dia) || 0;
+    
+    if (sys >= 180 || dia >= 120) {
+        return {
+            label: 'Crise Hipertensiva',
+            class: 'badge-crisis',
+            border: 'border-crisis',
+            message: 'Procure atendimento médico imediatamente.',
+            risk: 'Muito Alto',
+            action: 'Ligue para a emergência ou vá ao pronto-socorro mais próximo.'
+        };
+    }
+    if (sys >= 160 || dia >= 100) {
+        return {
+            label: 'Hipertensão Estágio 2',
+            class: 'badge-danger',
+            border: 'border-danger',
+            message: 'Pressão muito elevada.',
+            risk: 'Alto',
+            action: 'Repita a aferição após alguns minutos de repouso, observe sintomas e busque orientação médica.'
+        };
+    }
+    if (sys >= 140 || dia >= 90) {
+        return {
+            label: 'Hipertensão Estágio 1',
+            class: 'badge-coral',
+            border: 'border-coral',
+            message: 'Sua pressão está elevada.',
+            risk: 'Moderado',
+            action: 'Faça um acompanhamento médico regular e meça novamente após um breve período de repouso.'
+        };
+    }
+    if (sys >= 120 || dia >= 80) {
+        return {
+            label: 'Elevada / Atenção',
+            class: 'badge-warning',
+            border: 'border-warning',
+            message: 'Sua pressão merece acompanhamento.',
+            risk: 'Leve/Moderado',
+            action: 'Monitore sua rotina, reduza o consumo de sal e repita a aferição periodicamente.'
+        };
+    }
+    return {
+        label: 'Normal',
+        class: 'badge-success',
+        border: 'border-success',
+        message: 'Sua pressão está dentro da faixa ideal.',
+        risk: 'Baixo',
+        action: 'Parabéns! Mantenha hábitos de vida saudáveis e continue registrando regularmente.'
+    };
 };
 
 function getInitials(name) {
@@ -174,7 +222,7 @@ function updateUserProfile(user, data = null) {
 }
 
 // Dados Mockados para histórico
-const mockRecords = [
+let mockRecords = [
     { id: 1, date: '2026-05-16', time: '08:20', sys: 120, dia: 80, bpm: 72, periodo: 'Manhã', condicao: 'Em repouso' },
     { id: 2, date: '2026-05-15', time: '19:45', sys: 125, dia: 82, bpm: 75, periodo: 'Noite', condicao: 'Após estresse' },
     { id: 3, date: '2026-05-14', time: '07:30', sys: 118, dia: 78, bpm: 68, periodo: 'Manhã', condicao: 'Antes do medicamento' },
@@ -223,15 +271,92 @@ function renderHistory(records) {
                 <div class="values">${record.sys} / ${record.dia} <span class="bpm">❤ ${record.bpm} bpm</span></div>
                 <div class="text-xs text-slate-500 mt-1">${record.condicao}</div>
             </div>
-            <div class="${status.class}" style="font-size: 0.7rem; padding: 4px 8px;">${status.label}</div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 8px;">
+                <div class="${status.class}" style="font-size: 0.7rem; padding: 4px 8px;">${status.label}</div>
+                <button onclick="deleteRecord(${record.id})" style="background: transparent; border: none; cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; color: var(--primary); transition: all 0.2s;" title="Excluir Aferição">
+                    <i data-lucide="trash-2" style="width: 15px; height: 15px; stroke-width: 2.5;"></i>
+                </button>
+            </div>
         `;
         list.appendChild(card);
     });
+
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
 }
 
 function formatDate(dateString) {
     const [year, month, day] = dateString.split('-');
     return `${day}/${month}`;
+}
+
+async function deleteRecord(id) {
+    if (confirm("Tem certeza que deseja excluir esta aferição do seu histórico?")) {
+        // Filtra e remove do array local
+        mockRecords = mockRecords.filter(r => r.id !== id);
+        
+        const user = window.auth ? window.auth.currentUser : null;
+        if (user) {
+            // Salva offline localmente de imediato
+            localStorage.setItem(`records_${user.uid}`, JSON.stringify(mockRecords));
+            
+            // Salva no Firestore assincronamente em background
+            window.db.collection('users').doc(user.uid).collection('records').doc(id.toString()).delete()
+                .catch(err => console.warn("Firestore offline. Exclusão de registro mantida localmente."));
+        } else {
+            localStorage.setItem('records_guest', JSON.stringify(mockRecords));
+        }
+        
+        // Re-inicializa gráficos e renderiza a tela atualizada
+        initChart();
+        
+        const historyScreen = document.getElementById('history-screen');
+        if (historyScreen && historyScreen.classList.contains('active')) {
+            renderHistory(mockRecords);
+        }
+    }
+}
+
+function showBiomedicalAlert(sys, dia) {
+    const status = getStatus(sys, dia);
+    
+    // Atualiza elementos do modal de forma segura
+    const valSys = document.getElementById('alert-val-sys');
+    if (valSys) valSys.innerText = sys;
+    
+    const valDia = document.getElementById('alert-val-dia');
+    if (valDia) valDia.innerText = dia;
+    
+    const conversion = document.getElementById('alert-val-conversion');
+    if (conversion) {
+        const sysConv = Math.round(sys / 10);
+        const diaConv = Math.round(dia / 10);
+        conversion.innerText = `Leitura popular: equivale a ${sysConv} por ${diaConv}`;
+    }
+    
+    const badge = document.getElementById('alert-badge');
+    if (badge) {
+        badge.innerText = status.label;
+        badge.className = status.class; // badge-success, badge-warning, etc.
+    }
+    
+    const msg = document.getElementById('alert-message');
+    if (msg) msg.innerText = status.message;
+    
+    const risk = document.getElementById('alert-risk');
+    if (risk) risk.innerText = status.risk;
+    
+    const action = document.getElementById('alert-action');
+    if (action) action.innerText = status.action;
+    
+    // Inicializa Lucide no modal dinâmico
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+    
+    // Exibe o modal
+    showModal('biomedical-alert-modal');
 }
 
 function filtrarHistorico(filtro) {
@@ -573,6 +698,16 @@ async function finishAnamnese() {
 
 // Eventos
 document.addEventListener('DOMContentLoaded', () => {
+    // Carrega registros de convidado (guest) se existirem
+    const guestRecords = localStorage.getItem('records_guest');
+    if (guestRecords) {
+        try {
+            mockRecords = JSON.parse(guestRecords);
+        } catch (e) {
+            console.error("Erro ao fazer parse dos registros de convidado:", e);
+        }
+    }
+
     // Real Firebase Auth Login
     const loginBtn = document.getElementById('btn-login-google');
     const originalBtnHtml = loginBtn ? loginBtn.innerHTML : "Entrar com Google";
@@ -596,6 +731,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             // Atualiza de imediato com dados disponíveis do Google Auth (evita exibir "Carregando...")
             updateUserProfile(user);
+            
+            // Carrega os registros salvos localmente específicos para este usuário logado
+            const localRecords = localStorage.getItem(`records_${user.uid}`);
+            if (localRecords) {
+                try {
+                    mockRecords = JSON.parse(localRecords);
+                } catch (e) {
+                    console.error("Erro ao carregar registros locais do usuário:", e);
+                }
+            } else {
+                // Se for o primeiro acesso e não houver histórico, cria o default local
+                localStorage.setItem(`records_${user.uid}`, JSON.stringify(mockRecords));
+            }
             
             try {
                 const doc = await window.db.collection('users').doc(user.uid).get();
@@ -674,7 +822,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // Adiciona no mock e re-renderiza
-            mockRecords.unshift({
+            const newRecord = {
                 id: Date.now(),
                 date: new Date().toISOString().split('T')[0],
                 time: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
@@ -683,7 +831,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 bpm: bpm || '--',
                 periodo: getPeriodo(),
                 condicao: condicao
-            });
+            };
+            
+            mockRecords.unshift(newRecord);
+            
+            const user = window.auth ? window.auth.currentUser : null;
+            if (user) {
+                // Salva offline localmente de imediato
+                localStorage.setItem(`records_${user.uid}`, JSON.stringify(mockRecords));
+                
+                // Salva no Firestore de forma assíncrona em background
+                window.db.collection('users').doc(user.uid).collection('records').doc(newRecord.id.toString()).set(newRecord)
+                    .catch(err => console.warn("Firestore offline. Registro mantido localmente."));
+            } else {
+                localStorage.setItem('records_guest', JSON.stringify(mockRecords));
+            }
             
             initChart();
             if(document.getElementById('history-screen').classList.contains('active')){
@@ -692,6 +854,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             closeModal('new-record-modal');
             recordForm.reset();
+            
+            // Exibe o modal dinâmico com orientações da Biomédica
+            showBiomedicalAlert(newRecord.sys, newRecord.dia);
         });
     }
 

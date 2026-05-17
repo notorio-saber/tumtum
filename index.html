@@ -555,15 +555,13 @@
                     <button onclick="closeModal('new-record-modal')" class="close-btn"><i data-lucide="x"></i></button>
                 </div>
                 <form id="record-form" class="space-y-6">
-                    <div class="grid-2">
-                        <div class="input-field">
-                            <label>Sistólica (Máx)</label>
-                            <input type="number" id="reg-sys" placeholder="120" required>
-                        </div>
-                        <div class="input-field">
-                            <label>Diastólica (Mín)</label>
-                            <input type="number" id="reg-dia" placeholder="80" required>
-                        </div>
+                    <div class="input-field">
+                        <label>Sistólica (Máx)</label>
+                        <input type="number" id="reg-sys" placeholder="120" required>
+                    </div>
+                    <div class="input-field">
+                        <label>Diastólica (Mín)</label>
+                        <input type="number" id="reg-dia" placeholder="80" required>
                     </div>
                     <div class="input-field">
                         <label>Batimentos (BPM)</label>
@@ -611,6 +609,58 @@
                     </div>
                     
                     <button onclick="closeModal('ios-pwa-modal')" class="btn-primary btn-large w-full mt-6 shadow-glow">Entendi</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Alerta Biomédico Dinâmico (Recomendações da Biomédica) -->
+        <div id="biomedical-alert-modal" class="modal">
+            <div class="modal-overlay" onclick="closeModal('biomedical-alert-modal')"></div>
+            <div class="modal-body glass-heavy" style="text-align: center; border-radius: 28px; max-width: 420px; width: 90%;">
+                <div class="modal-header" style="border: none; padding-bottom: 0;">
+                    <h2 class="text-xl font-bold w-full text-center">Análise da Aferição</h2>
+                    <button onclick="closeModal('biomedical-alert-modal')" class="close-btn"><i data-lucide="x"></i></button>
+                </div>
+                
+                <div class="space-y-6" style="margin-top: 15px;">
+                    <!-- Aferição mmHg -->
+                    <div style="background: rgba(15, 23, 42, 0.03); border-radius: 20px; padding: 20px; border: 1px dashed rgba(15, 23, 42, 0.08); display: inline-block; width: 100%;">
+                        <span style="font-size: 0.8rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 5px;">Sua Pressão</span>
+                        <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; line-height: 1.1;">
+                            <span id="alert-val-sys">--</span>/<span id="alert-val-dia">--</span> <span style="font-size: 1rem; color: #64748b; font-weight: 500;">mmHg</span>
+                        </div>
+                        <div id="alert-val-conversion" style="font-size: 0.95rem; color: #64748b; font-weight: 600; margin-top: 6px;">Equivale a --</div>
+                    </div>
+
+                    <!-- Badge de Classificação -->
+                    <div>
+                        <span id="alert-badge" class="badge-success" style="font-size: 0.95rem; padding: 8px 16px; border-radius: 12px; display: inline-block;">--</span>
+                    </div>
+
+                    <!-- Mensagem Biomédica -->
+                    <div style="background: white; border-radius: 16px; padding: 18px; border: 1px solid var(--gray-medium); text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                        <div style="display: flex; align-items: flex-start; gap: 10px;">
+                            <i data-lucide="info" class="w-5 h-5 text-primary" style="flex-shrink: 0; margin-top: 2px;"></i>
+                            <div>
+                                <span style="font-size: 0.78rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 2px;">Diagnóstico</span>
+                                <p id="alert-message" style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); line-height: 1.3; margin: 0;">--</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Risco e Ação -->
+                    <div class="grid-2 text-left" style="gap: 12px; display: grid; grid-template-columns: 1fr 1fr;">
+                        <div style="background: var(--gray-light); padding: 12px; border-radius: 14px; border: 1px solid var(--gray-medium);">
+                            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 2px;">Nível de Risco</span>
+                            <span id="alert-risk" style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">--</span>
+                        </div>
+                        <div style="background: var(--gray-light); padding: 12px; border-radius: 14px; border: 1px solid var(--gray-medium);">
+                            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 2px;">Recomendação</span>
+                            <span id="alert-action" style="font-weight: 800; font-size: 0.85rem; color: var(--text-main); display: block; line-height: 1.2;">--</span>
+                        </div>
+                    </div>
+
+                    <button onclick="closeModal('biomedical-alert-modal')" class="btn-primary btn-large w-full shadow-glow">Fechar</button>
                 </div>
             </div>
         </div>
