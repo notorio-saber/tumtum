@@ -348,6 +348,21 @@
                     </div>
                 </div>
 
+                <!-- Dicas de Saúde da Dra. Layana (Top Clean Highlight) -->
+                <div id="health-tip-container" style="text-align: center; margin: 10px 0 25px 0; padding: 0 15px; font-family: 'Plus Jakarta Sans', sans-serif;">
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-bottom: 6px;">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-emerald-500 animate-pulse"></i>
+                        <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #10b981;">Minuto Saúde</span>
+                    </div>
+                    <p id="health-tip-content" style="font-size: 0.8rem; color: #475569; margin: 0 auto; max-width: 90%; line-height: 1.45; font-weight: 500;">
+                        Carregando dica de saúde da Dra. Layana...
+                    </p>
+                    <button onclick="nextHealthTip()" style="background: none; border: none; color: #64748b; font-size: 0.7rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; margin-top: 8px; padding: 4px 8px; border-radius: 20px; background: rgba(0,0,0,0.03); font-family: 'Plus Jakarta Sans', sans-serif;">
+                        <span>Próxima dica</span>
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+
                 <!-- Botão Gigante de Registro com Linhas em Movimento -->
                 <div id="patient-giant-card-wrapper" class="giant-measure-card" onclick="showModal('new-record-modal')">
                     <!-- Linhas em Movimento do Design System -->
@@ -407,23 +422,6 @@
                             <span style="font-size: 0.65rem;">Discar 192 (SAMU)</span>
                         </a>
                     </div>
-                </div>
-
-                <!-- Card de Dicas de Saúde (Dra. Layana) -->
-                <div class="card-premium glass mt-4" style="padding: 20px; text-align: left; border: 1px solid rgba(16, 185, 129, 0.15); background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(30, 41, 59, 0.01) 100%);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <div style="display: flex; gap: 8px; align-items: center; color: #10b981;">
-                            <i data-lucide="sparkles" class="w-4 h-4 text-emerald-500 animate-pulse"></i>
-                            <h4 style="margin: 0; font-size: 0.72rem; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-main);">Dica de Saúde da Dra. Layana</h4>
-                        </div>
-                        <button onclick="nextHealthTip()" style="background: none; border: none; color: #10b981; font-size: 0.72rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif;">
-                            <span>Outra dica</span>
-                            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-                        </button>
-                    </div>
-                    <p id="health-tip-content" style="font-size: 0.78rem; color: #64748b; margin: 0; line-height: 1.45; font-family: 'Plus Jakarta Sans', sans-serif;">
-                        Carregando dica de saúde da Dra. Layana...
-                    </p>
                 </div>
             </main>
         </section>
