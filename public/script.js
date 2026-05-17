@@ -492,7 +492,12 @@ function sendEmergencyLocation(btn) {
     if (navigator.permissions && navigator.permissions.query) {
         navigator.permissions.query({ name: 'geolocation' }).then((result) => {
             if (result.state === 'denied') {
-                showGlobalAlert("⚠️ GPS Bloqueado! Toque no ícone de 'Cadeado' ou 'Configurações' ao lado do endereço do site e mude 'Localização' para 'Permitir'.", "warning");
+                const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+                if (isStandalone) {
+                    showGlobalAlert("⚠️ GPS Bloqueado! Vá em Configurações -> Apps -> TumTum -> Permissões e ative a Localização.", "warning");
+                } else {
+                    showGlobalAlert("⚠️ GPS Bloqueado! Toque no ícone de 'Cadeado' ou 'Configurações' ao lado do endereço do site e mude 'Localização' para 'Permitir'.", "warning");
+                }
             }
         }).catch(() => {});
     }
@@ -524,9 +529,14 @@ function sendEmergencyLocation(btn) {
             clearTimeout(fallbackTimeout);
             console.error("Erro na geolocalização:", error);
             
-            // Fornece aviso inteligente apenas se a permissão foi negada explicitamente
+            // Fornece aviso inteligente e contextualizado conforme o modo de exibição (Navegador ou App Instalado)
             if (error.code === error.PERMISSION_DENIED) {
-                showGlobalAlert("⚠️ GPS Bloqueado! Toque no ícone de 'Cadeado' ao lado do endereço do site e ative a 'Localização'.", "warning");
+                const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+                if (isStandalone) {
+                    showGlobalAlert("⚠️ GPS Bloqueado! Vá em Configurações -> Apps -> TumTum -> Permissões e ative a Localização.", "warning");
+                } else {
+                    showGlobalAlert("⚠️ GPS Bloqueado! Toque no ícone de 'Cadeado' ao lado do endereço do site e mude 'Localização' para 'Permitir'.", "warning");
+                }
             }
             proceedWithLocation(null, null);
         },
