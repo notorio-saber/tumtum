@@ -2005,19 +2005,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             const nameEl = document.getElementById('display-name');
                             if (nameEl) nameEl.innerText = patData.nome || patData.displayName || "Paciente";
                             
-                            // Carrega os registros específicos do paciente
-                            const patRecordsSnap = await window.db.collection('users').doc(activePatientUid).collection('records').orderBy('createdAt', 'desc').limit(50).get();
+                            // Carrega os registros específicos do paciente (Ordenado de forma robusta por 'id' descendente)
+                            const patRecordsSnap = await window.db.collection('users').doc(activePatientUid).collection('records').orderBy('id', 'desc').limit(50).get();
                             mockRecords = [];
                             patRecordsSnap.forEach(rDoc => {
                                 const r = rDoc.data();
                                 mockRecords.push({
-                                    id: rDoc.id,
-                                    sys: r.sys,
-                                    dia: r.dia,
-                                    bpm: r.bpm,
-                                    date: r.date || "Hoje",
-                                    time: r.time || "00:00",
-                                    period: r.period || "Tarde",
+                                    id: Number(r.id) || Number(rDoc.id) || Date.now(),
+                                    sys: parseInt(r.sys),
+                                    dia: parseInt(r.dia),
+                                    bpm: r.bpm || '--',
+                                    date: r.date || "",
+                                    time: r.time || "",
+                                    periodo: r.periodo || r.period || "Tarde",
                                     condicao: r.condicao || "Repouso"
                                 });
                             });
