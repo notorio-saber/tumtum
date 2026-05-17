@@ -397,13 +397,114 @@ body {
     width: 100%;
 }
 
+.btn-secondary {
+    background: var(--glass);
+    color: var(--text-main);
+    border: 1px solid var(--gray-medium);
+    cursor: pointer;
+}
+
 .mt-4 { margin-top: 1rem; }
 .mb-6 { margin-bottom: 1.5rem; }
 .space-y-6 > * + * { margin-top: 1.5rem; }
-.hidden { display: none; }
+.space-y-4 > * + * { margin-top: 1rem; }
+.hidden { display: none !important; }
 .text-2xl { font-size: 1.5rem; }
+.text-xl { font-size: 1.25rem; }
+.text-lg { font-size: 1.125rem; }
+.text-center { text-align: center; }
 .font-bold { font-weight: 700; }
 .text-slate-500 { color: var(--text-muted); }
+.w-full { width: 100%; }
+
+/* Anamnese Onboarding Styles */
+.step-container {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.step-container.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background: var(--gray-medium);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--success);
+    transition: width 0.3s ease;
+}
+
+.choice-card {
+    background: var(--glass);
+    border: 2px solid var(--gray-medium);
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    width: 100%;
+}
+
+.choice-card.selected {
+    background: rgba(10, 38, 71, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 4px 12px rgba(10, 38, 71, 0.15);
+}
+
+.number-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--glass);
+    border: 1px solid var(--gray-medium);
+    border-radius: 16px;
+    padding: 8px;
+}
+
+.number-stepper button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.number-stepper input {
+    width: 80px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: transparent;
+    border: none;
+    color: var(--primary);
+}
+
+.grid-1 {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
 
 /* Custom Utilities for Mobile First */
 @media (min-width: 501px) {

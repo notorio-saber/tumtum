@@ -37,62 +37,231 @@
             </div>
         </section>
 
-        <!-- Tela de Cadastro de Perfil (Onboarding) -->
-        <section id="profile-setup-screen" class="screen">
-            <div class="container py-8">
-                <header class="mb-6">
-                    <h2 class="text-2xl font-bold">Conte-nos sobre você</h2>
-                    <p class="text-slate-500">Para um acompanhamento personalizado.</p>
-                </header>
-                <form id="profile-form" class="space-y-6">
-                    <div class="card-premium glass">
+        <!-- Tela de Anamnese (Onboarding) -->
+        <section id="anamnese-screen" class="screen">
+            <header class="app-header glass" style="margin-bottom: 0;">
+                <div class="user-info w-full">
+                    <h2 class="font-bold text-xl text-center">Perfil de Saúde</h2>
+                    <div class="progress-bar-container mt-4">
+                        <div class="progress-bar" id="anamnese-progress" style="width: 16%;"></div>
+                    </div>
+                    <p class="text-center text-xs text-slate-500 mt-2">Etapa <span id="current-step-display">1</span> de 6</p>
+                </div>
+            </header>
+
+            <main class="dashboard-content pb-24 mt-6">
+                <!-- Passo 1: Básico -->
+                <div class="step-container active" id="step-1">
+                    <h3 class="text-xl font-bold mb-4">Dados Principais</h3>
+                    <div class="card-premium glass space-y-4">
                         <div class="input-field">
                             <label>Nome Completo</label>
-                            <input type="text" id="p-nome" placeholder="Seu nome" required>
+                            <input type="text" id="a-nome" placeholder="Seu nome" class="text-lg">
                         </div>
-                        <div class="grid-2">
-                            <div class="input-field">
-                                <label>Nascimento</label>
-                                <input type="date" id="p-nascimento" required>
+                        <div class="input-field">
+                            <label>Sexo</label>
+                            <div class="grid-2">
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-sexo', 'M')">Masculino</button>
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-sexo', 'F')">Feminino</button>
                             </div>
-                            <div class="input-field">
-                                <label>Sexo</label>
-                                <select id="p-sexo">
-                                    <option value="M">Masculino</option>
-                                    <option value="F">Feminino</option>
-                                    <option value="O">Outro</option>
-                                </select>
-                            </div>
+                            <input type="hidden" id="a-sexo">
                         </div>
-                        <div class="grid-2">
-                            <div class="input-field">
-                                <label>Peso (kg)</label>
-                                <input type="number" id="p-peso" placeholder="85">
-                            </div>
-                            <div class="input-field">
-                                <label>Altura (m)</label>
-                                <input type="number" step="0.01" id="p-altura" placeholder="1.83">
+                        <div class="input-field">
+                            <label>Idade</label>
+                            <div class="number-stepper">
+                                <button type="button" onclick="stepNumber('a-idade', -1)"><i data-lucide="minus"></i></button>
+                                <input type="number" id="a-idade" value="60" readonly>
+                                <button type="button" onclick="stepNumber('a-idade', 1)"><i data-lucide="plus"></i></button>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="card-premium glass">
-                        <h3 class="font-bold mb-4">Saúde</h3>
-                        <div class="checkbox-group">
-                            <label><input type="checkbox" id="p-hipertenso"> Já possui diagnóstico de hipertensão?</label>
-                            <label><input type="checkbox" id="p-medicamento"> Usa medicamento para pressão?</label>
+                        <div class="input-field">
+                            <label>Peso (kg)</label>
+                            <div class="number-stepper">
+                                <button type="button" onclick="stepNumber('a-peso', -1)"><i data-lucide="minus"></i></button>
+                                <input type="number" id="a-peso" value="70" readonly>
+                                <button type="button" onclick="stepNumber('a-peso', 1)"><i data-lucide="plus"></i></button>
+                            </div>
                         </div>
-                        <div id="med-info" class="hidden mt-4">
-                            <div class="input-field">
-                                <label>Nome do Medicamento</label>
-                                <input type="text" id="p-med-nome" placeholder="Ex: Enalapril 20mg">
+                        <div class="input-field">
+                            <label>Altura (cm)</label>
+                            <div class="number-stepper">
+                                <button type="button" onclick="stepNumber('a-altura', -1)"><i data-lucide="minus"></i></button>
+                                <input type="number" id="a-altura" value="160" readonly>
+                                <button type="button" onclick="stepNumber('a-altura', 1)"><i data-lucide="plus"></i></button>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <button type="submit" class="btn-primary btn-large shadow-glow">Salvar e Continuar</button>
-                </form>
-            </div>
+                <!-- Passo 2: Cardiovascular -->
+                <div class="step-container" id="step-2">
+                    <h3 class="text-xl font-bold mb-4">Histórico Cardiovascular</h3>
+                    <div class="card-premium glass space-y-6">
+                        <div class="input-field">
+                            <label class="text-lg">Você possui hipertensão?</label>
+                            <div class="grid-1 gap-2">
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hiper', 'Sim')">Sim</button>
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hiper', 'Não')">Não</button>
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hiper', 'Não sei')">Não sei</button>
+                            </div>
+                            <input type="hidden" id="a-hiper">
+                        </div>
+                        <div class="input-field">
+                            <label class="text-lg">Faz uso de medicação para pressão?</label>
+                            <div class="grid-2">
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-med', 'Sim'); document.getElementById('med-details').classList.remove('hidden')">Sim</button>
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-med', 'Não'); document.getElementById('med-details').classList.add('hidden')">Não</button>
+                            </div>
+                            <input type="hidden" id="a-med">
+                        </div>
+                        <div id="med-details" class="hidden space-y-4 pt-4 border-t border-gray-200">
+                            <div class="input-field">
+                                <label>Qual medicamento?</label>
+                                <input type="text" id="a-med-nome" placeholder="Ex: Losartana 50mg" class="text-lg">
+                            </div>
+                            <div class="input-field">
+                                <label>Quantos horários por dia?</label>
+                                <div class="number-stepper">
+                                    <button type="button" onclick="stepNumber('a-med-freq', -1)"><i data-lucide="minus"></i></button>
+                                    <input type="number" id="a-med-freq" value="1" readonly>
+                                    <button type="button" onclick="stepNumber('a-med-freq', 1)"><i data-lucide="plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passo 3: Histórico e Sintomas -->
+                <div class="step-container" id="step-3">
+                    <h3 class="text-xl font-bold mb-4">Histórico Importante</h3>
+                    <div class="card-premium glass space-y-4">
+                        <label class="text-lg font-bold block mb-2">Já teve algum destes?</label>
+                        <div class="grid-2 gap-2">
+                            <button type="button" class="choice-card multi" onclick="toggleMulti(this, 'a-hist-infarto')">Infarto</button>
+                            <button type="button" class="choice-card multi" onclick="toggleMulti(this, 'a-hist-avc')">AVC</button>
+                            <button type="button" class="choice-card multi" onclick="toggleMulti(this, 'a-hist-arritmia')">Arritmia</button>
+                            <button type="button" class="choice-card multi" onclick="toggleMulti(this, 'a-hist-insuficiencia')">Insuficiência Cardíaca</button>
+                            <button type="button" class="choice-card multi w-full col-span-2" onclick="toggleMulti(this, 'a-hist-cardiopatia')">Outra Cardiopatia</button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-premium glass space-y-4 mt-4">
+                        <label class="text-lg font-bold block mb-2">Sintomas frequentes</label>
+                        <div class="grid-2 gap-2">
+                            <button type="button" class="choice-card multi" onclick="toggleMulti(this, 'a-sint-dor')">Dor no peito</button>
+                            <button type="button" class="choice-card multi" onclick="toggleMulti(this, 'a-sint-falta-ar')">Falta de ar</button>
+                            <button type="button" class="choice-card multi" onclick="toggleMulti(this, 'a-sint-tontura')">Tontura</button>
+                            <button type="button" class="choice-card multi" onclick="toggleMulti(this, 'a-sint-cabeca')">Dor de cabeça</button>
+                            <button type="button" class="choice-card multi" onclick="toggleMulti(this, 'a-sint-palpitacao')">Palpitação</button>
+                            <button type="button" class="choice-card multi" onclick="toggleMulti(this, 'a-sint-inchaco')">Inchaço</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passo 4: Hábitos -->
+                <div class="step-container" id="step-4">
+                    <h3 class="text-xl font-bold mb-4">Hábitos e Fatores</h3>
+                    <div class="card-premium glass space-y-6">
+                        <div class="input-field">
+                            <label>Você pratica atividade física?</label>
+                            <div class="grid-2 gap-2">
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hab-fisica', 'Sim')">Sim</button>
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hab-fisica', 'Não')">Não</button>
+                            </div>
+                            <input type="hidden" id="a-hab-fisica">
+                        </div>
+                        <div class="input-field">
+                            <label>Fuma?</label>
+                            <div class="grid-2 gap-2">
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hab-fuma', 'Sim')">Sim</button>
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hab-fuma', 'Não')">Não</button>
+                            </div>
+                            <input type="hidden" id="a-hab-fuma">
+                        </div>
+                        <div class="input-field">
+                            <label>Consome álcool?</label>
+                            <div class="grid-2 gap-2">
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hab-alcool', 'Sim')">Sim</button>
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hab-alcool', 'Não')">Não</button>
+                            </div>
+                            <input type="hidden" id="a-hab-alcool">
+                        </div>
+                        <div class="input-field">
+                            <label>Consome muito sal?</label>
+                            <div class="grid-2 gap-2">
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hab-sal', 'Sim')">Sim</button>
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hab-sal', 'Não')">Não</button>
+                            </div>
+                            <input type="hidden" id="a-hab-sal">
+                        </div>
+                        <div class="input-field">
+                            <label>Tem Diabetes?</label>
+                            <div class="grid-2 gap-2">
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hab-diabetes', 'Sim')">Sim</button>
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hab-diabetes', 'Não')">Não</button>
+                            </div>
+                            <input type="hidden" id="a-hab-diabetes">
+                        </div>
+                        <div class="input-field">
+                            <label>Tem Colesterol Alto?</label>
+                            <div class="grid-2 gap-2">
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hab-colesterol', 'Sim')">Sim</button>
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-hab-colesterol', 'Não')">Não</button>
+                            </div>
+                            <input type="hidden" id="a-hab-colesterol">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passo 5: Monitoramento & Emergência -->
+                <div class="step-container" id="step-5">
+                    <h3 class="text-xl font-bold mb-4">Rotina e Emergência</h3>
+                    <div class="card-premium glass space-y-6">
+                        <div class="input-field">
+                            <label>Deseja cadastrar um familiar para emergência?</label>
+                            <div class="grid-2 gap-2 mb-4">
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-emergencia', 'Sim'); document.getElementById('emergencia-details').classList.remove('hidden')">Sim</button>
+                                <button type="button" class="choice-card" onclick="selectChoice(this, 'a-emergencia', 'Não'); document.getElementById('emergencia-details').classList.add('hidden')">Não</button>
+                            </div>
+                            <input type="hidden" id="a-emergencia">
+                        </div>
+                        
+                        <div id="emergencia-details" class="hidden space-y-4 pt-4 border-t border-gray-200">
+                            <div class="input-field">
+                                <label>Nome do Contato</label>
+                                <input type="text" id="a-emerg-nome" placeholder="Ex: Maria (Filha)" class="text-lg">
+                            </div>
+                            <div class="input-field">
+                                <label>Telefone</label>
+                                <input type="tel" id="a-emerg-tel" placeholder="(11) 99999-9999" class="text-lg">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passo 6: Inteligência -->
+                <div class="step-container" id="step-6">
+                    <h3 class="text-xl font-bold mb-4">Finalizando...</h3>
+                    <div class="card-premium glass space-y-6">
+                        <div class="input-field">
+                            <label class="text-lg mb-2">Qual situação descreve melhor sua pressão hoje?</label>
+                            <div class="grid-1 gap-3">
+                                <button type="button" class="choice-card text-left" onclick="selectChoice(this, 'a-situacao', 'Controlada')">✅ Controlada</button>
+                                <button type="button" class="choice-card text-left" onclick="selectChoice(this, 'a-situacao', 'Oscila')">⚠️ Oscila às vezes</button>
+                                <button type="button" class="choice-card text-left" onclick="selectChoice(this, 'a-situacao', 'Alta')">🔴 Frequentemente alta</button>
+                                <button type="button" class="choice-card text-left" onclick="selectChoice(this, 'a-situacao', 'Investigando')">🔍 Ainda estou investigando</button>
+                            </div>
+                            <input type="hidden" id="a-situacao">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="flex mt-8 gap-4" style="align-items: center; justify-content: space-between;">
+                    <button type="button" id="btn-prev-step" class="btn-secondary btn-large hidden" style="flex: 1;" onclick="prevStep()">Voltar</button>
+                    <button type="button" id="btn-next-step" class="btn-primary btn-large shadow-glow" style="flex: 2;" onclick="nextStep()">Avançar</button>
+                </div>
+            </main>
         </section>
 
         <!-- Dashboard -->

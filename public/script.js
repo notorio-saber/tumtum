@@ -150,6 +150,122 @@ function initChart() {
     });
 }
 
+// --- Anamnese Logic ---
+let currentStep = 1;
+const totalSteps = 6;
+
+function selectChoice(btn, inputId, value) {
+    const parent = btn.closest('.grid-1') || btn.closest('.grid-2');
+    parent.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
+    btn.classList.add('selected');
+    document.getElementById(inputId).value = value;
+}
+
+function toggleMulti(btn, inputId) {
+    btn.classList.toggle('selected');
+    // Multi logic can just check selected class later, or we can use hidden inputs.
+    // For simplicity, we'll just read the classes on finish.
+}
+
+function stepNumber(inputId, change) {
+    const input = document.getElementById(inputId);
+    let val = parseInt(input.value) || 0;
+    val += change;
+    if (val < 0) val = 0;
+    input.value = val;
+}
+
+function updateProgress() {
+    document.getElementById('current-step-display').innerText = currentStep;
+    document.getElementById('anamnese-progress').style.width = `${(currentStep / totalSteps) * 100}%`;
+    
+    document.getElementById('btn-prev-step').classList.toggle('hidden', currentStep === 1);
+    const nextBtn = document.getElementById('btn-next-step');
+    
+    if (currentStep === totalSteps) {
+        nextBtn.innerText = "Concluir";
+        nextBtn.onclick = finishAnamnese;
+    } else {
+        nextBtn.innerText = "Avançar";
+        nextBtn.onclick = nextStep;
+    }
+}
+
+function nextStep() {
+    if (currentStep < totalSteps) {
+        document.getElementById(`step-${currentStep}`).classList.remove('active');
+        currentStep++;
+        document.getElementById(`step-${currentStep}`).classList.add('active');
+        updateProgress();
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        document.getElementById(`step-${currentStep}`).classList.remove('active');
+        currentStep--;
+        document.getElementById(`step-${currentStep}`).classList.add('active');
+        updateProgress();
+    }
+}
+
+async function finishAnamnese() {
+    const btn = document.getElementById('btn-next-step');
+    btn.innerText = "Salvando...";
+    btn.disabled = true;
+    
+    // Gathers data
+    const anamneseData = {
+        nome: document.getElementById('a-nome').value,
+        sexo: document.getElementById('a-sexo').value,
+        idade: parseInt(document.getElementById('a-idade').value),
+        peso: parseInt(document.getElementById('a-peso').value),
+        altura: parseInt(document.getElementById('a-altura').value),
+        
+        hipertensao: document.getElementById('a-hiper').value,
+        usaMedicamento: document.getElementById('a-med').value,
+        medicamentoNome: document.getElementById('a-med-nome').value,
+        medicamentoFreq: document.getElementById('a-med-freq').value,
+        
+        // Multiples
+        historico: Array.from(document.querySelectorAll('#step-3 .choice-card.multi.selected')).filter(b => b.innerText.includes('Infarto') || b.innerText.includes('AVC') || b.innerText.includes('Arritmia') || b.innerText.includes('Cardíaca') || b.innerText.includes('Cardiopatia')).map(b => b.innerText),
+        sintomas:  Array.from(document.querySelectorAll('#step-3 .choice-card.multi.selected')).filter(b => b.innerText.includes('Dor') || b.innerText.includes('Falta') || b.innerText.includes('Tontura') || b.innerText.includes('Palpitação') || b.innerText.includes('Inchaço')).map(b => b.innerText),
+        
+        habitos: {
+            fisica: document.getElementById('a-hab-fisica').value,
+            fuma: document.getElementById('a-hab-fuma').value,
+            alcool: document.getElementById('a-hab-alcool').value,
+            sal: document.getElementById('a-hab-sal').value,
+            diabetes: document.getElementById('a-hab-diabetes').value,
+            colesterol: document.getElementById('a-hab-colesterol').value
+        },
+        
+        emergenciaFamiliar: document.getElementById('a-emergencia').value,
+        emergenciaNome: document.getElementById('a-emerg-nome').value,
+        emergenciaTel: document.getElementById('a-emerg-tel').value,
+        
+        situacaoPressao: document.getElementById('a-situacao').value,
+        completedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    const user = window.auth.currentUser;
+    if (user) {
+        try {
+            await window.db.collection('users').doc(user.uid).set(anamneseData, { merge: true });
+            const displayName = document.getElementById('display-name');
+            if(displayName) displayName.innerText = anamneseData.nome || user.displayName || "Usuário";
+            
+            showScreen('dashboard-screen');
+            initChart();
+        } catch (error) {
+            console.error("Erro ao salvar:", error);
+            alert("Houve um erro ao salvar seu perfil. Tente novamente.");
+            btn.innerText = "Concluir";
+            btn.disabled = false;
+        }
+    }
+}
+
 // Eventos
 document.addEventListener('DOMContentLoaded', () => {
     // Real Firebase Auth Login
@@ -160,14 +276,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loginBtn.addEventListener('click', async () => {
             loginBtn.innerHTML = "Entrando...";
             try {
-                const result = await window.auth.signInWithPopup(window.googleProvider);
-                const user = result.user;
-                
-                const displayName = document.getElementById('display-name');
-                if(displayName) displayName.innerText = user.displayName || "Usuário";
-                
-                showScreen('dashboard-screen');
-                initChart();
+                await window.auth.signInWithPopup(window.googleProvider);
+                // A navegação será feita pelo onAuthStateChanged
             } catch (error) {
                 console.error("Erro no login:", error);
                 alert("Erro ao tentar fazer login: " + error.message);
@@ -176,13 +286,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Monitorar estado de autenticação (permanecer logado)
-    window.auth.onAuthStateChanged((user) => {
+    // Monitorar estado de autenticação
+    window.auth.onAuthStateChanged(async (user) => {
         if (user) {
-            const displayName = document.getElementById('display-name');
-            if(displayName) displayName.innerText = user.displayName || "Usuário";
-            showScreen('dashboard-screen');
-            initChart();
+            try {
+                const doc = await window.db.collection('users').doc(user.uid).get();
+                if (doc.exists && doc.data().completedAt) {
+                    // Já preencheu a anamnese
+                    const data = doc.data();
+                    const displayName = document.getElementById('display-name');
+                    if(displayName) displayName.innerText = data.nome || user.displayName || "Usuário";
+                    
+                    showScreen('dashboard-screen');
+                    initChart();
+                } else {
+                    // Novo usuário, precisa preencher
+                    document.getElementById('a-nome').value = user.displayName || "";
+                    showScreen('anamnese-screen');
+                    currentStep = 1;
+                    updateProgress();
+                }
+            } catch(e) {
+                console.error("Erro ao verificar perfil", e);
+                // Se o firestore falhar, mostra dashboard fallback
+                showScreen('dashboard-screen');
+                initChart();
+            }
         } else {
             showScreen('login-screen');
         }
