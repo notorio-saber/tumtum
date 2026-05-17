@@ -121,7 +121,7 @@
                     <div class="progress-bar-container mt-4">
                         <div class="progress-bar" id="anamnese-progress" style="width: 16%;"></div>
                     </div>
-                    <p class="text-center text-xs text-slate-500 mt-2">Etapa <span id="current-step-display">1</span> de 6</p>
+                    <p class="text-center text-xs text-slate-500 mt-2">Etapa <span id="current-step-display">1</span> de 7</p>
                 </div>
             </header>
 
@@ -321,6 +321,36 @@
                             </div>
                             <input type="hidden" id="a-situacao">
                         </div>
+                    </div>
+                </div>
+
+                <!-- Passo 7: Lembretes e Notificações (Gatilho de Engajamento) -->
+                <div class="step-container" id="step-7">
+                    <h3 class="text-xl font-bold mb-4">Ativar Lembretes</h3>
+                    <div class="card-premium glass text-center space-y-6" style="padding: 30px 20px;">
+                        <div style="background: rgba(239, 68, 68, 0.08); width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                            <i data-lucide="bell" class="w-10 h-10 text-red-500 animate-pulse"></i>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-bold text-slate-800">Lembretes Diários do Coração</h4>
+                            <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                                Para gerar a melhor retenção e cuidado diário com sua saúde, o TumTum enviará lembretes amigáveis às <strong>08h e 20h</strong>.
+                            </p>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 rounded-2xl" style="background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(239, 68, 68, 0.15); align-items: center; display: flex;">
+                            <div class="text-left" style="text-align: left;">
+                                <span class="font-bold text-slate-800" style="font-size: 0.95rem;">Lembretes Push</span>
+                                <p class="text-xs text-slate-500">Recomendado para sua segurança</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="a-push-enabled" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        
+                        <p class="text-xs text-slate-400">Você poderá gerenciar ou desativar esta opção no seu perfil a qualquer momento.</p>
                     </div>
                 </div>
 

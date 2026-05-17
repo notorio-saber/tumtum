@@ -1124,7 +1124,7 @@ function initChart() {
 
 // --- Anamnese Logic ---
 let currentStep = 1;
-const totalSteps = 6;
+const totalSteps = 7;
 
 function selectChoice(btn, inputId, value) {
     const parent = btn.closest('.grid-1') || btn.closest('.grid-2');
@@ -1318,6 +1318,48 @@ async function finishAnamnese() {
         
         // 5. Inicializa o gráfico de tendência semanal
         initChart();
+
+        // 6. Verifica se optou por manter os Lembretes Push ativos na anamnese
+        const pushEnabledCheck = document.getElementById('a-push-enabled');
+        if (pushEnabledCheck && pushEnabledCheck.checked) {
+            setTimeout(async () => {
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        const messaging = initFirebaseMessaging();
+                        if (messaging) {
+                            const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+                            const token = await messaging.getToken({ 
+                                serviceWorkerRegistration: reg,
+                                vapidKey: FCM_VAPID_KEY 
+                            });
+                            if (token) {
+                                await window.db.collection('users').doc(user.uid).update({
+                                    pushEnabled: true,
+                                    fcmTokens: firebase.firestore.FieldValue.arrayUnion(token)
+                                });
+                                console.log("Lembretes Push ativados com sucesso na onboarding!");
+                                if (window.checkTodayRegistrationAndBadge) {
+                                    window.checkTodayRegistrationAndBadge();
+                                }
+                            }
+                        }
+                    } else {
+                        await window.db.collection('users').doc(user.uid).update({
+                            pushEnabled: false
+                        });
+                    }
+                } catch (pushErr) {
+                    console.warn("Erro ao configurar lembretes push no onboarding:", pushErr);
+                }
+            }, 1000);
+        } else {
+            if (window.db) {
+                window.db.collection('users').doc(user.uid).update({
+                    pushEnabled: false
+                }).catch(e => console.warn(e));
+            }
+        }
         
     } catch (error) {
         console.error("Erro completo ao salvar anamnese:", error);
