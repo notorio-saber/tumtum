@@ -34,6 +34,44 @@ const getStatus = (sys, dia) => {
     return { label: 'Elevada', class: 'badge-danger', border: 'border-danger' };
 };
 
+function getInitials(name) {
+    if (!name) return "U";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return parts[0].substring(0, 2).toUpperCase();
+}
+
+function updateUserProfile(user, data = null) {
+    if (!user) return;
+    
+    // 1. Saudação baseada no horário
+    const period = getPeriodo();
+    let greetingText = "Olá,";
+    if (period === "Manhã") greetingText = "Bom dia,";
+    else if (period === "Tarde") greetingText = "Boa tarde,";
+    else if (period === "Noite" || period === "Madrugada") greetingText = "Boa noite,";
+    
+    const greetingEl = document.querySelector('.greeting');
+    if (greetingEl) greetingEl.innerText = greetingText;
+    
+    // 2. Nome do Usuário
+    const nameToDisplay = (data && data.nome) || user.displayName || "Usuário";
+    const displayName = document.getElementById('display-name');
+    if (displayName) displayName.innerText = nameToDisplay;
+    
+    // 3. Avatar (Foto do Google ou Iniciais)
+    const avatarElement = document.getElementById('user-avatar');
+    if (avatarElement) {
+        if (user.photoURL) {
+            avatarElement.innerHTML = `<img src="${user.photoURL}" alt="${nameToDisplay}" onerror="this.style.display='none'; this.parentElement.innerText='${getInitials(nameToDisplay)}';">`;
+        } else {
+            avatarElement.innerText = getInitials(nameToDisplay);
+        }
+    }
+}
+
 // Dados Mockados para histórico
 const mockRecords = [
     { id: 1, date: '2026-05-16', time: '08:20', sys: 120, dia: 80, bpm: 72, periodo: 'Manhã', condicao: 'Em repouso' },
@@ -273,8 +311,7 @@ async function finishAnamnese() {
     if (user) {
         try {
             await window.db.collection('users').doc(user.uid).set(anamneseData, { merge: true });
-            const displayName = document.getElementById('display-name');
-            if(displayName) displayName.innerText = anamneseData.nome || user.displayName || "Usuário";
+            updateUserProfile(user, anamneseData);
             
             showScreen('dashboard-screen');
             initChart();
@@ -310,13 +347,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Monitorar estado de autenticação
     window.auth.onAuthStateChanged(async (user) => {
         if (user) {
+            // Atualiza de imediato com dados disponíveis do Google Auth (evita exibir "Carregando...")
+            updateUserProfile(user);
+            
             try {
                 const doc = await window.db.collection('users').doc(user.uid).get();
                 if (doc.exists && doc.data().completedAt) {
                     // Já preencheu a anamnese
                     const data = doc.data();
-                    const displayName = document.getElementById('display-name');
-                    if(displayName) displayName.innerText = data.nome || user.displayName || "Usuário";
+                    updateUserProfile(user, data);
                     
                     showScreen('dashboard-screen');
                     initChart();
@@ -329,7 +368,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch(e) {
                 console.error("Erro ao verificar perfil", e);
-                // Se o firestore falhar, mostra dashboard fallback
+                // Se o firestore falhar, mostra dashboard fallback com o que temos
+                updateUserProfile(user);
                 showScreen('dashboard-screen');
                 initChart();
             }
