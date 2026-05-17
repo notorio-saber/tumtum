@@ -2654,7 +2654,7 @@ function playWelcomeHeartbeatOnFirstTouch() {
         setTimeout(() => {
             playHeartbeatSound();
             if (navigator.vibrate) {
-                navigator.vibrate([100, 50, 100]); // Batida cardíaca nativa no primeiro toque
+                navigator.vibrate([150, 100, 150]); // Batida cardíaca física nítida no primeiro toque
             }
         }, 150);
     }
@@ -2703,16 +2703,16 @@ function playHeartbeatSound() {
         // Primeiro "Tum" (grave e abafado)
         setTimeout(() => {
             if (sharedAudioContext) {
-                playBeat(sharedAudioContext, 60, 0.15); // Frequência de 60Hz, duração de 0.15s
+                playBeat(sharedAudioContext, 58, 0.20); // Frequência ligeiramente mais baixa, duração mais suave de 0.20s
             }
         }, 0);
         
-        // Segundo "Tum" (ligeiramente mais forte e curto)
+        // Segundo "Tum" (segundo batimento ligeiramente mais espaçado - Lub-Dub natural)
         setTimeout(() => {
             if (sharedAudioContext) {
-                playBeat(sharedAudioContext, 55, 0.18); // Frequência de 55Hz, duração de 0.18s
+                playBeat(sharedAudioContext, 52, 0.24); // Frequência de 52Hz, duração de 0.24s
             }
-        }, 150);
+        }, 240); // Espaçamento de 240ms para um batimento mais calmo, lento e natural
         
     } catch (e) {
         console.warn("Web Audio API não pôde reproduzir som:", e);
