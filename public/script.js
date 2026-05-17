@@ -1445,40 +1445,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 let doc = await window.db.collection('users').doc(user.uid).get();
                 
                 const tempRole = localStorage.getItem('temp_login_role');
-                if (!doc.exists) {
-                    // Novo usuário! Criamos o perfil inicial
-                    const finalRole = tempRole || 'paciente';
-                    const initialData = {
-                        uid: user.uid,
-                        email: user.email || "",
-                        displayName: user.displayName || "",
-                        role: finalRole,
-                        // Paciente novo começa INATIVO para forçar o Paywall do WhatsApp (exceto a Dra. Layana!)
-                        subscriptionActive: (user.uid === 'etSpfstGkKSKmTfBploZqVMMVKu2') ? true : (finalRole === 'paciente' ? false : true),
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-                    
-                    await window.db.collection('users').doc(user.uid).set(initialData, { merge: true });
-                    doc = await window.db.collection('users').doc(user.uid).get();
-                } else {
-                    // Usuário existente: Se selecionou um papel diferente no login, atualiza no Firestore!
-                    const existingData = doc.data();
-                    if (tempRole && tempRole !== existingData.role) {
-                        const updates = { role: tempRole };
-                        // Se virar paciente, resetar assinatura inativa por padrão (exceto admin)
-                        if (tempRole === 'paciente' && user.uid !== 'etSpfstGkKSKmTfBploZqVMMVKu2') {
-                            updates.subscriptionActive = false;
-                        } else if (tempRole !== 'paciente') {
-                            updates.subscriptionActive = true;
-                        }
-                        await window.db.collection('users').doc(user.uid).update(updates);
-                        // Atualiza o documento carregado
+                if (user.uid === 'etSpfstGkKSKmTfBploZqVMMVKu2') {
+                    // Conta Admin: 100% blindada contra erros de permissão de escrita do Firestore!
+                    if (tempRole) {
+                        localStorage.setItem('admin_override_role', tempRole);
+                    }
+                    if (!doc.exists) {
+                        const initialData = {
+                            uid: user.uid,
+                            email: user.email || "",
+                            displayName: user.displayName || "",
+                            role: 'paciente',
+                            subscriptionActive: true,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        await window.db.collection('users').doc(user.uid).set(initialData, { merge: true });
                         doc = await window.db.collection('users').doc(user.uid).get();
+                    }
+                } else {
+                    // Usuário Comum: Fluxo padrão seguro com Firestore
+                    if (!doc.exists) {
+                        const finalRole = tempRole || 'paciente';
+                        const initialData = {
+                            uid: user.uid,
+                            email: user.email || "",
+                            displayName: user.displayName || "",
+                            role: finalRole,
+                            subscriptionActive: finalRole === 'paciente' ? false : true,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        await window.db.collection('users').doc(user.uid).set(initialData, { merge: true });
+                        doc = await window.db.collection('users').doc(user.uid).get();
+                    } else {
+                        const existingData = doc.data();
+                        if (tempRole && tempRole !== existingData.role) {
+                            const updates = { role: tempRole };
+                            if (tempRole === 'paciente') {
+                                updates.subscriptionActive = false;
+                            } else {
+                                updates.subscriptionActive = true;
+                            }
+                            await window.db.collection('users').doc(user.uid).update(updates);
+                            doc = await window.db.collection('users').doc(user.uid).get();
+                        }
                     }
                 }
                 localStorage.removeItem('temp_login_role');
                 
-                const data = doc.data();
+                const data = doc.data() || {};
                 currentUserRole = data.role || 'paciente';
                 
                 // Aplicar override de papel local para o administrador (Dra. Layana) para testes rápidos e sem erro de permissões
