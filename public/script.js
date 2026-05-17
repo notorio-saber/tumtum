@@ -152,19 +152,41 @@ function initChart() {
 
 // Eventos
 document.addEventListener('DOMContentLoaded', () => {
-    // Mock Login
+    // Real Firebase Auth Login
     const loginBtn = document.getElementById('btn-login-google');
+    const originalBtnHtml = loginBtn ? loginBtn.innerHTML : "Entrar com Google";
+    
     if (loginBtn) {
-        loginBtn.addEventListener('click', () => {
+        loginBtn.addEventListener('click', async () => {
             loginBtn.innerHTML = "Entrando...";
-            setTimeout(() => {
+            try {
+                const result = await window.auth.signInWithPopup(window.googleProvider);
+                const user = result.user;
+                
                 const displayName = document.getElementById('display-name');
-                if(displayName) displayName.innerText = "João Silva";
+                if(displayName) displayName.innerText = user.displayName || "Usuário";
+                
                 showScreen('dashboard-screen');
                 initChart();
-            }, 1500);
+            } catch (error) {
+                console.error("Erro no login:", error);
+                alert("Erro ao tentar fazer login: " + error.message);
+                loginBtn.innerHTML = originalBtnHtml; // Reset button
+            }
         });
     }
+
+    // Monitorar estado de autenticação (permanecer logado)
+    window.auth.onAuthStateChanged((user) => {
+        if (user) {
+            const displayName = document.getElementById('display-name');
+            if(displayName) displayName.innerText = user.displayName || "Usuário";
+            showScreen('dashboard-screen');
+            initChart();
+        } else {
+            showScreen('login-screen');
+        }
+    });
 
     // Form Submissão
     const recordForm = document.getElementById('record-form');
