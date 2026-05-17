@@ -311,6 +311,8 @@ async function finishAnamnese() {
     if (user) {
         try {
             await window.db.collection('users').doc(user.uid).set(anamneseData, { merge: true });
+            // Salva sinalizador local para dupla segurança (offline/erros)
+            localStorage.setItem(`anamnese_completed_${user.uid}`, 'true');
             updateUserProfile(user, anamneseData);
             
             showScreen('dashboard-screen');
@@ -353,7 +355,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const doc = await window.db.collection('users').doc(user.uid).get();
                 if (doc.exists && doc.data().completedAt) {
-                    // Já preencheu a anamnese
+                    // Salva sinalizador local e carrega o painel
+                    localStorage.setItem(`anamnese_completed_${user.uid}`, 'true');
                     const data = doc.data();
                     updateUserProfile(user, data);
                     
@@ -368,10 +371,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch(e) {
                 console.error("Erro ao verificar perfil", e);
-                // Se o firestore falhar, mostra dashboard fallback com o que temos
-                updateUserProfile(user);
-                showScreen('dashboard-screen');
-                initChart();
+                // Se falhar a conexão com o Firestore, tentamos checar localmente se já preencheu.
+                // Se não houver registro local de conclusão, abrimos a anamnese por segurança!
+                const localCompleted = localStorage.getItem(`anamnese_completed_${user.uid}`);
+                if (localCompleted === 'true') {
+                    updateUserProfile(user);
+                    showScreen('dashboard-screen');
+                    initChart();
+                } else {
+                    document.getElementById('a-nome').value = user.displayName || "";
+                    showScreen('anamnese-screen');
+                    currentStep = 1;
+                    updateProgress();
+                }
             }
         } else {
             showScreen('login-screen');
