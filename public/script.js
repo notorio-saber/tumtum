@@ -2040,6 +2040,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (window.checkTodayRegistrationAndBadge) {
                             window.checkTodayRegistrationAndBadge();
                         }
+                        
+                        // Gatilho Afetivo de Marca: Dispara o som e vibração de batimento cardíaco "Tum-Tum" ao abrir o app!
+                        setTimeout(() => {
+                            if (typeof playHeartbeatSound === 'function') {
+                                playHeartbeatSound();
+                            }
+                            if (navigator.vibrate) {
+                                navigator.vibrate([100, 50, 100]); // Vibração em batida dupla de coração
+                            }
+                        }, 600);
                     } else {
                         document.getElementById('a-nome').value = user.displayName || "";
                         showScreen('anamnese-screen');
