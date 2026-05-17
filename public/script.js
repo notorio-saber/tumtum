@@ -33,6 +33,36 @@ function dismissPwaBanner() {
 }
 window.dismissPwaBanner = dismissPwaBanner;
 
+// --- Dicas de Saúde da Dra. Layana ---
+const HEALTH_TIPS = [
+    "<strong>💡 Sal Oculto:</strong> Alimentos ultraprocessados são cheios de sódio escondido. Priorize temperos naturais como limão, alho, cebola e ervas finas nas suas refeições.",
+    "<strong>💧 Hidratação é Vida:</strong> Beber água regularmente dilui o sangue e ajuda no bombeamento do coração, facilitando o controle natural da pressão arterial.",
+    "<strong>🚶‍♀️ Caminhada Leve:</strong> Fazer 30 minutos de caminhada por dia melhora a elasticidade das artérias, reduzindo a pressão a longo prazo de forma consistente.",
+    "<strong>☕ Cafeína sob Controle:</strong> O café acelera o coração e contrai vasos. Tente moderar o consumo e evite beber café 30 minutos antes de aferir sua pressão.",
+    "<strong>🧘‍♂️ Respiração Protetora:</strong> Em picos de ansiedade, inspire fundo por 4 segundos, segure por 4 e expire em 6 segundos por 5 vezes. Sua pressão irá relaxar.",
+    "<strong>😴 Sono e Cortisol:</strong> Dormir mal eleva o cortisol, o hormônio do estresse, que sobe os batimentos e a pressão. Priorize 7 a 8 horas de repouso por noite."
+];
+
+let currentTipIndex = 0;
+
+function showHealthTip() {
+    const tipEl = document.getElementById('health-tip-content');
+    if (tipEl) {
+        // Selecionar aleatoriamente no carregamento inicial
+        if (currentTipIndex === 0) {
+            currentTipIndex = Math.floor(Math.random() * HEALTH_TIPS.length);
+        }
+        tipEl.innerHTML = HEALTH_TIPS[currentTipIndex];
+    }
+}
+window.showHealthTip = showHealthTip;
+
+function nextHealthTip() {
+    currentTipIndex = (currentTipIndex + 1) % HEALTH_TIPS.length;
+    showHealthTip();
+}
+window.nextHealthTip = nextHealthTip;
+
 // Utilitários
 const getPeriodo = (date = new Date()) => {
     const hora = date.getHours();
@@ -352,6 +382,11 @@ function updateUserProfile(user, data = null) {
     } else {
         if (clinicalWrapper) clinicalWrapper.classList.add('hidden');
         if (editAnamneseBtn) editAnamneseBtn.classList.add('hidden');
+    }
+    
+    // Renderiza a dica de saúde da Dra. Layana na Home se for paciente
+    if (currentUserRole === 'paciente') {
+        showHealthTip();
     }
     
     // Atualiza/Recria os ícones dinâmicos do Lucide
