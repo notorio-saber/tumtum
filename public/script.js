@@ -96,6 +96,20 @@ const CLINICAL_MESSAGES = {
     ]
 };
 
+// Função para normalizar e converter as aferições (suporta formatos como "12", "12,5" e "120" na mesma entrada)
+function parsePressureValue(val) {
+    if (!val) return 0;
+    let cleanVal = val.toString().replace(',', '.').trim();
+    let num = parseFloat(cleanVal);
+    if (isNaN(num)) return 0;
+    
+    // Se for menor que 30, converte o formato decimal "12" ou "12.5" para 3 dígitos "120" ou "125"
+    if (num < 30) {
+        return Math.round(num * 10);
+    }
+    return Math.round(num);
+}
+
 const getStatus = (sys, dia) => {
     sys = parseInt(sys) || 0;
     dia = parseInt(dia) || 0;
@@ -2140,8 +2154,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            const sys = document.getElementById('reg-sys').value;
-            const dia = document.getElementById('reg-dia').value;
+            const sysRaw = document.getElementById('reg-sys').value;
+            const diaRaw = document.getElementById('reg-dia').value;
+            const sys = parsePressureValue(sysRaw);
+            const dia = parsePressureValue(diaRaw);
             const bpm = document.getElementById('reg-bpm').value;
             const condicao = document.getElementById('reg-condicao').options[document.getElementById('reg-condicao').selectedIndex].text;
             
