@@ -956,6 +956,9 @@ window.selectLoginRole = (role) => {
     });
     const targetBtn = document.getElementById(`role-${role}`);
     if (targetBtn) targetBtn.classList.add('selected');
+    
+    // Armazena síncronamente como override do Admin para viabilizar seus testes sem interferência de cache antigo
+    localStorage.setItem('admin_override_role', role);
 };
 
 window.changeUserRole = async (role) => {

@@ -17,4 +17,7 @@ const db = firebase.firestore();
 // Exporta para uso no script.js
 window.auth = auth;
 window.db = db;
-window.googleProvider = new firebase.auth.GoogleAuthProvider();
+
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
+window.googleProvider = googleProvider;
