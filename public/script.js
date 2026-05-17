@@ -1340,7 +1340,7 @@ async function finishAnamnese() {
                     if (permission === 'granted') {
                         const messaging = initFirebaseMessaging();
                         if (messaging) {
-                            const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+                            const reg = await navigator.serviceWorker.ready;
                             const token = await messaging.getToken({ 
                                 serviceWorkerRegistration: reg,
                                 vapidKey: FCM_VAPID_KEY 
@@ -2771,9 +2771,9 @@ async function togglePushNotifications(toggleEl) {
                 return;
             }
             
-            // Registra explicitamente o SW de messaging
-            const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
-            console.log('Service Worker do FCM registrado com sucesso!', reg);
+            // Utiliza o Service Worker PWA pronto e unificado
+            const reg = await navigator.serviceWorker.ready;
+            console.log('Service Worker unificado pronto para uso!', reg);
             
             // 3. Obtém o Token FCM
             let token;

@@ -61,3 +61,90 @@ self.addEventListener('fetch', (event) => {
       })
   );
 });
+
+// ==========================================
+// --- INTEGRATION OF FIREBASE CLOUD MESSAGING (FCM) ---
+// ==========================================
+
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_iwHuubgDX5N5nxLFmMS8QzuIj3A8Gpc",
+  authDomain: "tumtum-28b8d.firebaseapp.com",
+  projectId: "tumtum-28b8d",
+  storageBucket: "tumtum-28b8d.firebasestorage.app",
+  messagingSenderId: "751609980025",
+  appId: "1:751609980025:web:6bda69fd364b8bdbf420a8"
+};
+
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+
+// Intercepta e exibe notificações push em segundo plano
+messaging.onBackgroundMessage((payload) => {
+    console.log('[sw.js] Mensagem recebida em segundo plano: ', payload);
+    
+    const notificationTitle = payload.notification.title || 'TumTum 💙';
+    const notificationOptions = {
+        body: payload.notification.body || 'Está na hora de aferir sua pressão.',
+        icon: '/logo.png',
+        badge: '/logo.png',
+        tag: 'tumtum-reminder',
+        renotify: true,
+        vibrate: [100, 50, 100], // Pulsação de batimento cardíaco
+        data: {
+            action: 'open-register'
+        }
+    };
+
+    self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// Manipula o clique na notificação push
+self.addEventListener('notificationclick', (event) => {
+    console.log('[sw.js] Notificação clicada: ', event.notification);
+    event.notification.close();
+
+    const targetUrl = new URL('/?action=register', self.location.origin).href;
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            let matchingClient = null;
+            for (let i = 0; i < clientList.length; i++) {
+                const client = clientList[i];
+                if (client.url.indexOf(self.location.origin) === 0) {
+                    matchingClient = client;
+                    break;
+                }
+            }
+            
+            if (matchingClient) {
+                try {
+                    matchingClient.postMessage({ action: 'open-register-modal' });
+                } catch(e) {
+                    console.error("Erro ao enviar postMessage:", e);
+                }
+                
+                let navPromise = Promise.resolve();
+                if ('navigate' in matchingClient) {
+                    try {
+                        navPromise = matchingClient.navigate(targetUrl);
+                    } catch(e) {
+                        console.error("Erro ao navegar cliente:", e);
+                    }
+                }
+                
+                return navPromise.then(() => {
+                    return matchingClient.focus();
+                }).catch(() => {
+                    return matchingClient.focus();
+                });
+            } else {
+                if (clients.openWindow) {
+                    return clients.openWindow(targetUrl);
+                }
+            }
+        })
+    );
+});
