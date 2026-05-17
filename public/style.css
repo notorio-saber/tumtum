@@ -406,6 +406,8 @@ body {
     border-top-right-radius: 32px;
     padding: 30px;
     padding-bottom: 50px;
+    max-height: 90dvh; /* Garante que o modal caiba na tela */
+    overflow-y: auto;  /* Permite rolagem apenas dentro do modal se a tela for pequena */
     animation: slideUp 0.3s ease-out;
 }
 
@@ -840,6 +842,103 @@ body {
     border-radius: 20px;
     border: 1px solid rgba(239, 68, 68, 0.08);
     transition: all 0.3s ease;
+}
+
+/* Compactação da Anamnese (Evita Rolagem Mobile) */
+#anamnese-screen {
+    min-height: 100dvh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: 12px;
+}
+
+#anamnese-screen .app-header {
+    padding: 10px 15px;
+    margin: -12px -12px 10px -12px;
+}
+
+#anamnese-screen .dashboard-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 10px !important;
+    margin-top: 0 !important;
+    overflow-y: auto; /* Permite rolar apenas se for uma tela muito minúscula */
+}
+
+/* Reduzir espaçamentos de cards na anamnese */
+#anamnese-screen .card-premium {
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border-radius: 18px;
+}
+
+#anamnese-screen .space-y-4 > * + * {
+    margin-top: 8px !important;
+}
+
+#anamnese-screen .space-y-6 > * + * {
+    margin-top: 10px !important;
+}
+
+/* Compactar botões de escolha na anamnese */
+#anamnese-screen .choice-card {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    border-radius: 12px;
+}
+
+/* Compactar steppers de números na anamnese */
+#anamnese-screen .number-stepper {
+    padding: 3px;
+    border-radius: 12px;
+}
+
+#anamnese-screen .number-stepper button {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+}
+
+#anamnese-screen .number-stepper input {
+    font-size: 1.15rem;
+}
+
+/* Compactar campos de texto e labels */
+#anamnese-screen .input-field {
+    gap: 4px;
+}
+
+#anamnese-screen .input-field label {
+    font-size: 0.8rem;
+}
+
+#anamnese-screen .input-field input, 
+#anamnese-screen .input-field select {
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+}
+
+/* Compactar títulos da anamnese */
+#anamnese-screen h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px !important;
+}
+
+/* Ajustar botões de navegação no rodapé da anamnese */
+#anamnese-screen .flex.mt-8.gap-4 {
+    margin-top: 10px !important;
+}
+
+#anamnese-screen .btn-large {
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 1rem;
 }
 
 
