@@ -257,6 +257,46 @@ function updateUserProfile(user, data = null) {
         }
     }
     
+    // Configura o SOS Painel de Emergência na Dashboard do Paciente
+    const sosWidget = document.getElementById('patient-emergency-widget');
+    if (sosWidget) {
+        const isPatient = currentUserRole === 'paciente';
+        const subActive = subscriptionActive !== false;
+        
+        if (isPatient && subActive) {
+            sosWidget.classList.remove('hidden');
+            
+            let emergNome = "Familiar";
+            let emergTel = "";
+            
+            if (data) {
+                emergNome = data.emergenciaNome || "Familiar";
+                emergTel = data.emergenciaTel || "";
+            }
+            
+            const cleanTel = emergTel.replace(/\D/g, "");
+            const callBtn = document.getElementById('btn-widget-call-contact');
+            const callLbl = document.getElementById('lbl-widget-call-contact');
+            
+            if (callBtn) {
+                if (cleanTel) {
+                    callBtn.href = `tel:${cleanTel}`;
+                    callBtn.style.opacity = '1';
+                    callBtn.style.pointerEvents = 'auto';
+                } else {
+                    callBtn.href = '#';
+                    callBtn.style.opacity = '0.5';
+                    callBtn.style.pointerEvents = 'none';
+                }
+            }
+            if (callLbl) {
+                callLbl.innerText = emergNome !== "Familiar" ? `Ligar p/ ${emergNome.split(' ')[0]}` : "Ligar Familiar";
+            }
+        } else {
+            sosWidget.classList.add('hidden');
+        }
+    }
+    
     // Ocultar dados médicos e botão de edição se o usuário logado for Médico ou Familiar
     const clinicalWrapper = document.getElementById('profile-clinical-wrapper');
     const editAnamneseBtn = document.getElementById('profile-edit-anamnese-btn');
@@ -274,6 +314,131 @@ function updateUserProfile(user, data = null) {
         lucide.createIcons();
     }
 }
+
+// Função global para enviar localização de emergência via WhatsApp
+function sendEmergencyLocation(btn) {
+    if (!btn) return;
+    
+    const originalHtml = btn.innerHTML;
+    btn.classList.add('btn-loading');
+    
+    // Exibe feedback de progresso premium
+    btn.innerHTML = `<span>🌐 Obtendo GPS...</span>`;
+    
+    if (!navigator.geolocation) {
+        alert("⚠️ Desculpe, seu navegador não suporta a função de geolocalização.");
+        resetBtn();
+        return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            proceedWithLocation(lat, lng);
+        },
+        (error) => {
+            console.error("Erro na geolocalização:", error);
+            let errorMsg = "Não foi possível obter sua localização. Por favor, verifique se o seu GPS está ativo e se concedeu permissão de localização ao navegador.";
+            if (error.code === error.PERMISSION_DENIED) {
+                errorMsg = "Permissão de geolocalização recusada pelo navegador. Ative as permissões nas configurações para usar o SOS.";
+            }
+            alert("⚠️ " + errorMsg);
+            
+            // Fallback amigável de envio de SOS sem geolocalização
+            if (confirm("Deseja abrir o WhatsApp para notificar seu contato de emergência mesmo sem o mapa da sua localização atual?")) {
+                proceedWithLocation(null, null);
+            } else {
+                resetBtn();
+            }
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+    
+    function proceedWithLocation(lat, lng) {
+        const user = window.auth ? window.auth.currentUser : null;
+        let data = null;
+        if (user) {
+            const localData = localStorage.getItem(`anamnese_data_${user.uid}`);
+            if (localData) {
+                try {
+                    data = JSON.parse(localData);
+                } catch(e) {}
+            }
+        }
+        
+        let emergTel = "";
+        let emergNome = "Familiar";
+        
+        if (data) {
+            emergTel = data.emergenciaTel || "";
+            emergNome = data.emergenciaNome || "Familiar";
+        }
+        
+        // Fallback: ler do elemento da interface de perfil
+        if (!emergTel || emergTel === "--") {
+            const emergLinkEl = document.getElementById('p-emerg-tel');
+            if (emergLinkEl) {
+                const spanEl = emergLinkEl.querySelector('span');
+                if (spanEl && spanEl.innerText !== "--") {
+                    emergTel = spanEl.innerText;
+                }
+            }
+            const emergNameEl = document.getElementById('p-emerg-nome');
+            if (emergNameEl && emergNameEl.innerText !== "--") {
+                emergNome = emergNameEl.innerText;
+            }
+        }
+        
+        if (!emergTel || emergTel === "--") {
+            alert("⚠️ Você não possui um contato de emergência configurado! Por favor, acesse seu Perfil e clique em 'Editar Ficha de Saúde' para preencher o passo 5.");
+            resetBtn();
+            return;
+        }
+        
+        const cleanTel = emergTel.replace(/\D/g, "");
+        const primeNome = emergNome.split(' ')[0];
+        
+        let message = `🚨 *ALERTA DE SOS - TUMTUM APP*\n\nOlá, ${primeNome}! `;
+        
+        if (lat && lng) {
+            message += `Estou precisando de ajuda agora! Minha localização geográfica em tempo real é:\n📍 Google Maps: https://www.google.com/maps?q=${lat},${lng}\n\n`;
+        } else {
+            message += `Estou precisando de ajuda urgente agora!\n\n`;
+        }
+        
+        // Adicionar contexto clínico de pressão caso haja registros recentes
+        if (mockRecords && mockRecords.length > 0) {
+            const lastRec = mockRecords[0];
+            const status = getStatus(lastRec.sys, lastRec.dia);
+            
+            message += `🩺 *Minha última aferição de pressão:*\n`;
+            message += `• Pressão: *${lastRec.sys}/${lastRec.dia} mmHg*\n`;
+            message += `• Classificação: *${status.label}*\n`;
+            message += `• Frequência Cardíaca: ${lastRec.bpm} BPM\n`;
+            message += `• Condição: ${lastRec.condicao}\n`;
+            message += `• Aferido hoje às ${lastRec.time} (${getPeriodo()}).\n\n`;
+        }
+        
+        message += `Por favor, entre em contato comigo ou venha ao meu encontro o mais rápido possível!`;
+        
+        // Abrir link do WhatsApp
+        const waUrl = `https://wa.me/55${cleanTel}?text=${encodeURIComponent(message)}`;
+        window.open(waUrl, '_blank');
+        
+        resetBtn();
+    }
+    
+    function resetBtn() {
+        btn.innerHTML = originalHtml;
+        btn.classList.remove('btn-loading');
+    }
+}
+window.sendEmergencyLocation = sendEmergencyLocation;
 
 // Dados do histórico do aplicativo (inicia zerado para novas contas de acordo com as regras de negócio)
 let mockRecords = [];

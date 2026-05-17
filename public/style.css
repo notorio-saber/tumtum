@@ -1330,4 +1330,110 @@ body {
     transform: scale(1.05);
 }
 
+/* SOS & Painel de Emergência (Widget) */
+.emergency-widget {
+    border: 1px solid rgba(239, 68, 68, 0.15) !important;
+    background: rgba(239, 68, 68, 0.02) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.emergency-widget:hover {
+    transform: translateY(-2px) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    box-shadow: 0 15px 30px -5px rgba(239, 68, 68, 0.06) !important;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+/* Custom Emergency Buttons */
+.btn-sos-call {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 6px;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    min-height: 68px;
+    text-decoration: none;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.03);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-sos-call:hover {
+    background: rgba(16, 185, 129, 0.08);
+    transform: scale(1.03);
+}
+
+.btn-sos-location {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 6px;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    min-height: 68px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.03);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-sos-location:hover {
+    background: rgba(59, 130, 246, 0.08);
+    transform: scale(1.03);
+}
+
+.btn-sos-samu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 6px;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    min-height: 68px;
+    text-decoration: none;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: var(--primary);
+    background: rgba(239, 68, 68, 0.03);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-sos-samu:hover {
+    background: rgba(239, 68, 68, 0.08);
+    transform: scale(1.03);
+}
+
+/* Geolocation Loading State on Button */
+.btn-loading {
+    opacity: 0.6 !important;
+    pointer-events: none !important;
+}
+
+.btn-loading i {
+    animation: spin 1s infinite linear !important;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 
