@@ -491,6 +491,7 @@ function showScreen(screenId) {
     
     if(screenId === 'history-screen') {
         renderHistory(mockRecords);
+        initChart();
     }
     
     window.scrollTo(0, 0);
@@ -512,11 +513,13 @@ function renderHistory(records) {
     
     const filtersWrapper = document.getElementById('history-filters-wrapper');
     const chipsWrapper = document.getElementById('history-chips-wrapper');
+    const chartCard = document.getElementById('history-chart-card');
     
     // Se for acompanhante/médico e não tiver paciente ativo
     if (currentUserRole !== 'paciente' && !activePatientUid) {
         if (filtersWrapper) filtersWrapper.style.display = 'none';
         if (chipsWrapper) chipsWrapper.style.display = 'none';
+        if (chartCard) chartCard.style.display = 'none';
         
         list.innerHTML = `
             <div class="card-premium glass" style="text-align: center; padding: 32px 20px; border: 1px dashed rgba(15, 23, 42, 0.08); margin-top: 20px; width: 100%;">
@@ -541,6 +544,7 @@ function renderHistory(records) {
     // Restaura exibição de filtros para usuários com registros válidos
     if (filtersWrapper) filtersWrapper.style.display = '';
     if (chipsWrapper) chipsWrapper.style.display = '';
+    if (chartCard) chartCard.style.display = '';
     
     records.forEach(record => {
         const status = getStatus(record.sys, record.dia);
@@ -778,7 +782,9 @@ function updateAverages() {
 }
 
 function initChart() {
-    const ctx = document.getElementById('mainChart').getContext('2d');
+    const canvas = document.getElementById('mainChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 0, 160);
     gradient.addColorStop(0, 'rgba(239, 68, 68, 0.15)');
     gradient.addColorStop(1, 'rgba(239, 68, 68, 0)');

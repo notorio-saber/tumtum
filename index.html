@@ -364,50 +364,29 @@
 
                 <!-- Painel de Emergência SOS (Exclusivo para Paciente com Assinatura Ativa) -->
                 <div id="patient-emergency-widget" class="card-premium glass emergency-widget hidden" style="margin-top: 15px;">
-                    <h3 class="font-bold text-lg mb-2" style="color: var(--primary); display: flex; align-items: center; gap: 8px;">
-                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
-                        <span>SOS • Painel de Emergência</span>
-                    </h3>
-                    <p class="text-xs text-slate-500 mb-4" style="text-align: left; line-height: 1.4;">Se você estiver se sentindo mal ou com sintomas graves, use as ações de socorro rápido abaixo.</p>
-                    
-                    <div class="grid-3">
-                        <!-- Ligar para Contato -->
-                        <a id="btn-widget-call-contact" href="tel:" class="btn-sos-call">
-                            <i data-lucide="phone"></i>
-                            <span id="lbl-widget-call-contact" style="font-size: 0.65rem;">Ligar Familiar</span>
-                        </a>
-                        
-                        <!-- Enviar Localização -->
-                        <button id="btn-widget-send-location" onclick="sendEmergencyLocation(this)" class="btn-sos-location" type="button">
-                            <i data-lucide="map-pin"></i>
-                            <span style="font-size: 0.65rem;">Enviar Localização</span>
-                        </button>
-                        
-                        <!-- Ligar SAMU 192 -->
-                        <a href="tel:192" class="btn-sos-samu">
-                            <i data-lucide="ambulance"></i>
-                            <span style="font-size: 0.65rem;">Discar 192</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Gráfico Rápido Semanal com Médias Integradas (Mais Alto e Espaçoso) -->
-                <div class="chart-card card-premium glass mt-4" style="padding: 20px 20px 15px 20px;">
-                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px;">
-                        <h3 class="font-bold text-lg" style="margin: 0; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif;">Gráfico Semanal</h3>
-                        <div style="display: flex; gap: 8px;">
-                            <div class="avg-pill" style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(15, 23, 42, 0.06); border-radius: 10px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
-                                <span style="font-size: 9px; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1;">Média 7d</span>
-                                <span id="avg-7d" style="font-weight: 800; font-size: 0.85rem; color: #334155; line-height: 1;">--/--</span>
-                            </div>
-                            <div class="avg-pill" style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(15, 23, 42, 0.06); border-radius: 10px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
-                                <span style="font-size: 9px; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1;">Média 30d</span>
-                                <span id="avg-30d" style="font-weight: 800; font-size: 0.85rem; color: #334155; line-height: 1;">--/--</span>
-                            </div>
+                <div id="patient-emergency-widget" class="emergency-widget card-premium glass mt-4 hidden">
+                    <div class="emergency-header">
+                        <div class="emergency-icon-glow">
+                            <i data-lucide="shield-alert" class="w-5 h-5 text-red-500 animate-pulse"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm" style="margin: 0; color: #ef4444; font-family: 'Plus Jakarta Sans', sans-serif;">SOS • Painel de Emergência</h3>
+                            <p class="text-xs text-slate-400" style="margin: 2px 0 0 0;">Ações de socorro rápido em caso de crise.</p>
                         </div>
                     </div>
-                    <div class="chart-container" style="height: 220px; position: relative; width: 100%;">
-                        <canvas id="mainChart"></canvas>
+                    <div class="emergency-grid">
+                        <a id="btn-widget-call-contact" href="#" class="btn-sos-call shadow-glow">
+                            <i data-lucide="phone" class="w-4 h-4 mr-2"></i>
+                            <span id="lbl-widget-call-contact">Ligar Familiar</span>
+                        </a>
+                        <button onclick="sendEmergencyLocation(this)" class="btn-sos-location shadow-glow">
+                            <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>
+                            <span>Enviar Localização</span>
+                        </button>
+                        <a href="tel:192" class="btn-sos-samu shadow-glow">
+                            <i data-lucide="ambulance" class="w-4 h-4 mr-2"></i>
+                            <span>Discar 192 (SAMU)</span>
+                        </a>
                     </div>
                 </div>
             </main>
@@ -425,6 +404,26 @@
             </header>
 
             <main class="dashboard-content pb-24">
+                <!-- Gráfico Semanal com Médias Integradas (Movido do Dashboard para o Histórico) -->
+                <div id="history-chart-card" class="chart-card card-premium glass mt-4" style="padding: 20px 20px 15px 20px;">
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px;">
+                        <h3 class="font-bold text-lg" style="margin: 0; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif;">Gráfico Semanal</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <div class="avg-pill" style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(15, 23, 42, 0.06); border-radius: 10px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                                <span style="font-size: 9px; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1;">Média 7d</span>
+                                <span id="avg-7d" style="font-weight: 800; font-size: 0.85rem; color: #334155; line-height: 1;">--/--</span>
+                            </div>
+                            <div class="avg-pill" style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(15, 23, 42, 0.06); border-radius: 10px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                                <span style="font-size: 9px; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1;">Média 30d</span>
+                                <span id="avg-30d" style="font-weight: 800; font-size: 0.85rem; color: #334155; line-height: 1;">--/--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" style="height: 220px; position: relative; width: 100%;">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+
                 <div class="filters-container">
                     <button class="filter-chip active" onclick="filtrarHistorico('todos')">Todos</button>
                     <button class="filter-chip" onclick="filtrarHistorico('7dias')">7 dias</button>
