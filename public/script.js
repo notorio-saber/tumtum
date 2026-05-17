@@ -622,6 +622,18 @@ function showPaywall() {
         }
     }
     
+    // Atualiza dinamicamente o link de WhatsApp com o e-mail do usuário logado
+    const whatsappBtn = document.getElementById('btn-paywall-whatsapp');
+    if (whatsappBtn) {
+        const user = window.auth ? window.auth.currentUser : null;
+        const userEmail = user ? user.email : '';
+        let baseMsg = "Olá Dra. Layana, adorei o TumTum App e gostaria de ativar meu plano premium de monitoramento!";
+        if (userEmail) {
+            baseMsg += ` (Meu e-mail de cadastro é: ${userEmail})`;
+        }
+        whatsappBtn.href = `https://wa.me/5547920015676?text=${encodeURIComponent(baseMsg)}`;
+    }
+    
     // Atualiza dinamicamente o botão de fechar baseado no estado do trial
     const closeBtn = document.getElementById('btn-paywall-close');
     if (closeBtn) {
