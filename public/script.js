@@ -70,6 +70,41 @@ function updateUserProfile(user, data = null) {
             avatarElement.innerText = getInitials(nameToDisplay);
         }
     }
+
+    // 4. Preenchimento da Tela de Perfil
+    const profileName = document.getElementById('profile-name');
+    if (profileName) profileName.innerText = nameToDisplay;
+    
+    const profileEmail = document.getElementById('profile-email');
+    if (profileEmail) profileEmail.innerText = user.email || "";
+    
+    const profileAvatar = document.getElementById('profile-avatar');
+    if (profileAvatar) {
+        if (user.photoURL) {
+            profileAvatar.innerHTML = `<img src="${user.photoURL}" alt="${nameToDisplay}" onerror="this.style.display='none'; this.parentElement.innerText='${getInitials(nameToDisplay)}';">`;
+        } else {
+            profileAvatar.innerText = getInitials(nameToDisplay);
+        }
+    }
+    
+    if (data) {
+        if (document.getElementById('p-idade')) document.getElementById('p-idade').innerText = data.idade ? `${data.idade} anos` : '-- anos';
+        if (document.getElementById('p-sexo')) document.getElementById('p-sexo').innerText = data.sexo || '--';
+        if (document.getElementById('p-peso')) document.getElementById('p-peso').innerText = data.peso ? `${data.peso} kg` : '-- kg';
+        if (document.getElementById('p-altura')) document.getElementById('p-altura').innerText = data.altura ? `${data.altura} cm` : '-- cm';
+        if (document.getElementById('p-emerg-nome')) document.getElementById('p-emerg-nome').innerText = data.emergenciaNome || '--';
+        
+        const emergTel = document.getElementById('p-emerg-tel');
+        if (emergTel) {
+            if (data.emergenciaTel) {
+                emergTel.href = `tel:${data.emergenciaTel.replace(/\D/g, '')}`;
+                emergTel.querySelector('span').innerText = data.emergenciaTel;
+            } else {
+                emergTel.href = '#';
+                emergTel.querySelector('span').innerText = '--';
+            }
+        }
+    }
 }
 
 // Dados Mockados para histórico
@@ -85,11 +120,11 @@ function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     
-    // Resetar navegação inferior
+    // Resetar navegação inferior (3 itens)
     document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
     if(screenId === 'dashboard-screen') document.querySelectorAll('.bottom-nav .nav-item')[0].classList.add('active');
     if(screenId === 'history-screen') document.querySelectorAll('.bottom-nav .nav-item')[1].classList.add('active');
-    // Adicionar outros se necessário
+    if(screenId === 'profile-screen') document.querySelectorAll('.bottom-nav .nav-item')[2].classList.add('active');
     
     if(screenId === 'history-screen') {
         renderHistory(mockRecords);
@@ -167,8 +202,8 @@ let mainChart;
 function initChart() {
     const ctx = document.getElementById('mainChart').getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-    gradient.addColorStop(0, 'rgba(10, 38, 71, 0.2)');
-    gradient.addColorStop(1, 'rgba(10, 38, 71, 0)');
+    gradient.addColorStop(0, 'rgba(239, 68, 68, 0.15)');
+    gradient.addColorStop(1, 'rgba(239, 68, 68, 0)');
 
     if (mainChart) mainChart.destroy();
 
@@ -179,22 +214,22 @@ function initChart() {
             datasets: [{
                 label: 'Sistólica',
                 data: mockRecords.map(r => r.sys).reverse(),
-                borderColor: '#0A2647',
+                borderColor: '#ef4444',
                 borderWidth: 3,
                 tension: 0.4,
                 fill: true,
                 backgroundColor: gradient,
-                pointBackgroundColor: '#0A2647'
+                pointBackgroundColor: '#ef4444'
             },
             {
                 label: 'Diastólica',
                 data: mockRecords.map(r => r.dia).reverse(),
-                borderColor: '#2C74B3',
+                borderColor: '#fca5a5',
                 borderWidth: 2,
                 tension: 0.4,
                 fill: false,
                 borderDash: [5, 5],
-                pointBackgroundColor: '#2C74B3'
+                pointBackgroundColor: '#fca5a5'
             }]
         },
         options: {
@@ -406,12 +441,24 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('last-time').innerText = `Hoje, ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
             
             const status = getStatus(sys, dia);
-            const card = document.getElementById('status-card');
-            const badge = document.getElementById('status-badge');
             
-            card.className = `card-premium glass border-l-8 ${status.border}`;
-            badge.className = `${status.class} mt-4`;
-            badge.innerText = `Pressão ${status.label}`;
+            // Atualiza o pill de status no botão gigante
+            const giantReading = document.getElementById('giant-last-reading');
+            if (giantReading) {
+                if (status.label === 'Normal') {
+                    giantReading.style.background = 'rgba(16, 185, 129, 0.1)';
+                    giantReading.style.color = '#065f46';
+                    giantReading.style.borderColor = 'rgba(16, 185, 129, 0.2)';
+                } else if (status.label === 'Atenção') {
+                    giantReading.style.background = 'rgba(245, 158, 11, 0.1)';
+                    giantReading.style.color = '#92400e';
+                    giantReading.style.borderColor = 'rgba(245, 158, 11, 0.2)';
+                } else {
+                    giantReading.style.background = 'rgba(239, 68, 68, 0.1)';
+                    giantReading.style.color = '#991b1b';
+                    giantReading.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                }
+            }
             
             // Adiciona no mock e re-renderiza
             mockRecords.unshift({
@@ -464,10 +511,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Função para Logout Seguro
+async function handleLogout() {
+    if (confirm("Deseja mesmo sair da sua conta?")) {
+        try {
+            await window.auth.signOut();
+            // Limpa o local storage de segurança
+            localStorage.clear();
+            // Recarrega a página para resetar todos os estados
+            window.location.reload();
+        } catch (error) {
+            console.error("Erro ao sair:", error);
+            alert("Erro ao tentar deslogar: " + error.message);
+        }
+    }
+}
+
 // Expor funções globalmente para o HTML
 window.showScreen = showScreen;
 window.showModal = showModal;
 window.closeModal = closeModal;
 window.filtrarHistorico = filtrarHistorico;
 window.exportarCSV = exportarCSV;
+window.handleLogout = handleLogout;
 

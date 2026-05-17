@@ -291,46 +291,42 @@
                     <h2 id="display-name" class="font-bold text-xl">Carregando...</h2>
                 </div>
                 <div class="header-actions">
-                    <button id="btn-notifications" class="icon-btn"><i data-lucide="bell"></i></button>
                     <div class="avatar-circle" id="user-avatar">--</div>
                 </div>
             </header>
 
             <main class="dashboard-content pb-24">
-                <!-- Última Medição -->
-                <div class="last-reading-container">
-                    <div id="status-card" class="card-premium glass border-l-8 border-success">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="text-slate-500 font-medium uppercase text-xs tracking-wider">Última Medição</span>
-                            <span id="last-time" class="time-tag">Hoje, 08:20</span>
-                        </div>
-                        <div class="pressure-display">
-                            <div class="val-group">
-                                <span id="last-sys" class="text-5xl font-black">120</span>
-                                <span class="text-xs uppercase font-bold text-slate-400">Sistólica</span>
-                            </div>
-                            <div class="divider">/</div>
-                            <div class="val-group">
-                                <span id="last-dia" class="text-5xl font-black text-slate-700">80</span>
-                                <span class="text-xs uppercase font-bold text-slate-400">Diastólica</span>
-                            </div>
-                        </div>
-                        <div id="status-badge" class="badge-success mt-4">Pressão Normal</div>
+                <!-- Botão Gigante de Registro com Linhas em Movimento -->
+                <div class="giant-measure-card" onclick="showModal('new-record-modal')">
+                    <!-- Linhas em Movimento do Design System -->
+                    <div class="beam-h-card"></div>
+                    <div class="beam-v-card" style="animation-delay: 2s;"></div>
+                    
+                    <div class="giant-plus-circle shadow-glow">
+                        <div class="giant-plus-pulse"></div>
+                        <i data-lucide="plus" class="w-12 h-12"></i>
+                    </div>
+                    <h3 class="giant-measure-title">Registrar Pressão</h3>
+                    <p class="giant-measure-desc">Toque em qualquer lugar desta caixa para registrar sua pressão agora</p>
+                    
+                    <!-- Última Medição embutida no botão de forma limpa -->
+                    <div id="giant-last-reading" class="giant-last-reading-text">
+                        Última Medição: <span id="last-sys">--</span>/<span id="last-dia">--</span> mmHg • <span id="last-time">Sem registros</span>
                     </div>
                 </div>
 
-                <!-- Gráfico Rápido -->
+                <!-- Gráfico Rápido Semanal Simplificado -->
                 <div class="chart-card card-premium glass mt-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold">Tendência Semanal</h3>
-                        <i data-lucide="trending-up" class="text-success"></i>
+                        <h3 class="font-bold text-lg">Gráfico da Semana</h3>
+                        <i data-lucide="trending-up" class="text-primary"></i>
                     </div>
                     <div class="chart-container">
                         <canvas id="mainChart"></canvas>
                     </div>
                 </div>
 
-                <!-- Médias -->
+                <!-- Médias Semanal e Mensal -->
                 <div class="grid-2 mt-6">
                     <div class="mini-card glass">
                         <span class="text-xs text-slate-500">Média 7 dias</span>
@@ -342,6 +338,7 @@
                     </div>
                 </div>
             </main>
+        </section>
 
         <!-- Tela de Histórico -->
         <section id="history-screen" class="screen">
@@ -369,32 +366,89 @@
             </main>
         </section>
 
-            <!-- Bottom Nav -->
-            <nav class="bottom-nav glass">
-                <button class="nav-item active" onclick="showScreen('dashboard-screen')">
-                    <i data-lucide="home"></i>
-                    <span>Início</span>
-                </button>
-                <button class="nav-item" onclick="showScreen('history-screen')">
-                    <i data-lucide="history"></i>
-                    <span>Histórico</span>
-                </button>
-                <button class="nav-btn-center" onclick="showModal('new-record-modal')">
-                    <div class="heart-add-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="heart-svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-                        <i data-lucide="plus" class="heart-plus"></i>
+        <!-- Tela de Perfil -->
+        <section id="profile-screen" class="screen">
+            <header class="app-header glass">
+                <div class="user-info">
+                    <h2 class="font-bold text-xl">Meu Perfil</h2>
+                </div>
+            </header>
+
+            <main class="dashboard-content pb-24 space-y-6">
+                <!-- Cartão Principal do Usuário -->
+                <div class="card-premium glass flex flex-col items-center text-center p-6" style="gap: 12px;">
+                    <div class="avatar-circle" id="profile-avatar" style="width: 80px; height: 80px; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; font-weight: 700; background: var(--gray-light); color: var(--primary); border: 2px solid var(--gray-medium);">--</div>
+                    <div>
+                        <h3 id="profile-name" class="font-bold text-2xl">Carregando...</h3>
+                        <p id="profile-email" class="text-sm text-slate-500">...</p>
                     </div>
+                </div>
+
+                <!-- Detalhes de Saúde (Anamnese) -->
+                <div class="card-premium glass space-y-4">
+                    <h4 class="font-bold text-lg border-b pb-2 text-slate-700">Dados de Saúde</h4>
+                    <div class="grid-2 gap-4 text-left">
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase font-bold">Idade</span>
+                            <span id="p-idade" class="font-bold text-lg">-- anos</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase font-bold">Sexo</span>
+                            <span id="p-sexo" class="font-bold text-lg">--</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase font-bold">Peso</span>
+                            <span id="p-peso" class="font-bold text-lg">-- kg</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase font-bold">Altura</span>
+                            <span id="p-altura" class="font-bold text-lg">-- cm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contato de Emergência -->
+                <div class="card-premium glass space-y-4">
+                    <h4 class="font-bold text-lg border-b pb-2 text-slate-700">Contato de Emergência</h4>
+                    <div class="text-left space-y-2">
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase font-bold">Nome</span>
+                            <span id="p-emerg-nome" class="font-bold text-lg">--</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase font-bold">Telefone</span>
+                            <a id="p-emerg-tel" href="#" class="font-bold text-lg text-primary flex items-center gap-2 mt-1" style="color: var(--primary); text-decoration: none;">
+                                <i data-lucide="phone" class="w-5 h-5"></i>
+                                <span>--</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botão de Sair -->
+                <button onclick="handleLogout()" class="btn-secondary w-full py-4 text-lg font-bold rounded-2xl flex items-center justify-center gap-2" style="background: rgba(239, 68, 68, 0.05); color: var(--primary); border: 2px dashed rgba(239, 68, 68, 0.2); cursor: pointer; transition: all 0.2s;">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                    <span>Sair da Conta</span>
                 </button>
-                <button class="nav-item" onclick="showScreen('stats-screen')">
-                    <i data-lucide="bar-chart-2"></i>
-                    <span>Gráficos</span>
-                </button>
-                <button class="nav-item" onclick="showScreen('profile-screen')">
-                    <i data-lucide="user"></i>
-                    <span>Perfil</span>
-                </button>
-            </nav>
+            </main>
         </section>
+
+        <!-- Bottom Nav -->
+        <nav class="bottom-nav glass">
+            <button class="nav-item active" onclick="showScreen('dashboard-screen')">
+                <i data-lucide="home"></i>
+                <span>Início</span>
+            </button>
+            <button class="nav-item" onclick="showScreen('history-screen')">
+                <i data-lucide="history"></i>
+                <span>Histórico</span>
+            </button>
+            <button class="nav-item" onclick="showScreen('profile-screen')">
+                <i data-lucide="user"></i>
+                <span>Perfil</span>
+            </button>
+        </nav>
+    </section>
 
         <!-- Modal de Novo Registro -->
         <div id="new-record-modal" class="modal">
