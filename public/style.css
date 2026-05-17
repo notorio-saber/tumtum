@@ -847,9 +847,13 @@ body {
 
 /* Compactação da Anamnese (Evita Rolagem Mobile) */
 #anamnese-screen {
+    display: none; /* Mantém oculto por padrão como qualquer tela */
+}
+
+#anamnese-screen.active {
     min-height: 100dvh;
     height: 100dvh;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     justify-content: space-between;
     overflow: hidden;
