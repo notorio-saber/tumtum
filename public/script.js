@@ -2503,7 +2503,7 @@ window.startEditAnamnese = startEditAnamnese;
 // --- SISTEMA DE NOTIFICAÇÕES PUSH (FCM) & FEEDBACKS ---
 
 // Chave VAPID para Web Push do seu Console do Firebase -> Cloud Messaging -> Configuração da Web
-const FCM_VAPID_KEY = "SUA_CHAVE_VAPID_AQUI"; 
+const FCM_VAPID_KEY = "BCHkF46JUhjrQ2iQ4af7b16-vdDWu7WPE7h1flOpJCru-iEQ_43SRzzo4xPLCBGal-lCvoDJeIk16Rxb1nW6WAQ"; 
 
 let messagingInstance = null;
 
