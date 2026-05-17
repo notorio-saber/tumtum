@@ -552,14 +552,6 @@ function updateNavigationByRole() {
 window.updateNavigationByRole = updateNavigationByRole;
 
 function showScreen(screenId) {
-    // FREEMIUM GATING: Bloquear acesso a Histórico ou Acompanhantes no plano grátis após o limite de 4 registros
-    const isPremiumLocked = !subscriptionActive && mockRecords && mockRecords.length >= 4;
-    if (currentUserRole === 'paciente' && isPremiumLocked) {
-        if (screenId === 'history-screen' || screenId === 'companions-screen') {
-            showPaywall();
-            return;
-        }
-    }
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     
